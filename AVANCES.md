@@ -312,3 +312,11 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Errores encontrados y corregidos: la pantalla no se actualizaba después de guardar; texto técnico de Streamlit visible al consultar un folio; "None" en lugar de "Sin calcular"; formularios que conservaban datos al cambiar de bache; costos sin formato; gráficas en orden alfabético.
 - Base reconstruida después de las pruebas. Pendiente menor: la métrica «Intervención» se corta en pantallas angostas.
 - La métrica «Intervención» usa el nombre corto (el completo en la ayuda). Capturas del documento final retomadas con Playwright y entregable_final_SIPA.docx regenerado; pruebas 7/7; base restaurada.
+
+## 7 nov 2026 · Proyecto en GitHub y tablero en GitHub Pages
+- Repositorio público: https://github.com/rebeca256/sipa-bacheo-inteligente (sin los documentos de los docentes; ver `.gitignore`).
+- Tablero en línea: https://rebeca256.github.io/sipa-bacheo-inteligente/ — corre en el navegador con stlite 1.12.1 (sin servidor). Usa la copia de solo consulta `tablero/datos/` (`scripts/exportar_datos_tablero.py`); el sitio se arma con `scripts/construir_sitio.py` en `docs/`.
+- `tablero/app.py` detecta la fuente: SQL Server en local (todo se guarda) o la copia en línea (las reglas se revisan igual, nada se guarda).
+- Pruebas: `tablero/pruebas_sitio.py` 5/5 contra el sitio publicado; `tablero/pruebas_e2e.py` 7/7 en local. Primera carga del sitio: unos 27 s.
+- Corregido en `bd/08`: la validación simulada ahora queda antes de la decisión (antes salía después de la reparación).
+- Para actualizar el sitio: reconstruir la base, `python scripts/exportar_datos_tablero.py`, `python scripts/construir_sitio.py`, commit y push.
