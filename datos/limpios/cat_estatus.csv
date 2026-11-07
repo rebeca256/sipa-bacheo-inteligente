@@ -1,0 +1,5 @@
+﻿estatus_original,estatus_agrupado,descripcion
+ATENDIDO,RESUELTO,Solicitud atendida (nombre usado en 2019-2021)
+CERRADO,RESUELTO,Solicitud cerrada (nombre usado en 2022)
+TURNADO,TURNADO,Enviada a otra área o dependencia
+RECIBIDO,PENDIENTE,Recibida sin atención registrada

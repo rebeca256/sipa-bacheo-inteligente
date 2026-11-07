@@ -1,0 +1,14 @@
+﻿paso,descripcion,registros_afectados
+C1,Comunidades oficiales (Bando 2026),55
+A1,Polígonos de zonas inundables (Atlas de Riesgo 2023),23
+A2,Hospitales y mercados del atlas,72
+A3,Escuelas con coordenadas (catálogo municipal),473
+R1,Reportes leídos,75
+R-X,Excluidos: sin coordenadas,6
+R-X,Excluidos: a más de 1000 m del límite municipal de Chalco,1
+R1b,Fuera del polígono pero cerca del límite (ubicación dudosa),6
+R2,"Comunidades corregidas (acentos, paréntesis o alias)",17
+R3,Comunidades que no están en el Bando 2026 (se conservan),0
+R4,Marcados como posible duplicado,6
+R5,Celdas de 250 m con al menos un reporte,44
+R6,Reportes válidos guardados,68

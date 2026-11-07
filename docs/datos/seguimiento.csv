@@ -1,0 +1,604 @@
+id_bache,fecha,de_estado,a_estado,comentario
+1646,2026-07-17 21:31:00,REPORTADO,VALIDADO,Validado en inspección.
+1646,2026-07-19 04:01:00,PRIORIZADO,EN_ATENCION,Programado para el turno nocturno.
+1646,2026-07-20 04:31:00,EN_ATENCION,REPARADO,Reparado.
+1262,2026-07-21 02:02:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1262,2026-07-22 16:02:00,EN_ATENCION,REPARADO,Reparado (simulado).
+313,2026-02-16 16:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+313,2026-02-18 05:46:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1215,2026-05-22 21:40:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1215,2026-05-23 22:40:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1342,2026-03-27 17:53:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1342,2026-03-29 08:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1280,2026-02-03 04:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1280,2026-02-03 23:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1051,2026-02-26 12:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1051,2026-02-27 22:14:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1644,2026-02-14 13:32:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1644,2026-02-15 16:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1062,2026-06-19 01:15:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1062,2026-06-20 08:45:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1456,2026-01-24 12:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1456,2026-01-25 11:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1176,2026-09-25 10:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1176,2026-09-26 15:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1642,2026-09-13 13:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1642,2026-09-19 22:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+639,2026-04-15 01:04:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+639,2026-04-21 04:34:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1306,2026-05-27 00:15:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1306,2026-06-02 19:45:00,EN_ATENCION,REPARADO,Reparado (simulado).
+871,2026-10-09 07:04:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+871,2026-10-17 14:04:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1292,2026-08-21 09:20:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1292,2026-08-30 08:20:00,EN_ATENCION,REPARADO,Reparado (simulado).
+692,2026-06-12 05:55:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+692,2026-06-23 14:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+185,2026-07-31 19:18:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+185,2026-08-05 05:18:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1083,2026-02-21 15:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1083,2026-02-25 23:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+475,2026-03-02 13:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+475,2026-03-13 17:17:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1241,2026-04-03 02:23:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1241,2026-04-04 14:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+816,2026-08-22 03:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+816,2026-09-02 02:43:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1193,2026-01-30 21:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1193,2026-02-10 18:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+502,2026-01-20 08:23:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+502,2026-01-23 08:23:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1345,2026-05-22 00:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1345,2026-05-24 15:46:00,EN_ATENCION,REPARADO,Reparado (simulado).
+822,2026-05-07 16:12:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+822,2026-05-19 05:42:00,EN_ATENCION,REPARADO,Reparado (simulado).
+374,2026-07-02 19:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+374,2026-07-13 12:54:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1212,2026-08-15 06:50:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1212,2026-08-18 00:50:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1427,2026-07-27 15:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1427,2026-08-06 03:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+697,2026-07-02 15:10:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+697,2026-07-13 16:40:00,EN_ATENCION,REPARADO,Reparado (simulado).
+734,2026-02-13 20:58:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+734,2026-02-14 18:58:00,EN_ATENCION,REPARADO,Reparado (simulado).
+855,2026-04-20 01:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+855,2026-04-23 18:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1196,2026-03-16 10:18:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1196,2026-03-27 09:48:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1640,2026-08-22 18:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1640,2026-08-30 15:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+860,2026-10-10 10:59:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+860,2026-10-22 01:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1293,2026-06-06 00:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1293,2026-06-15 13:51:00,EN_ATENCION,REPARADO,Reparado (simulado).
+451,2026-04-10 19:53:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+451,2026-04-19 03:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1358,2026-02-21 16:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1358,2026-02-24 07:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1074,2026-09-03 13:03:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1074,2026-09-14 20:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1188,2026-08-14 00:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1188,2026-08-24 21:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1126,2026-07-27 21:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1126,2026-07-29 23:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1181,2026-01-18 08:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1181,2026-01-21 05:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+878,2026-06-15 05:49:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+878,2026-06-23 15:49:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1279,2026-04-02 06:32:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1279,2026-04-09 06:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1389,2026-02-28 15:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1389,2026-03-05 08:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1238,2026-08-09 21:45:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1238,2026-08-13 07:15:00,EN_ATENCION,REPARADO,Reparado (simulado).
+627,2026-04-03 13:15:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+627,2026-04-11 14:15:00,EN_ATENCION,REPARADO,Reparado (simulado).
+984,2026-08-21 01:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+984,2026-08-25 05:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1087,2026-05-07 00:02:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1087,2026-05-14 13:02:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1166,2026-01-31 08:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1166,2026-02-05 10:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1275,2026-04-13 02:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1275,2026-04-15 00:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1249,2026-06-28 08:48:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1249,2026-07-07 05:18:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1113,2026-03-01 19:35:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1113,2026-03-07 17:35:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1228,2026-01-25 06:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1228,2026-02-05 11:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+638,2026-08-16 09:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+638,2026-08-25 03:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+908,2026-05-09 13:15:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+908,2026-05-14 19:45:00,EN_ATENCION,REPARADO,Reparado (simulado).
+642,2026-09-13 06:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+642,2026-09-16 14:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1192,2026-09-05 15:55:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1192,2026-09-14 16:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1391,2026-05-17 14:53:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1391,2026-05-23 20:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+191,2026-03-04 20:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+191,2026-03-16 14:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+989,2026-08-28 17:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+989,2026-08-31 02:34:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1304,2026-02-11 17:02:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1304,2026-02-22 09:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1637,2026-09-04 11:35:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1637,2026-09-13 19:05:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1127,2026-06-30 18:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1127,2026-07-08 08:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1123,2026-06-15 02:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1123,2026-06-25 11:52:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1174,2026-08-13 20:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1174,2026-08-16 19:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+419,2026-08-16 18:59:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+419,2026-08-28 01:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1508,2026-06-01 03:06:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1508,2026-06-08 20:36:00,EN_ATENCION,REPARADO,Reparado (simulado).
+651,2026-06-01 19:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+651,2026-06-08 22:33:00,EN_ATENCION,REPARADO,Reparado (simulado).
+837,2026-08-04 16:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+837,2026-08-14 04:43:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1419,2026-03-28 18:13:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1419,2026-03-30 13:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+582,2026-04-23 02:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+582,2026-04-26 00:08:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1476,2026-01-08 21:50:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1476,2026-01-12 16:50:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1259,2026-06-13 23:51:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1259,2026-06-24 06:21:00,EN_ATENCION,REPARADO,Reparado (simulado).
+569,2026-07-08 12:50:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+569,2026-07-12 05:20:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1294,2026-09-24 15:48:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1294,2026-09-28 21:48:00,EN_ATENCION,REPARADO,Reparado (simulado).
+411,2026-01-24 04:31:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+411,2026-02-03 10:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1283,2026-07-08 17:45:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1283,2026-07-13 02:15:00,EN_ATENCION,REPARADO,Reparado (simulado).
+640,2026-10-06 18:18:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+640,2026-10-18 01:48:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1146,2026-05-13 13:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1146,2026-05-24 05:17:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1075,2026-08-19 08:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1075,2026-08-20 19:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1252,2026-07-30 10:06:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1252,2026-08-04 09:06:00,EN_ATENCION,REPARADO,Reparado (simulado).
+671,2026-06-29 20:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+671,2026-07-09 16:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+525,2026-01-19 06:13:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+525,2026-01-21 19:43:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1155,2026-01-15 22:14:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1155,2026-01-20 07:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1356,2026-04-15 00:35:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1356,2026-04-20 11:35:00,EN_ATENCION,REPARADO,Reparado (simulado).
+506,2026-06-02 02:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+506,2026-06-12 23:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1197,2026-05-11 18:39:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1197,2026-05-23 16:39:00,EN_ATENCION,REPARADO,Reparado (simulado).
+875,2026-08-03 08:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+875,2026-08-08 21:04:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1256,2026-07-27 19:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1256,2026-08-05 02:39:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1105,2026-09-24 19:14:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1105,2026-09-26 09:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1499,2026-07-17 14:32:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1499,2026-07-21 14:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1020,2026-04-28 01:53:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1020,2026-05-04 11:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+873,2026-04-29 10:12:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+873,2026-05-08 07:42:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1201,2026-06-24 23:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1201,2026-07-05 21:56:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1053,2026-06-09 03:38:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1053,2026-06-15 17:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+821,2026-05-19 21:58:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+821,2026-05-22 15:58:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1072,2026-03-30 02:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1072,2026-04-02 17:46:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1089,2026-09-11 18:45:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1089,2026-09-16 14:45:00,EN_ATENCION,REPARADO,Reparado (simulado).
+910,2026-03-28 17:18:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+910,2026-04-05 05:18:00,EN_ATENCION,REPARADO,Reparado (simulado).
+665,2026-05-26 07:57:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+665,2026-05-27 16:57:00,EN_ATENCION,REPARADO,Reparado (simulado).
+631,2026-03-06 06:41:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+631,2026-03-16 11:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1495,2026-10-02 22:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1495,2026-10-08 04:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+920,2026-09-21 00:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+920,2026-09-27 01:04:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1330,2026-01-28 13:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1330,2026-02-03 09:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1139,2026-08-14 14:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1139,2026-08-23 07:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+934,2026-05-24 05:35:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+934,2026-05-30 18:05:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1129,2026-08-04 02:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1129,2026-08-10 06:14:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1359,2026-01-20 18:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1359,2026-01-23 17:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1086,2026-09-09 22:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1086,2026-09-18 17:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1320,2026-02-01 19:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1320,2026-02-02 20:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1354,2026-09-18 00:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1354,2026-09-24 00:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1104,2026-07-18 10:05:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1104,2026-07-29 00:35:00,EN_ATENCION,REPARADO,Reparado (simulado).
+975,2026-08-13 07:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+975,2026-08-22 19:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1183,2026-02-06 12:03:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1183,2026-02-12 13:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+226,2026-08-09 07:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+226,2026-08-16 08:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+400,2026-07-20 19:32:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+400,2026-07-31 05:02:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1566,2026-01-25 17:15:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1566,2026-01-31 05:15:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1190,2026-05-13 04:58:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1190,2026-05-18 23:58:00,EN_ATENCION,REPARADO,Reparado (simulado).
+40,2026-07-27 00:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+40,2026-08-07 02:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+557,2026-05-11 18:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+557,2026-05-12 13:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+643,2026-07-14 14:30:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+643,2026-07-21 04:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+800,2026-01-29 18:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+800,2026-02-04 06:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1110,2026-05-08 03:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1110,2026-05-14 21:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1210,2026-08-04 18:57:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1210,2026-08-16 15:57:00,EN_ATENCION,REPARADO,Reparado (simulado).
+653,2026-07-11 12:19:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+653,2026-07-20 09:49:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1173,2026-02-18 00:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1173,2026-02-27 10:54:00,EN_ATENCION,REPARADO,Reparado (simulado).
+441,2026-07-04 02:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+441,2026-07-12 04:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1348,2026-05-09 04:27:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1348,2026-05-17 05:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+38,2026-06-05 09:32:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+38,2026-06-12 07:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1270,2026-04-30 21:27:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1270,2026-05-02 01:57:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1284,2026-05-16 13:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1284,2026-05-23 15:46:00,EN_ATENCION,REPARADO,Reparado (simulado).
+495,2026-09-11 18:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+495,2026-09-22 20:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1502,2026-04-21 07:55:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1502,2026-05-02 02:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+605,2026-07-29 15:38:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+605,2026-08-07 11:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1141,2026-01-22 17:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1141,2026-01-31 01:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+592,2026-01-11 05:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+592,2026-01-14 03:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1167,2026-04-26 21:03:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1167,2026-05-07 16:33:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1532,2026-08-05 01:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1532,2026-08-09 21:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1436,2026-08-24 03:59:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1436,2026-09-03 22:29:00,EN_ATENCION,REPARADO,Reparado (simulado).
+538,2026-03-02 22:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+538,2026-03-05 08:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+761,2026-08-28 04:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+761,2026-08-31 08:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+603,2026-06-16 20:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+603,2026-06-23 21:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+802,2026-09-13 07:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+802,2026-09-20 05:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+250,2026-04-08 23:12:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+250,2026-04-14 19:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+886,2026-08-04 18:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+886,2026-08-09 16:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1344,2026-09-21 03:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1344,2026-10-01 14:09:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1282,2026-03-06 03:57:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1282,2026-03-14 19:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1223,2026-07-07 12:05:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1223,2026-07-10 07:05:00,EN_ATENCION,REPARADO,Reparado (simulado).
+519,2026-03-31 23:20:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+519,2026-04-04 00:20:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1012,2026-03-20 23:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1012,2026-03-22 12:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+778,2026-08-19 22:31:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+778,2026-08-27 07:31:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1378,2026-03-23 14:28:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1378,2026-04-01 04:28:00,EN_ATENCION,REPARADO,Reparado (simulado).
+545,2026-05-06 07:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+545,2026-05-13 00:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1312,2026-09-26 16:27:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1312,2026-10-02 13:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1091,2026-09-14 03:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1091,2026-09-16 22:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1597,2026-07-14 20:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1597,2026-07-23 18:37:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1271,2026-07-02 04:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1271,2026-07-07 00:51:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1144,2026-07-21 02:16:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1144,2026-07-24 22:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+237,2026-08-18 03:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+237,2026-08-21 12:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1531,2026-03-08 13:45:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1531,2026-03-09 21:45:00,EN_ATENCION,REPARADO,Reparado (simulado).
+367,2026-08-21 05:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+367,2026-08-26 12:37:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1435,2026-08-12 07:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1435,2026-08-24 00:51:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1254,2026-08-20 05:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1254,2026-08-27 19:51:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1286,2026-05-09 13:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1286,2026-05-16 00:39:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1433,2026-01-14 21:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1433,2026-01-17 18:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1207,2026-03-20 18:52:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1207,2026-03-23 13:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+752,2026-08-16 16:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+752,2026-08-21 09:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1231,2026-04-14 19:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1231,2026-04-21 19:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1424,2026-10-04 21:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1424,2026-10-12 01:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1226,2026-10-02 23:10:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1226,2026-10-04 12:10:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1422,2026-03-04 11:55:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1422,2026-03-08 12:25:00,EN_ATENCION,REPARADO,Reparado (simulado).
+971,2026-07-06 23:49:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+971,2026-07-15 13:49:00,EN_ATENCION,REPARADO,Reparado (simulado).
+632,2026-05-03 11:23:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+632,2026-05-09 06:23:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1633,2026-02-01 21:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1633,2026-02-04 09:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1571,2026-03-09 18:38:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1571,2026-03-21 06:08:00,EN_ATENCION,REPARADO,Reparado (simulado).
+952,2026-07-22 22:16:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+952,2026-08-02 08:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1285,2026-05-26 06:30:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1285,2026-05-30 23:00:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1479,2026-10-01 07:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1479,2026-10-10 18:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+673,2026-07-23 17:18:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+673,2026-07-27 04:48:00,EN_ATENCION,REPARADO,Reparado (simulado).
+847,2026-04-01 03:19:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+847,2026-04-01 18:19:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1463,2026-06-01 05:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1463,2026-06-09 13:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+10,2026-02-22 21:06:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+10,2026-03-01 02:36:00,EN_ATENCION,REPARADO,Reparado (simulado).
+514,2026-02-17 00:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+514,2026-02-23 03:54:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1239,2026-02-15 22:07:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1239,2026-02-24 11:37:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1198,2026-09-14 03:01:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1198,2026-09-17 12:31:00,EN_ATENCION,REPARADO,Reparado (simulado).
+234,2026-03-01 10:31:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+234,2026-03-06 09:31:00,EN_ATENCION,REPARADO,Reparado (simulado).
+749,2026-04-19 13:14:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+749,2026-04-24 00:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+661,2026-08-01 16:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+661,2026-08-09 01:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+294,2026-02-08 20:03:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+294,2026-02-18 01:33:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1565,2026-04-18 23:02:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1565,2026-04-20 10:02:00,EN_ATENCION,REPARADO,Reparado (simulado).
+142,2026-06-27 09:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+142,2026-07-06 19:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+31,2026-03-05 16:30:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+31,2026-03-12 13:30:00,EN_ATENCION,REPARADO,Reparado (simulado).
+948,2026-03-07 23:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+948,2026-03-17 21:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1056,2026-09-25 18:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1056,2026-10-07 07:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+623,2026-05-21 07:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+623,2026-05-30 12:25:00,EN_ATENCION,REPARADO,Reparado (simulado).
+388,2026-04-28 23:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+388,2026-05-03 19:25:00,EN_ATENCION,REPARADO,Reparado (simulado).
+925,2026-03-18 00:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+925,2026-03-21 21:29:00,EN_ATENCION,REPARADO,Reparado (simulado).
+921,2026-07-02 16:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+921,2026-07-06 12:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1214,2026-03-13 12:23:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1214,2026-03-16 18:53:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1357,2026-06-27 06:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1357,2026-06-27 19:00:00,EN_ATENCION,REPARADO,Reparado (simulado).
+263,2026-08-21 10:27:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+263,2026-08-31 13:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+366,2026-01-14 18:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+366,2026-01-17 19:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+681,2026-01-28 10:07:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+681,2026-02-09 02:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1049,2026-08-27 01:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1049,2026-08-30 06:17:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1263,2026-07-08 16:41:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1263,2026-07-18 19:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1019,2026-06-08 19:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1019,2026-06-17 10:09:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1278,2026-05-04 11:16:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1278,2026-05-10 22:46:00,EN_ATENCION,REPARADO,Reparado (simulado).
+932,2026-08-29 14:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+932,2026-09-07 06:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+833,2026-05-09 13:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+833,2026-05-13 09:09:00,EN_ATENCION,REPARADO,Reparado (simulado).
+576,2026-08-27 05:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+576,2026-08-28 03:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+982,2026-01-30 16:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+982,2026-02-03 19:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+470,2026-09-11 01:52:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+470,2026-09-23 01:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+630,2026-01-23 11:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+630,2026-02-01 19:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1319,2026-09-14 13:40:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1319,2026-09-26 03:10:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1152,2026-07-16 10:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1152,2026-07-25 19:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+945,2026-08-05 01:27:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+945,2026-08-09 23:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1612,2026-06-17 21:36:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1612,2026-06-23 14:06:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1182,2026-05-09 01:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1182,2026-05-17 08:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1184,2026-07-19 22:07:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1184,2026-07-25 14:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1609,2026-04-13 01:33:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1609,2026-04-14 20:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+884,2026-09-26 10:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+884,2026-10-04 17:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1525,2026-07-06 02:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1525,2026-07-16 01:04:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1243,2026-03-20 17:30:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1243,2026-03-27 12:00:00,EN_ATENCION,REPARADO,Reparado (simulado).
+748,2026-08-08 04:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+748,2026-08-13 10:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+543,2026-03-27 19:00:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+543,2026-04-02 00:00:00,EN_ATENCION,REPARADO,Reparado (simulado).
+721,2026-03-10 01:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+721,2026-03-17 14:14:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1209,2026-04-03 14:38:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1209,2026-04-11 23:08:00,EN_ATENCION,REPARADO,Reparado (simulado).
+148,2026-07-24 05:57:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+148,2026-07-31 09:27:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1355,2026-04-20 00:54:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1355,2026-04-23 21:24:00,EN_ATENCION,REPARADO,Reparado (simulado).
+675,2026-04-15 21:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+675,2026-04-16 18:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+410,2026-03-24 19:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+410,2026-04-03 01:34:00,EN_ATENCION,REPARADO,Reparado (simulado).
+703,2026-07-01 19:41:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+703,2026-07-08 22:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+946,2026-05-31 05:36:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+946,2026-06-04 12:36:00,EN_ATENCION,REPARADO,Reparado (simulado).
+727,2026-07-19 00:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+727,2026-07-29 21:21:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1227,2026-09-12 21:20:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1227,2026-09-21 23:20:00,EN_ATENCION,REPARADO,Reparado (simulado).
+188,2026-09-27 01:24:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+188,2026-10-07 13:54:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1003,2026-01-30 09:41:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1003,2026-02-11 02:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1058,2026-03-31 04:02:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1058,2026-04-11 08:32:00,EN_ATENCION,REPARADO,Reparado (simulado).
+158,2026-01-17 21:06:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+158,2026-01-27 18:36:00,EN_ATENCION,REPARADO,Reparado (simulado).
+694,2026-04-07 15:06:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+694,2026-04-08 16:36:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1616,2026-07-08 22:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1616,2026-07-18 04:56:00,EN_ATENCION,REPARADO,Reparado (simulado).
+102,2026-04-16 21:13:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+102,2026-04-19 11:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+402,2026-03-13 04:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+402,2026-03-24 06:42:00,EN_ATENCION,REPARADO,Reparado (simulado).
+477,2026-05-16 23:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+477,2026-05-25 18:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+719,2026-05-28 19:14:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+719,2026-06-01 13:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+656,2026-06-26 21:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+656,2026-07-04 20:41:00,EN_ATENCION,REPARADO,Reparado (simulado).
+796,2026-09-20 09:23:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+796,2026-09-23 01:23:00,EN_ATENCION,REPARADO,Reparado (simulado).
+874,2026-05-18 07:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+874,2026-05-26 00:37:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1277,2026-07-30 16:12:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1277,2026-08-04 02:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1178,2026-02-11 20:10:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1178,2026-02-13 16:10:00,EN_ATENCION,REPARADO,Reparado (simulado).
+272,2026-07-04 00:48:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+272,2026-07-15 22:48:00,EN_ATENCION,REPARADO,Reparado (simulado).
+533,2026-04-13 02:28:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+533,2026-04-24 00:58:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1187,2026-10-07 06:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1187,2026-10-13 22:56:00,EN_ATENCION,REPARADO,Reparado (simulado).
+615,2026-02-27 16:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+615,2026-03-04 05:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+942,2026-05-29 09:31:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+942,2026-06-02 18:01:00,EN_ATENCION,REPARADO,Reparado (simulado).
+650,2026-02-27 13:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+650,2026-03-08 05:56:00,EN_ATENCION,REPARADO,Reparado (simulado).
+72,2026-09-21 04:11:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+72,2026-09-28 19:11:00,EN_ATENCION,REPARADO,Reparado (simulado).
+708,2026-04-25 02:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+708,2026-05-01 06:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+967,2026-09-12 11:40:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+967,2026-09-21 18:40:00,EN_ATENCION,REPARADO,Reparado (simulado).
+903,2026-06-30 09:07:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+903,2026-07-01 00:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+432,2026-08-24 08:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+432,2026-09-04 12:21:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1390,2026-05-04 20:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1390,2026-05-15 04:55:00,EN_ATENCION,REPARADO,Reparado (simulado).
+251,2026-01-29 22:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+251,2026-02-05 19:17:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1339,2026-10-05 01:08:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1339,2026-10-16 07:38:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1082,2026-05-12 16:35:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1082,2026-05-18 20:05:00,EN_ATENCION,REPARADO,Reparado (simulado).
+137,2026-03-28 12:05:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+137,2026-04-04 20:05:00,EN_ATENCION,REPARADO,Reparado (simulado).
+950,2026-05-04 01:17:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+950,2026-05-12 03:17:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1639,2026-04-11 19:37:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1639,2026-04-17 14:07:00,EN_ATENCION,REPARADO,Reparado (simulado).
+555,2026-06-15 00:34:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+555,2026-06-24 03:04:00,EN_ATENCION,REPARADO,Reparado (simulado).
+807,2026-08-30 21:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+807,2026-08-31 18:14:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1101,2026-08-02 06:16:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1101,2026-08-12 14:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+995,2026-08-10 14:31:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+995,2026-08-15 11:31:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1341,2026-03-29 07:14:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1341,2026-04-06 05:14:00,EN_ATENCION,REPARADO,Reparado (simulado).
+823,2026-04-12 01:29:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+823,2026-04-19 20:59:00,EN_ATENCION,REPARADO,Reparado (simulado).
+122,2026-07-06 06:46:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+122,2026-07-16 17:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+494,2026-02-22 15:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+494,2026-03-02 02:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+590,2026-08-10 14:44:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+590,2026-08-20 06:44:00,EN_ATENCION,REPARADO,Reparado (simulado).
+770,2026-05-06 11:10:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+770,2026-05-09 09:40:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1014,2026-09-13 03:16:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1014,2026-09-25 01:16:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1029,2026-09-19 01:26:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1029,2026-09-20 02:56:00,EN_ATENCION,REPARADO,Reparado (simulado).
+523,2026-01-29 12:58:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+523,2026-02-05 09:58:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1415,2026-09-11 18:43:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1415,2026-09-21 19:43:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1467,2026-05-18 23:36:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1467,2026-05-22 03:06:00,EN_ATENCION,REPARADO,Reparado (simulado).
+607,2026-03-14 01:30:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+607,2026-03-21 12:00:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1119,2026-02-02 13:51:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1119,2026-02-10 00:21:00,EN_ATENCION,REPARADO,Reparado (simulado).
+496,2026-09-13 00:36:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+496,2026-09-21 15:06:00,EN_ATENCION,REPARADO,Reparado (simulado).
+596,2026-08-22 17:12:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+596,2026-09-02 01:42:00,EN_ATENCION,REPARADO,Reparado (simulado).
+459,2026-08-24 20:09:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+459,2026-08-28 12:09:00,EN_ATENCION,REPARADO,Reparado (simulado).
+558,2026-09-02 03:42:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+558,2026-09-07 00:12:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1472,2026-04-09 21:57:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1472,2026-04-11 11:57:00,EN_ATENCION,REPARADO,Reparado (simulado).
+146,2026-03-15 18:21:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+146,2026-03-25 04:51:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1466,2026-02-08 21:47:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1466,2026-02-12 14:47:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1634,2026-04-02 07:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1634,2026-04-10 00:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+92,2026-04-09 16:03:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+92,2026-04-16 00:03:00,EN_ATENCION,REPARADO,Reparado (simulado).
+136,2026-03-25 05:56:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+136,2026-03-28 15:26:00,EN_ATENCION,REPARADO,Reparado (simulado).
+201,2026-06-30 13:39:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+201,2026-07-04 16:39:00,EN_ATENCION,REPARADO,Reparado (simulado).
+1519,2026-05-07 09:40:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+1519,2026-05-17 18:10:00,EN_ATENCION,REPARADO,Reparado (simulado).
+687,2026-09-18 02:22:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+687,2026-09-24 14:22:00,EN_ATENCION,REPARADO,Reparado (simulado).
+539,2026-07-03 19:13:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+539,2026-07-12 17:13:00,EN_ATENCION,REPARADO,Reparado (simulado).
+966,2026-05-03 01:25:00,PRIORIZADO,EN_ATENCION,Programado por la autoridad (simulado).
+966,2026-05-05 12:25:00,EN_ATENCION,REPARADO,Reparado (simulado).

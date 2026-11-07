@@ -1,0 +1,5 @@
+variante,rojos_en_3_dias,espera_promedio,espera_p90,espera_maxima,espera_verdes,brecha_alcaldias,alcaldia_peor,pendientes_al_final
+FIFO,0.061,21.1,39,44,21.2,6.8,GUSTAVO A. MADERO,1355
+SIPA β=0.10,1.0,21.1,55,83,29.2,19.8,CUAJIMALPA DE MORELOS,1361
+SIPA β=0.30,1.0,21.1,52,83,28.7,18.5,CUAJIMALPA DE MORELOS,1360
+SIPA + cupo,1.0,21.1,51,68,28.7,16.5,TLAHUAC,1361

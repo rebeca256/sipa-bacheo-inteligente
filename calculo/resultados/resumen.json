@@ -1,0 +1,220 @@
+{
+  "factor_lluvias": 1.7962987331999878,
+  "reportes_mes_lluvias": 1147.095238095238,
+  "reportes_mes_secas": 638.588235294117,
+  "k_secas": 0.08,
+  "k_lluvias": 0.14370389865599903,
+  "v0_tipico_m3": 0.13631,
+  "area_tipica_m2": 1.72,
+  "profundidad_tipica_cm": 9.5,
+  "costo_m3": 7578.9473684210525,
+  "baches_analizados": 1345,
+  "tarifa_tipica": "BACHEO_PROFUNDO",
+  "tarifa_nombre": "Bacheo profundo: corte, caja y mezcla en caliente",
+  "tarifa_m2": 720.0,
+  "costo_fijo": 1500.0,
+  "duplica_secas_meses": 8.664339756999317,
+  "duplica_lluvias_meses": 4.823440331422138,
+  "tabla_perdida": [
+    {
+      "temporada": "Secas",
+      "meses": 0,
+      "perdida_m3": 0.0,
+      "volumen_total_m3": 0.13631,
+      "toneladas": 0.35985839999999997,
+      "costo": 2533.0863157894737,
+      "costo_extra_por_esperar": 0.0
+    },
+    {
+      "temporada": "Secas",
+      "meses": 3,
+      "perdida_m3": 0.03697397168031068,
+      "volumen_total_m3": 0.17328397168031068,
+      "toneladas": 0.4574696852360202,
+      "costo": 2813.310101156039,
+      "costo_extra_por_esperar": 280.22378536656515
+    },
+    {
+      "temporada": "Secas",
+      "meses": 6,
+      "perdida_m3": 0.0839771017629133,
+      "volumen_total_m3": 0.22028710176291327,
+      "toneladas": 0.581557948654091,
+      "costo": 3169.544350203132,
+      "costo_extra_por_esperar": 636.4580344136584
+    },
+    {
+      "temporada": "Secas",
+      "meses": 12,
+      "perdida_m3": 0.21969034629230516,
+      "volumen_total_m3": 0.35600034629230515,
+      "toneladas": 0.9398409142116856,
+      "costo": 4198.10788768905,
+      "costo_extra_por_esperar": 1665.021571899576
+    },
+    {
+      "temporada": "Lluvias",
+      "meses": 0,
+      "perdida_m3": 0.0,
+      "volumen_total_m3": 0.13631,
+      "toneladas": 0.35985839999999997,
+      "costo": 2533.0863157894737,
+      "costo_extra_por_esperar": 0.0
+    },
+    {
+      "temporada": "Lluvias",
+      "meses": 3,
+      "perdida_m3": 0.07346665131221489,
+      "volumen_total_m3": 0.20977665131221487,
+      "toneladas": 0.5538103594642473,
+      "costo": 3089.886199418892,
+      "costo_extra_por_esperar": 556.7998836294182
+    },
+    {
+      "temporada": "Lluvias",
+      "meses": 6,
+      "perdida_m3": 0.1865294353735352,
+      "volumen_total_m3": 0.3228394353735352,
+      "toneladas": 0.852296109386133,
+      "costo": 3946.783089146793,
+      "costo_extra_por_esperar": 1413.6967733573192
+    },
+    {
+      "temporada": "Lluvias",
+      "meses": 12,
+      "perdida_m3": 0.6283096246225737,
+      "volumen_total_m3": 0.7646196246225736,
+      "toneladas": 2.0185958090035943,
+      "costo": 7295.011891876347,
+      "costo_extra_por_esperar": 4761.925576086874
+    }
+  ],
+  "riemann": [
+    {
+      "n": 3,
+      "izquierda": 0.16100665873716605,
+      "error_izquierda_%": -13.682975335907933,
+      "derecha": 0.21461667289172448,
+      "error_derecha_%": 15.057804395291868,
+      "punto medio": 0.1858889814152089,
+      "error_punto medio_%": -0.34335275665406323
+    },
+    {
+      "n": 6,
+      "izquierda": 0.17344782007618748,
+      "error_izquierda_%": -7.013164046280999,
+      "derecha": 0.2002528271534667,
+      "error_derecha_%": 7.357225819318909,
+      "punto medio": 0.18636903265795624,
+      "error_punto medio_%": -0.08599324565463144
+    },
+    {
+      "n": 12,
+      "izquierda": 0.17990842636707186,
+      "error_izquierda_%": -3.5495786459678147,
+      "derecha": 0.19331092990571147,
+      "error_derecha_%": 3.6356162868321387,
+      "punto medio": 0.18648931658111645,
+      "error_punto medio_%": -0.02150802222630833
+    },
+    {
+      "n": 60,
+      "izquierda": 0.18519239499530693,
+      "error_izquierda_%": -0.7167985983288754,
+      "derecha": 0.18787289570303484,
+      "error_derecha_%": 0.7202403882311064,
+      "punto medio": 0.18652783038986043,
+      "error_punto medio_%": -0.0008604452544204864
+    }
+  ],
+  "exacto_lluvias_6m": 0.1865294353735352,
+  "valor_medio": {
+    "T": 6,
+    "tasa_promedio": 0.031088239228922534,
+    "c": 3.2142359692635996,
+    "r_c": 0.03108823922892253
+  },
+  "valor_presente": [
+    {
+      "meses": 0,
+      "vp_secas": 2533.0863157894737,
+      "vp_lluvias": 2533.0863157894737
+    },
+    {
+      "meses": 3,
+      "vp_secas": 2740.860050500361,
+      "vp_lluvias": 3010.3135950422225
+    },
+    {
+      "meses": 6,
+      "vp_secas": 3008.3983628874616,
+      "vp_lluvias": 3746.120726564426
+    },
+    {
+      "meses": 12,
+      "vp_secas": 3782.0791780982427,
+      "vp_lluvias": 6572.0827854741865
+    }
+  ],
+  "delta_mensual": 0.008696667943686905,
+  "k_promedio": 0.11185194932799952,
+  "intervalo_optimo": {
+    "promedio": 28.077368113171154,
+    "lluvias": 21.854023341258227,
+    "A_promedio": 78.38227940768745,
+    "A_lluvias": 100.70310981704883,
+    "A_cada_3_meses": 514.1344098718256,
+    "A_cada_48_meses": 166.80280082008366
+  },
+  "anual_por_tramos": {
+    "perdida_m3": 0.38542254752557703,
+    "volumen_final_m3": 0.521732547525577,
+    "costo_enero": 2533.0863157894737,
+    "costo_diciembre": 5454.183518088583
+  },
+  "cuarta_potencia": [
+    {
+      "w_rel": 1.0,
+      "phi": 1.0,
+      "perdida_6m": 0.1865294353735352
+    },
+    {
+      "w_rel": 1.1,
+      "phi": 1.4641000000000004,
+      "perdida_6m": 0.2730977463303929
+    },
+    {
+      "w_rel": 1.2,
+      "phi": 2.0736,
+      "perdida_6m": 0.3867874371905626
+    },
+    {
+      "w_rel": 1.3,
+      "phi": 2.8561000000000005,
+      "perdida_6m": 0.532746720370354
+    },
+    {
+      "w_rel": 1.5,
+      "phi": 5.0625,
+      "perdida_6m": 0.944305266578522
+    }
+  ],
+  "coincide_con_base": 9.094947017729282e-13,
+  "total_baches": {
+    "costo_hoy": 4610686.8,
+    "extra_3m": 698248.718373829,
+    "extra_6m": 1808044.294680193,
+    "extra_12m": 6209706.608196579,
+    "toneladas_hoy": 579.9007104,
+    "toneladas_6m": 1373.4488879630837
+  },
+  "chalco": {
+    "territorio": "CHALCO",
+    "baches": 11,
+    "volumen_m3": 1.93671,
+    "costo_hoy": 26552.8,
+    "extra_3m": 5834.008197394959,
+    "extra_6m": 15332.880984458854,
+    "extra_12m": 52534.33153303317
+  }
+}

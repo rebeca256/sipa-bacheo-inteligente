@@ -1,0 +1,26 @@
+# Archivos temporales y de entorno
+__pycache__/
+*.pyc
+.pytest_cache/
+~$*
+*.log
+scratch*.log
+
+# Respaldo local de la versión anterior del alcance
+respaldo_alcance_v1/
+
+# Capturas que generan las pruebas
+tablero/capturas/pruebas/
+tablero/capturas/sitio/
+tablero/capturas/pages_*.png
+
+# Documentos de los docentes (no son del equipo; no se publican)
+Planeación Didáctica*.docx
+PHLCDN-Planeación Didáctica*.docx
+planeacion_pensamiento_complejo_para_la_argumentacion.docx
+problema_prototipico_3semestre.docx
+Chalco_priorizacion_vial_y_conservacion_preventiva.pdf
+Guia_fosas_septicas_zonas_inundables.pdf
+Guia_suelo_subsuelo_y_pavimentacion_Chalco.pdf
+Historia_carretera_Mexico_Cuautla_fuentes_APA.pdf
+Investigacion_drenaje_pluvial_Chalco_fuentes_academicas.pdf

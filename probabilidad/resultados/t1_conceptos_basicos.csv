@@ -1,0 +1,16 @@
+concepto,valor
+Celdas analizadas (espacio muestral),9512.0
+P(B): celda con baches reportados en 2019,0.3566021867115223
+P(A): celda con al menos un accidente en 2019,0.5261774600504626
+P(A ∩ B),0.19880151387720774
+P(A)·P(B) (si fueran independientes),0.18763603285230962
+P(A | B),0.5574882075471698
+P(A | no B),0.5088235294117647
+P(G | B): accidente grave dado bache,0.07045990566037735
+P(G | no B),0.060294117647058824
+P(G) por probabilidad total,0.063919259882254
+P(B | G) por Bayes,0.39309210526315785
+Chi cuadrada de independencia A-B,20.53602354083177
+Valor p,5.851950514406297e-06
+"P(reporte en temporada de lluvias), frecuentista",0.689411358933088
+"P(≥3 de 5 revisados en vía rápida), conteo",0.2961816305469556

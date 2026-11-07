@@ -1,0 +1,15 @@
+cuenta,cargo,abono,naturaleza,grupo,saldo_deudor,saldo_acreedor
+Bancos,6500000.0,6995439.1,D,Activo circulante,0.0,495439.1
+Inventario de mezcla asfáltica,3677022.72,3342747.93,D,Activo circulante,334274.79,0.0
+Equipo de bacheo,1200000.0,0.0,D,Activo no circulante,1200000.0,0.0
+Depreciación acumulada de equipo,0.0,120000.0,A,Activo no circulante,0.0,120000.0
+Software SIPA (intangible),360000.0,0.0,D,Activo no circulante,360000.0,0.0
+Amortización acumulada de software,0.0,120000.0,A,Activo no circulante,0.0,120000.0
+Acreedores diversos (contratista),0.0,300847.31,A,Pasivo a corto plazo,0.0,300847.31
+Provisión para reclamaciones por daños,53614.93,134037.33,A,Pasivo a corto plazo,0.0,80422.4
+Patrimonio inicial,0.0,500000.0,A,Patrimonio,0.0,500000.0
+Ingresos por asignación presupuestal,0.0,6000000.0,A,Ingresos,0.0,6000000.0
+Costo de materiales de bacheo,3342747.93,0.0,D,Costo de operación,3342747.93,0.0
+Costo de mano de obra de bacheo,2005648.76,0.0,D,Costo de operación,2005648.76,0.0
+Gasto por provisión de reclamaciones,134037.33,0.0,D,Gastos de operación,134037.33,0.0
+Depreciación y amortización,240000.0,0.0,D,Gastos de operación,240000.0,0.0

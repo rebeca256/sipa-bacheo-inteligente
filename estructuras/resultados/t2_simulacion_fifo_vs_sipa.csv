@@ -1,0 +1,9 @@
+estrategia,grupo,baches,reparados,espera_promedio,espera_maxima
+FIFO,rojos,32,23,7.8,14
+FIFO,amarillos,163,104,7.7,14
+FIFO,verdes,491,286,7.7,14
+FIFO,todos,686,413,7.7,14
+SIPA,rojos,32,32,0.0,0
+SIPA,amarillos,166,166,0.1,1
+SIPA,verdes,488,215,10.8,23
+SIPA,todos,686,413,7.7,23

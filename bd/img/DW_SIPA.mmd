@@ -1,0 +1,99 @@
+erDiagram
+    dim_tiempo ||--o{ fact_reporte : "fecha"
+    dim_ubicacion ||--o{ fact_reporte : ""
+    dim_celda ||--o{ fact_reporte : ""
+    dim_estatus ||--o{ fact_reporte : ""
+    dim_fuente ||--o{ fact_reporte : ""
+
+    dim_tiempo ||--o{ fact_priorizacion : "fecha cálculo"
+    dim_ubicacion ||--o{ fact_priorizacion : ""
+    dim_celda ||--o{ fact_priorizacion : ""
+    dim_semaforo ||--o{ fact_priorizacion : "modelo / final"
+    dim_intervencion ||--o{ fact_priorizacion : recomienda
+
+    dim_tiempo ||--o{ fact_atencion : "decisión / cierre"
+    dim_ubicacion ||--o{ fact_atencion : ""
+    dim_celda ||--o{ fact_atencion : ""
+    dim_intervencion ||--o{ fact_atencion : ""
+    dim_semaforo ||--o{ fact_atencion : ""
+
+    fact_reporte {
+        int id_tiempo PK,FK
+        int id_reporte PK "degenerada"
+        int id_ubicacion FK
+        int id_celda FK
+        int id_estatus FK
+        int id_fuente FK
+        tinyint cantidad
+        bit posible_duplicado
+        bit ubicacion_dudosa
+    }
+    fact_priorizacion {
+        int id_calculo PK
+        int id_bache "degenerada"
+        int id_tiempo FK
+        int id_ubicacion FK
+        int id_celda FK
+        tinyint id_semaforo_modelo FK
+        tinyint id_semaforo_final FK
+        varchar decision
+        decimal ipu
+        int id_intervencion FK
+        decimal costo_estimado
+        decimal v_inundacion
+        decimal v_servicios
+    }
+    fact_atencion {
+        int id_bache PK "degenerada"
+        int id_tiempo_decision FK
+        int id_tiempo_cierre FK
+        int id_ubicacion FK
+        int id_intervencion FK
+        tinyint id_semaforo_final FK
+        varchar estado
+        decimal costo_estimado
+        decimal costo_reportado
+        int horas_resolucion
+        bit cumplio_meta
+    }
+    dim_tiempo {
+        int id_tiempo PK "AAAAMMDD"
+        smallint anio
+        tinyint trimestre
+        tinyint mes
+        varchar nombre_dia
+        varchar temporada "LLUVIAS / SECAS"
+    }
+    dim_ubicacion {
+        int id_ubicacion PK
+        varchar colonia
+        varchar territorio
+        varchar entidad
+    }
+    dim_celda {
+        int id_celda PK
+        varchar celda_id
+        bit cerca_zona_inundable
+        int servicios_500m
+    }
+    dim_semaforo {
+        tinyint id_semaforo PK
+        varchar nombre
+        smallint dias_objetivo
+    }
+    dim_intervencion {
+        int id_intervencion PK
+        varchar clave
+        varchar nombre
+        decimal costo_m2
+        decimal costo_fijo
+    }
+    dim_estatus {
+        int id_estatus PK
+        varchar estatus_original
+        varchar estatus_agrupado
+    }
+    dim_fuente {
+        int id_fuente PK
+        varchar nombre
+    }

@@ -1,0 +1,23 @@
+﻿paso,descripcion,registros_afectados
+0,Registros leídos,35743
+1,Texto normalizado en 'colonia_datos',599
+1,Texto normalizado en 'alcaldia',6
+1,Texto normalizado en 'estatus',0
+X,Excluidos: folio no numérico,0
+2,Prefijo '- ' eliminado del folio,35743
+X,Excluidos: folio duplicado,0
+X,Excluidos: fecha inválida,0
+X,Excluidos: coordenadas no numéricas,0
+X,Excluidos: coordenadas fuera de la CDMX,114
+X,Excluidos: estatus desconocido,0
+5,Estatus agrupados con el catálogo (ATENDIDO y CERRADO -> RESUELTO),30732
+6,Alcaldía inferida por vecinos (<= 1000 m),109
+6,Alcaldía que sigue vacía,47
+6,Colonia inferida por vecinos (<= 150 m),158
+6,Colonia que sigue vacía,165
+6,Marcados como ubicación dudosa (sin alcaldía; posible Estado de México),47
+7,Marcados como posible duplicado (misma celda ~11 m y < 30 días),158
+7,Reportes que comparten ubicación (~11 m) con otro reporte,921
+8,"Registros en periodos atípicos (marcados, no excluidos)",684
+8,Celdas de 250 m con al menos un reporte,8323
+9,Registros finales en la base limpia,35629

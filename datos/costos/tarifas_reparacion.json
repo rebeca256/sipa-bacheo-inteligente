@@ -1,0 +1,17 @@
+{
+  "version": "2026-11",
+  "moneda": "MXN",
+  "fuente": "Estimación ILUSTRATIVA del equipo SIPA; debe sustituirse por el tabulador de precios unitarios de la autoridad",
+  "formula": "costo = costo_fijo + costo_m2 * MAX(area_bache_m2, area_minima_m2)",
+  "incluye": "material, mano de obra, maquinaria, señalización y traslado",
+  "tarifas": [
+    {"clave": "BACHEO_SUPERFICIAL", "nombre": "Bacheo superficial con mezcla en frío",
+     "costo_m2": 380.00, "costo_fijo": 900.00, "area_minima_m2": 0.5},
+    {"clave": "BACHEO_PROFUNDO", "nombre": "Bacheo profundo: corte, caja y mezcla en caliente",
+     "costo_m2": 720.00, "costo_fijo": 1500.00, "area_minima_m2": 1.0},
+    {"clave": "BACHEO_CON_SELLO", "nombre": "Bacheo con sello impermeable y revisión de drenaje pluvial",
+     "costo_m2": 850.00, "costo_fijo": 2200.00, "area_minima_m2": 1.0},
+    {"clave": "REENCARPETADO", "nombre": "Reencarpetado del tramo (unos 100 m de un carril)",
+     "costo_m2": 480.00, "costo_fijo": 15000.00, "area_minima_m2": 350.0}
+  ]
+}

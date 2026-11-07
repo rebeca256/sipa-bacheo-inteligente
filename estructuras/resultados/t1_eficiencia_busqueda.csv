@@ -1,0 +1,4 @@
+n,claves_distintas,us_lineal,us_hash,us_avl,comparaciones_lineal,comparaciones_avl,altura_avl,cota_avl,cubeta_mas_larga,factor_carga
+1000,1000,18.96,3.39,1.32,521.9,9.3,12,14.4,5,0.488
+10000,9918,194.82,2.4,1.39,4851.6,12.6,16,19.1,6,0.605
+34945,34494,654.84,8.07,3.36,17941.5,14.5,18,21.7,7,0.526

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>SIPA · Sistema Inteligente de Priorización Asfáltica</title>
+    <meta name="description" content="Prototipo funcional de SIPA: priorización de baches basada en evidencia. UNRC LCDN 2026-2." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.1/build/stlite.css" />
+    <style>
+      #carga { font-family: system-ui, sans-serif; max-width: 640px; margin: 15vh auto; text-align: center; color: #333; }
+      #carga h1 { color: #1f3a5f; margin-bottom: .2em; }
+      #carga p { line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="carga">
+        <h1>SIPA</h1>
+        <p>Sistema Inteligente de Priorización Asfáltica</p>
+        <p>Cargando el tablero… La primera vez tarda entre 15 y 30 segundos, porque el navegador
+           descarga Python. Las siguientes visitas son más rápidas.</p>
+      </div>
+    </div>
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.1/build/stlite.js";
+      const archivos = ["app.py", "datos/autoridades.csv", "datos/baches.csv", "datos/causas.csv", "datos/cobertura.csv", "datos/colonias.csv", "datos/costo_pendiente.csv", "datos/decisiones.csv", "datos/detalle.csv", "datos/reincidencia.csv", "datos/reportes.csv", "datos/resueltos.csv", "datos/seguimiento.csv", "datos/tiempos.csv"];
+      const files = {};
+      for (const ruta of archivos) files[ruta] = { url: "./" + ruta };
+      mount(
+        {
+          requirements: ["pydeck"],
+          entrypoint: "app.py",
+          files,
+          streamlitConfig: { "client.toolbarMode": "viewer" },
+        },
+        document.getElementById("root"),
+      );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+pandas>=2.0
+numpy>=1.24
+streamlit>=1.40
+pydeck
+altair
+pyodbc
+openpyxl
+python-docx
+matplotlib
+scipy
+playwright
+pytest

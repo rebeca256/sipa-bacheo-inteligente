@@ -1,0 +1,23 @@
+asiento,fecha,cuenta,cargo,abono,concepto
+1,01/01,Bancos,500000.0,0.0,Aportación inicial de patrimonio a la Unidad de Bacheo
+1,01/01,Patrimonio inicial,0.0,500000.0,Aportación inicial de patrimonio a la Unidad de Bacheo
+2,15/01,Bancos,6000000.0,0.0,Se recibe la asignación presupuestal anual del programa de bacheo
+2,15/01,Ingresos por asignación presupuestal,0.0,6000000.0,Se recibe la asignación presupuestal anual del programa de bacheo
+3,01/02,Equipo de bacheo,1200000.0,0.0,"Compra de camión bacheador con petrolizadora, pago por transferencia"
+3,01/02,Bancos,0.0,1200000.0,"Compra de camión bacheador con petrolizadora, pago por transferencia"
+4,01/02,Software SIPA (intangible),360000.0,0.0,Desarrollo e implantación del sistema SIPA
+4,01/02,Bancos,0.0,360000.0,Desarrollo e implantación del sistema SIPA
+5,10/02,Inventario de mezcla asfáltica,3677022.72,0.0,"Compra de 1,713 t de mezcla asfáltica (IVA incluido, no acreditable)"
+5,10/02,Bancos,0.0,3677022.72,"Compra de 1,713 t de mezcla asfáltica (IVA incluido, no acreditable)"
+6,31/03,Costo de materiales de bacheo,3342747.93,0.0,Consumo de mezcla en la reparación de los baches pendientes
+6,31/03,Inventario de mezcla asfáltica,0.0,3342747.93,Consumo de mezcla en la reparación de los baches pendientes
+7,31/03,Costo de mano de obra de bacheo,2005648.76,0.0,Mano de obra del contratista; queda 15 % por pagar
+7,31/03,Bancos,0.0,1704801.45,Mano de obra del contratista; queda 15 % por pagar
+7,31/03,Acreedores diversos (contratista),0.0,300847.31,Mano de obra del contratista; queda 15 % por pagar
+8,30/06,Gasto por provisión de reclamaciones,134037.33,0.0,Reconocimiento de la provisión por reclamaciones de daños (NIF C-9)
+8,30/06,Provisión para reclamaciones por daños,0.0,134037.33,Reconocimiento de la provisión por reclamaciones de daños (NIF C-9)
+9,30/09,Provisión para reclamaciones por daños,53614.93,0.0,Pago de reclamaciones procedentes contra la provisión
+9,30/09,Bancos,0.0,53614.93,Pago de reclamaciones procedentes contra la provisión
+10,31/12,Depreciación y amortización,240000.0,0.0,"Depreciación anual del equipo (10 años, línea recta) y amortización de SIPA (3 años)"
+10,31/12,Depreciación acumulada de equipo,0.0,120000.0,"Depreciación anual del equipo (10 años, línea recta) y amortización de SIPA (3 años)"
+10,31/12,Amortización acumulada de software,0.0,120000.0,"Depreciación anual del equipo (10 años, línea recta) y amortización de SIPA (3 años)"

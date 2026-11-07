@@ -1,0 +1,214 @@
+erDiagram
+    territorio ||--o{ colonia : contiene
+    territorio ||--o{ peso_criterio : configura
+    territorio ||--o{ usuario : "autoridad de"
+    territorio ||--o{ zona_inundable : delimita
+    territorio ||--o{ equipamiento : ubica
+    colonia ||--o{ tramo : contiene
+    colonia ||--o{ reporte : ubica
+    tipo_vialidad ||--o{ tramo : clasifica
+    celda ||--o{ tramo : contiene
+    celda ||--o{ bache : contiene
+    celda ||--o{ reporte : contiene
+    celda ||--o{ accidente : contiene
+    celda ||--o| riesgo_celda_72h : estima
+
+    tramo ||--o{ bache : tiene
+    tramo ||--o{ aforo : mide
+    tramo ||--o{ accidente : registra
+    tramo ||--o{ ruta_tramo : ""
+    ruta_transporte ||--o{ ruta_tramo : recorre
+
+    cat_fuente_reporte ||--o{ reporte : origina
+    cat_estatus_reporte ||--o{ reporte : clasifica
+    cat_estado_bache ||--o{ bache : estado
+    bache ||--o{ reporte : "agrupa duplicados"
+    reporte ||--o| contacto_ciudadano : "priv (opcional)"
+    reporte ||--o{ notificacion : recibe
+    seguimiento_bache ||--o{ notificacion : genera
+
+    criterio_ipu ||--o{ peso_criterio : pondera
+    criterio_ipu ||--o{ detalle_calculo : desglosa
+    bache ||--o{ calculo_prioridad : prioriza
+    calculo_prioridad ||--|{ detalle_calculo : justifica
+    calculo_prioridad ||--o{ decision_humana : revisa
+    usuario ||--o{ decision_humana : toma
+
+    tarifa_reparacion ||--o{ calculo_prioridad : "costea (JSON)"
+    bache ||--o{ seguimiento_bache : "avance informado"
+    usuario ||--o{ seguimiento_bache : informa
+    cat_estado_bache ||--o{ seguimiento_bache : "estado nuevo"
+
+    territorio {
+        int id_territorio PK
+        varchar nombre
+        varchar tipo
+        varchar entidad
+    }
+    colonia {
+        int id_colonia PK
+        int id_territorio FK
+        varchar nombre
+        varchar clave_oficial
+        varchar tipo_asentamiento
+        decimal indice_marginacion
+        int poblacion
+    }
+    riesgo_celda_72h {
+        varchar celda_id PK,FK
+        int acc_total
+        bit via_rapida
+        decimal p72_accidente "CHECK 0-1"
+        varchar semaforo_72h "CHECK ROJO/AMARILLO/VERDE"
+        decimal v_riesgo_72h "CHECK 0-1, criterio RIESGO_72H"
+    }
+    celda {
+        varchar celda_id PK
+        decimal latitud
+        decimal longitud
+    }
+    tramo {
+        int id_tramo PK
+        varchar nombre_vialidad
+        tinyint id_tipo_vialidad FK
+        int id_colonia FK
+        varchar celda_id FK
+        decimal longitud_m
+    }
+    bache {
+        int id_bache PK
+        int id_tramo FK
+        varchar celda_id FK
+        tinyint severidad "CHECK 1-5"
+        decimal profundidad_cm
+        decimal area_m2
+        tinyint id_estado_bache FK
+        date fecha_deteccion
+    }
+    reporte {
+        int id_reporte PK
+        int folio_origen "UNIQUE filtrado"
+        tinyint id_fuente FK
+        int id_bache FK
+        int id_colonia FK
+        varchar celda_id FK
+        date fecha_solicitud
+        varchar estatus_original FK
+        bit ubicacion_dudosa
+        bit posible_duplicado
+    }
+    contacto_ciudadano {
+        int id_contacto PK
+        int id_reporte FK "UNIQUE"
+        varchar medio
+        varchar dato_contacto
+        bit consentimiento "CHECK = 1"
+    }
+    aforo {
+        int id_aforo PK
+        int id_tramo FK
+        date fecha_medicion
+        int vehiculos_dia
+        decimal pct_carga_pesada
+    }
+    ruta_transporte {
+        int id_ruta PK
+        varchar nombre
+        varchar tipo
+        int pasajeros_dia
+    }
+    ruta_tramo {
+        int id_ruta PK,FK
+        int id_tramo PK,FK
+    }
+    zona_inundable {
+        int id_zona PK
+        int id_territorio FK
+        varchar clave
+        geography poligono
+        varchar fuente
+    }
+    equipamiento {
+        int id_equipamiento PK
+        int id_territorio FK
+        varchar tipo "ESCUELA, HOSPITAL, MERCADO"
+        varchar nombre
+        int personas
+        geography ubicacion "calculada"
+    }
+    accidente {
+        int id_accidente PK
+        int id_tramo FK
+        varchar celda_id FK
+        date fecha
+        varchar gravedad
+    }
+    criterio_ipu {
+        tinyint id_criterio PK
+        varchar clave
+        varchar nombre
+    }
+    peso_criterio {
+        int id_territorio PK,FK
+        tinyint id_criterio PK,FK
+        date vigente_desde PK
+        date vigente_hasta
+        decimal peso "CHECK 0-1"
+    }
+    calculo_prioridad {
+        int id_calculo PK
+        int id_bache FK
+        decimal ipu
+        varchar semaforo
+        varchar clave_tarifa FK
+        decimal costo_estimado
+        varchar version_modelo
+    }
+    detalle_calculo {
+        int id_calculo PK,FK
+        tinyint id_criterio PK,FK
+        decimal valor_normalizado
+        decimal peso_aplicado
+    }
+    usuario {
+        int id_usuario PK
+        varchar nombre
+        varchar rol "AUTORIDAD, ANALISTA, ADMIN"
+        int id_territorio FK
+    }
+    decision_humana {
+        int id_decision PK
+        int id_calculo FK
+        int id_usuario FK
+        varchar decision
+        varchar semaforo_ajustado
+        varchar justificacion "obligatoria si ajusta"
+    }
+    tarifa_reparacion {
+        varchar clave PK
+        varchar nombre
+        decimal costo_m2 "CHECK > 0"
+        decimal costo_fijo
+        decimal area_minima_m2
+        varchar version "del archivo JSON"
+    }
+    cat_estado_bache {
+        tinyint id_estado_bache PK
+        varchar nombre
+    }
+    seguimiento_bache {
+        int id_seguimiento PK
+        int id_bache FK
+        tinyint id_estado_anterior FK
+        tinyint id_estado_nuevo FK
+        int id_usuario FK "autoridad"
+        datetime fecha
+        varchar comentario "obligatorio si descarta"
+        decimal costo_reportado "solo al reparar"
+    }
+    notificacion {
+        int id_notificacion PK
+        int id_reporte FK
+        int id_seguimiento FK
+        varchar medio
+    }
