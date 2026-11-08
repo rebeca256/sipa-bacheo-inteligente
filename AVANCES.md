@@ -320,3 +320,6 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Pruebas: `tablero/pruebas_sitio.py` 5/5 contra el sitio publicado; `tablero/pruebas_e2e.py` 7/7 en local. Primera carga del sitio: unos 27 s.
 - Corregido en `bd/08`: la validación simulada ahora queda antes de la decisión (antes salía después de la reparación).
 - Para actualizar el sitio: reconstruir la base, `python scripts/exportar_datos_tablero.py`, `python scripts/construir_sitio.py`, commit y push.
+
+## 7 nov 2026 · Entregables en PDF
+- `pdf/`: los 10 entregables en PDF (`scripts/exportar_pdf.py`, mammoth + Chrome; la automatización de Word se bloquea en esta computadora). README con enlaces. Corregida la referencia a la sección 3.1 del entregable final. Se quitó del repositorio el PDF viejo de Pensamiento Complejo.
