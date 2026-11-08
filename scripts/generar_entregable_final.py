@@ -177,7 +177,7 @@ def declaracion(doc):
     parrafo(doc, "El código del prototipo, los modelos y este documento se elaboraron con apoyo de IA "
                  "generativa (Claude, de Anthropic), con autorización de las y los docentes y dando el crédito "
                  "correspondiente. El equipo revisó, ejecutó y verificó los resultados, y es responsable de su "
-                 "contenido. La percepción inicial de la sección 4.1 la escribe el equipo sin apoyo de IA.",
+                 "contenido. La percepción inicial de la sección 3.1 la escribe el equipo sin apoyo de IA.",
             "Declaración de uso de IA. ")
 
 

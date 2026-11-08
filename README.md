@@ -27,6 +27,24 @@ Corre en el navegador con [stlite](https://github.com/whitphx/stlite) (Streamlit
 | `scripts/` | Limpieza de datos y generadores de los documentos de entrega |
 | `*.docx` | Entregables: `entregable_final_SIPA.docx` (evidencia integradora) y uno por asignatura |
 
+## Entregables en PDF
+
+Para leerlos directo en GitHub (los originales en Word están en la raíz del repositorio):
+
+| Documento | PDF |
+|---|---|
+| Evidencia integradora (entregable final) | [entregable_final_SIPA.pdf](pdf/entregable_final_SIPA.pdf) |
+| Fundamentos de Bases de Datos | [avance2_BD_entrega.pdf](pdf/avance2_BD_entrega.pdf) |
+| Estructuras de Datos: plan de viabilidad | [avance2_ED_plan_viabilidad.pdf](pdf/avance2_ED_plan_viabilidad.pdf) |
+| Probabilidad: semáforo de riesgo a 72 h | [avance2_Probabilidad_semaforo72h.pdf](pdf/avance2_Probabilidad_semaforo72h.pdf) |
+| Cálculo Integral: degradación del asfalto | [avance2_Calculo_degradacion.pdf](pdf/avance2_Calculo_degradacion.pdf) |
+| Contabilidad Financiera: provisiones NIF C-9 | [avance2_Contabilidad_NIF_C9.pdf](pdf/avance2_Contabilidad_NIF_C9.pdf) |
+| Pensamiento Complejo: estrategia de argumentación | [avance2_PensamientoComplejo_argumentacion.pdf](pdf/avance2_PensamientoComplejo_argumentacion.pdf) |
+| Primer avance e incidente de Estructuras de Datos | [avance1_PP.pdf](pdf/avance1_PP.pdf) · [avance2_PP_incidente_ED.pdf](pdf/avance2_PP_incidente_ED.pdf) |
+| Control interno de la entrega de BD (rúbricas) | [avance2_BD_planeacion.pdf](pdf/avance2_BD_planeacion.pdf) |
+
+Se generan con `python scripts/exportar_pdf.py` (sin Word: mammoth y Chrome), así que el formato es más sencillo que el del .docx.
+
 ## Cómo ejecutar en local
 
 Requisitos: Python 3.11+, SQL Server con ODBC Driver 17 y PowerShell.
