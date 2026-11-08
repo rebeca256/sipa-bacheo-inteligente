@@ -323,3 +323,8 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 
 ## 7 nov 2026 · Entregables en PDF
 - `pdf/`: los 10 entregables en PDF (`scripts/exportar_pdf.py`, mammoth + Chrome; la automatización de Word se bloquea en esta computadora). README con enlaces. Corregida la referencia a la sección 3.1 del entregable final. Se quitó del repositorio el PDF viejo de Pensamiento Complejo.
+
+## 7 nov 2026 · Segundo avance de Estructuras de Datos, rehecho
+- `avance2_ED_plan_viabilidad.docx` ahora es «Prototipo funcional y plan de viabilidad» y gira alrededor de las estructuras (lo que evalúa la UCA): el problema del FIFO, diagrama de clases (`estructuras/img/clases.png`), una sección por estructura con su código real (extraído del archivo con `ast`), complejidad y medición; decisión hash contra AVL con datos (el AVL resultó más rápido en µs y se explica por qué igual se elige la hash para duplicados); las 12 pruebas; resultados FIFO contra cola de prioridad; plan de viabilidad, contraste percepción-evidencia (pendiente del equipo) e intervenciones ligadas a cada estructura.
+- Quitadas las partes viejas: cargar riesgo 72 h y GTFS (ya hechos), cifras escritas a mano, nombres sin acentos y la referencia dudosa.
+- Los bloques de código usan el estilo «Codigo»; `scripts/exportar_pdf.py` los convierte en `<pre>` para que el PDF conserve la sangría (también en el documento de BD).

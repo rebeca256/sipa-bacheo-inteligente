@@ -1,9 +1,14 @@
 """
-SIPA - Genera el plan de viabilidad y la propuesta de intervenciones públicas (2º producto
-de la evidencia integradora, UCA Estructuras de Datos) a partir de los resultados de
-estructuras/experimentos.py, estructuras/viabilidad.py y de Cálculo, Probabilidad y Contabilidad.
+SIPA - Segundo avance de Estructuras de Datos: prototipo funcional y plan de viabilidad.
+
+El documento gira alrededor de las estructuras (lo que evalúa la UCA: «el cumplimiento de las
+complejidades solicitadas y el uso de estructuras que faciliten la gestión de los datos»):
+para cada una explica qué problema resuelve, muestra el código real (extraído del archivo, no
+copiado a mano), su complejidad teórica y lo que midió el prototipo. Después, el plan de
+viabilidad y las intervenciones, con las cifras de los resultados.
 
 Uso (desde la carpeta del proyecto):
+    python estructuras/pruebas.py
     python estructuras/experimentos.py
     python estructuras/viabilidad.py
     python scripts/generar_doc_viabilidad_ED.py
@@ -14,21 +19,54 @@ Desarrollado con apoyo de IA generativa (Claude, de Anthropic), con autorizació
 docente y crédito declarado. El equipo revisó y es responsable del contenido.
 """
 
+import ast
+import csv
 import json
+import sys
 from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from generar_doc_planeacion_bd import AZUL, parrafo, tabla, titulo, vinetas
+sys.path.insert(0, str(Path(__file__).parent))
+from generar_doc_planeacion_bd import AZUL, parrafo, tabla, titulo, vinetas  # noqa: E402
 
-ED = Path("estructuras/resultados")
+ED = Path("estructuras")
+RES = ED / "resultados"
 SALIDA = "avance2_ED_plan_viabilidad.docx"
 
+ACENTOS = {"Juarez": "Juárez", "Coyoacan": "Coyoacán", "Tlahuac": "Tláhuac", "Alvaro": "Álvaro",
+           "Obregon": "Obregón", "Cuauhtemoc": "Cuauhtémoc", "De": "de", "La": "La"}
+
+
+# ---------------------------------------------------------------------------
+# Utilidades
+# ---------------------------------------------------------------------------
 
 def leer(ruta):
     return json.loads(Path(ruta).read_text(encoding="utf-8"))
+
+
+def leer_csv(ruta):
+    with open(ruta, encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
+
+
+def nombre(texto):
+    return " ".join(ACENTOS.get(w, w) for w in texto.title().split())
+
+
+def pct(x):
+    return f"{100 * x:.0f} %"
+
+
+def m(x):
+    return f"${x:,.0f}"
+
+
+def mm(x):
+    return f"${x / 1e6:,.2f} M"
 
 
 def figura(doc, ruta, pie, ancho=15):
@@ -41,9 +79,48 @@ def figura(doc, ruta, pie, ancho=15):
     r.font.size = Pt(9)
 
 
-def pct(x):
-    return f"{100 * x:.0f} %"
+def fuente(archivo, nombre_funcion, clase=None):
+    """Código real de una función o método, tomado del archivo del prototipo."""
+    texto = (ED / archivo).read_text(encoding="utf-8")
+    arbol = ast.parse(texto)
+    nodos = arbol.body
+    if clase:
+        nodos = next(n for n in arbol.body if isinstance(n, ast.ClassDef) and n.name == clase).body
+    nodo = next(n for n in nodos if isinstance(n, ast.FunctionDef) and n.name == nombre_funcion)
+    lineas = texto.splitlines()[nodo.lineno - 1:nodo.end_lineno]
+    sangria = len(lineas[0]) - len(lineas[0].lstrip())
+    return "\n".join(linea[sangria:] for linea in lineas)
 
+
+def codigo(doc, texto, pie=None):
+    """Bloque de código con el estilo «Codigo» (Consolas; exportar_pdf.py lo convierte en <pre>)."""
+    if "Codigo" not in [s.name for s in doc.styles]:
+        from docx.enum.style import WD_STYLE_TYPE
+        estilo = doc.styles.add_style("Codigo", WD_STYLE_TYPE.PARAGRAPH)
+        estilo.base_style = doc.styles["Normal"]
+        estilo.font.name = "Consolas"
+        estilo.font.size = Pt(8)
+        estilo.paragraph_format.space_after = Pt(0)
+        estilo.paragraph_format.left_indent = Cm(0.6)
+    for linea in texto.strip("\n").split("\n"):
+        doc.add_paragraph(linea if linea else " ", style="Codigo")
+    if pie:
+        p = doc.add_paragraph()
+        r = p.add_run(pie)
+        r.italic = True
+        r.font.size = Pt(8.5)
+    else:
+        doc.add_paragraph()
+
+
+def ficha(doc, problema, complejidad, medida):
+    tabla(doc, ["Problema que resuelve", "Complejidad", "Lo que midió el prototipo"],
+          [[problema, complejidad, medida]], [6.5, 3, 6.5])
+
+
+# ---------------------------------------------------------------------------
+# Secciones
+# ---------------------------------------------------------------------------
 
 def portada(doc):
     for texto, tam, neg in [
@@ -56,8 +133,8 @@ def portada(doc):
         ("SIPA", 28, True),
         ("Sistema Inteligente de Priorización Asfáltica", 14, False),
         ("", 12, False),
-        ("Evidencia integradora · Producto 2", 14, True),
-        ("Plan de viabilidad y propuesta de intervenciones públicas basadas en evidencia", 12, False),
+        ("Segundo avance · Estructuras de Datos", 14, True),
+        ("Prototipo funcional y plan de viabilidad", 12, False),
         ("", 12, False),
     ]:
         p = doc.add_paragraph()
@@ -74,32 +151,356 @@ def portada(doc):
           [["UCA", "Estructuras de Datos (LCDN3EST8)"],
            ["Docente", "Luisa Reyna Beatriz Ayon Muñoz"],
            ["Grupo", "302"],
-           ["Fecha de entrega", "[fecha]"]], [4.5, 7])
+           ["Fecha de entrega", "[POR DEFINIR]"]], [4.5, 7])
     doc.add_page_break()
+    parrafo(doc, "El código del prototipo (carpeta estructuras/) y este documento se elaboraron con apoyo "
+                 "de IA generativa (Claude, de Anthropic), con autorización de la docente y dando el crédito "
+                 "correspondiente. El equipo revisó, ejecutó y probó el código, y es responsable de su contenido. "
+                 "Todas las estructuras están programadas desde cero, sin heapq, dict de Python como tabla hash "
+                 "ni otras bibliotecas que ya las resuelvan.", "Declaración de uso de IA. ")
+
+
+def problema(doc, fifo, sipa, ll):
+    titulo(doc, "1. El problema: una cola FIFO para atender baches")
+    parrafo(doc, "El incidente crítico describe un sistema que atiende los reportes en orden de llegada (FIFO). "
+                 "Eso trae tres fallas:")
+    vinetas(doc, [
+        f"Ignora la urgencia. En nuestra simulación de 90 días de lluvias de 2019 con datos reales, la cola FIFO "
+        f"atiende a tiempo (3 días o menos) solo el {pct(fifo['rojos_en_3_dias'])} de los baches de mayor riesgo.",
+        "Satura la memoria con duplicados: varios vecinos reportan el mismo bache y cada aviso se vuelve una "
+        "solicitud distinta.",
+        "Genera rutas caóticas: la brigada visita los baches en el orden en que llegaron, sin importar dónde están.",
+    ])
+    parrafo(doc, "El prototipo sustituye la cola por un conjunto de estructuras, cada una para una parte del "
+                 "problema. Un reporte recorre este camino:")
+    tabla(doc, ["Paso", "Estructura", "Complejidad"], [
+        ["1. Llega el reporte", "Lista doblemente enlazada", "O(1)"],
+        ["2. ¿Ya existe ese bache?", "Tabla hash (y conjunto)", "O(1) en promedio"],
+        ["3. Se calcula su prioridad y entra a la cola de atención", "Max-heap", "O(log n)"],
+        ["4. La autoridad ajusta una prioridad y puede deshacerlo", "Pila de deshacer y rehacer", "O(1) + O(log n)"],
+        ["5. Se arma el plan del día y la ruta de la brigada", "Max-heap + grafo con Dijkstra", "O(k log n) + O((V+E) log V)"],
+        ["6. Consultas por rango (por ejemplo, una zona)", "Árbol AVL", "O(log n + k)"],
+    ], [6.5, 5.5, 4])
+    parrafo(doc, f"Datos: los reportes reales de baches de la CDMX 2019-2022 (sin periodos atípicos) y el riesgo de "
+                 f"accidente a 72 horas por celda que calcula el modelo de Probabilidad. En lluvias llegan "
+                 f"{ll['lluvias']} baches nuevos por día y en secas {ll['secas']}.")
+
+
+def poo(doc):
+    titulo(doc, "2. Diseño orientado a objetos")
+    parrafo(doc, "El dominio se modela con tres clases. Reporte guarda el aviso ciudadano y calcula su clave de "
+                 "ubicación. Bache agrupa los reportes de un mismo daño y calcula su prioridad. Brigada recibe un "
+                 "plan y arma su ruta sobre el grafo. La clase SistemaSIPA integra las estructuras: cada una es un "
+                 "atributo con una sola responsabilidad (encapsulamiento), y sus operaciones se usan sin conocer "
+                 "cómo están programadas por dentro.")
+    figura(doc, ED / "img/clases.png", "Figura 1. Diagrama de clases del prototipo (estructuras/*.py).", 15.5)
+    parrafo(doc, "El índice de prioridad de un bache vive en un método de la clase, así que cambiar la fórmula "
+                 "no afecta a ninguna estructura:")
+    codigo(doc, fuente("modelos.py", "calcular_ipu", "Bache"),
+           "modelos.py · Bache.calcular_ipu: severidad (45 %), riesgo de accidente a 72 h (40 %) y reportes con "
+           "tope de 10 (15 %).")
+    parrafo(doc, "El prototipo usa este IPU simplificado de tres criterios para probar las estructuras. La base de "
+                 "datos SIPA calcula el IPU completo con diez criterios; el max-heap funciona igual con cualquiera "
+                 "de los dos, porque solo compara números.", "Nota. ")
+
+
+def estructuras(doc, exp, ef):
+    titulo(doc, "3. Las estructuras del prototipo")
+    dd = exp["desduplicacion"]
+    grande = ef[-1]
+
+    titulo(doc, "3.1 Lista doblemente enlazada: entrada de reportes", 2)
+    parrafo(doc, "Los reportes llegan en ráfagas y a veces hay que cancelar uno o unir los de otro canal (por "
+                 "ejemplo, los de una app con los de una línea telefónica). En un arreglo, borrar en medio obliga a "
+                 "recorrer todo lo que sigue. Cada nodo de la lista apunta al anterior y al siguiente, así que "
+                 "basta con reconectar dos referencias.")
+    codigo(doc, fuente("lista_enlazada.py", "eliminar", "ListaReportes"))
+    ficha(doc, "Registrar, cancelar y fusionar reportes sin reacomodar la memoria",
+          "O(1) para insertar, eliminar y fusionar",
+          f"{dd['reportes']:,} reportes registrados; la prueba verifica el recorrido en los dos sentidos")
+
+    titulo(doc, "3.2 Tabla hash y conjunto: eliminación de duplicados", 2)
+    parrafo(doc, "La clave de un reporte es su ubicación redondeada a cuatro decimales (unos 11 m). Para saber si "
+                 "un bache ya existe, se busca esa clave y sus 8 vecinas, porque dos personas pueden marcar el mismo "
+                 "bache unos metros aparte. Si hay un bache pendiente reportado hace menos de 30 días, es un "
+                 "duplicado; si ya se reparó o el último reporte tiene 30 días o más, se cuenta como una reaparición. Las colisiones se resuelven por encadenamiento "
+                 "(cada cubeta es una lista) y la tabla duplica su tamaño cuando el factor de carga pasa de 0.75. "
+                 "La clase Conjunto se construye sobre la misma tabla y se usa en Dijkstra y en el DFS para marcar "
+                 "los vértices visitados.")
+    codigo(doc, fuente("tabla_hash.py", "_indice", "TablaHash") + "\n\n" + fuente("tabla_hash.py", "insertar", "TablaHash"))
+    ficha(doc, "Saber en tiempo constante si un bache ya fue reportado",
+          "O(1) en promedio; O(n) el rehash, pocas veces",
+          f"{dd['duplicados']:,} duplicados y {dd['reincidencias']:,} reapariciones entre {dd['reportes']:,} reportes en "
+          f"{dd['segundos_hash']:.1f} s: {dd['busquedas_hash']:,} búsquedas en lugar de "
+          f"{dd['comparaciones_por_pares'] / 1e6:,.0f} millones de comparaciones por pares. Factor de carga "
+          f"{float(grande['factor_carga']):.2f}; la cubeta más larga tiene {grande['cubeta_mas_larga']} elementos")
+
+    titulo(doc, "3.3 Árbol AVL y recursividad: consultas ordenadas", 2)
+    parrafo(doc, "Un árbol binario de búsqueda se degrada a una lista si las claves llegan ordenadas, y los "
+                 "reportes llegan ordenados por fecha. El AVL lo evita: después de cada inserción revisa el factor de "
+                 "balance y, si una rama es dos niveles más alta que la otra, la corrige con una o dos rotaciones. "
+                 "La inserción es recursiva: cada llamada baja un nivel y, al regresar, rebalancea el nodo.")
+    codigo(doc, fuente("avl.py", "_insertar", "ArbolAVL"))
+    parrafo(doc, "El recorrido en orden y la búsqueda por rango también son recursivos. La búsqueda por rango "
+                 "poda las ramas que no pueden contener claves del intervalo:")
+    codigo(doc, fuente("avl.py", "_rango", "ArbolAVL"))
+    ficha(doc, "Mantener los baches ordenados y consultar rangos (una zona, un periodo)",
+          "O(log n) para insertar y buscar; O(log n + k) para un rango",
+          f"Con {int(grande['claves_distintas']):,} claves, altura {grande['altura_avl']} (la cota teórica es "
+          f"{float(grande['cota_avl']):.1f}) y {float(grande['comparaciones_avl']):.1f} comparaciones por búsqueda, "
+          f"contra {float(grande['comparaciones_lineal']):,.0f} de la búsqueda lineal")
+
+    titulo(doc, "3.4 Max-heap: la cola de atención", 2)
+    parrafo(doc, "Es la estructura que reemplaza a la cola FIFO. Se guarda en un arreglo donde los hijos del "
+                 "nodo i están en 2i+1 y 2i+2, y cada padre tiene una prioridad mayor o igual que la de sus hijos, "
+                 "así que el bache más urgente siempre está en la raíz. Al extraerlo, el último elemento pasa a la "
+                 "raíz y baja hasta su lugar. Además, el heap guarda la posición de cada bache, lo que permite "
+                 "actualizar su prioridad (cuando llega otro reporte o cuando la autoridad la ajusta) sin buscarlo.")
+    codigo(doc, fuente("heap.py", "extraer_max", "MaxHeap") + "\n\n" + fuente("heap.py", "_bajar", "MaxHeap"))
+    parrafo(doc, "Para que un bache de prioridad baja no espere para siempre, su prioridad sube un poco con los "
+                 "días de espera, con un tope que impide que rebase a un rojo:")
+    codigo(doc, fuente("modelos.py", "prioridad_efectiva", "Bache"))
+    ficha(doc, "Entregar siempre el bache más urgente, aunque lleguen reportes nuevos",
+          "O(1) ver el máximo; O(log n) insertar, extraer y actualizar",
+          "La prueba extrae 500 elementos aleatorios y comprueba que salen en orden descendente; ver los resultados "
+          "de la sección 5")
+
+    titulo(doc, "3.5 Pila: deshacer y rehacer las decisiones de la autoridad", 2)
+    parrafo(doc, "Cuando la autoridad ajusta una prioridad, la decisión se apila con su motivo (es obligatorio). "
+                 "Deshacer saca la última decisión de una pila y la pasa a la otra; rehacer hace lo contrario. Una "
+                 "bitácora aparte guarda todo, incluidos los deshacer, para rendir cuentas.")
+    codigo(doc, fuente("pila.py", "deshacer", "PilaDecisiones"))
+    ficha(doc, "Corregir un ajuste sin perder el historial", "O(1) en la pila, más O(log n) para actualizar el heap",
+          "La prueba ajusta, deshace y rehace, y verifica la prioridad en el heap y la bitácora")
+
+    titulo(doc, "3.6 Grafo, Dijkstra y DFS: rutas de las brigadas", 2)
+    ru = exp["rutas"]
+    parrafo(doc, f"La red se representa con listas de adyacencia: cada celda de 250 m con baches es un vértice y "
+                 f"se conecta con sus vecinas, con la distancia en metros como peso. Dijkstra calcula la distancia "
+                 f"mínima desde un origen usando un min-heap propio. El recorrido en profundidad (DFS) es recursivo "
+                 f"y sirve para comprobar qué vértices son alcanzables desde la planta de asfalto. En "
+                 f"{nombre(ru['alcaldia'])} el grafo tiene {ru['vertices']} vértices y {ru['aristas']:,} aristas.")
+    codigo(doc, fuente("grafo.py", "dijkstra", "GrafoVial") + "\n\n" + fuente("grafo.py", "dfs", "GrafoVial"))
+    ficha(doc, "Ordenar la visita de la brigada para recorrer menos",
+          "O((V + E) log V) Dijkstra; O(V + E) DFS",
+          f"El plan de 8 baches recorre {ru['km_orden_prioridad']:.1f} km en orden de prioridad y "
+          f"{ru['km_vecino_cercano']:.1f} km por vecino más cercano: "
+          f"{100 * (1 - ru['km_vecino_cercano'] / ru['km_orden_prioridad']):.0f} % menos")
+    if (RES / "g3_ruta_brigada.png").exists():
+        figura(doc, RES / "g3_ruta_brigada.png", f"Figura 2. Ruta de la brigada en {nombre(ru['alcaldia'])}.", 13)
+    parrafo(doc, "El heap decide qué baches entran al plan del día y el grafo decide en qué orden se visitan, así "
+                 "que acortar la ruta no sacrifica la prioridad.")
+
+
+def hash_vs_avl(doc, ef):
+    titulo(doc, "4. ¿Tabla hash o árbol AVL? La decisión")
+    parrafo(doc, "El incidente pide elegir entre las dos para la búsqueda de coordenadas repetidas. Medimos el "
+                 "tiempo promedio por búsqueda con tamaños crecientes de la base:")
+    tabla(doc, ["Reportes", "Búsqueda lineal", "Tabla hash", "AVL", "Comparaciones lineal", "Comparaciones AVL",
+                "Altura AVL"],
+          [[f"{int(f['n']):,}", f"{float(f['us_lineal']):,.1f} µs", f"{float(f['us_hash']):.1f} µs",
+            f"{float(f['us_avl']):.1f} µs", f"{float(f['comparaciones_lineal']):,.0f}",
+            f"{float(f['comparaciones_avl']):.1f}", f['altura_avl']] for f in ef],
+          [2.2, 2.5, 2, 1.6, 2.8, 2.6, 2])
+    figura(doc, RES / "g1_eficiencia_busqueda.png", "Figura 3. Tiempo de búsqueda según el tamaño de la base.", 13)
+    lin, ha, av = float(ef[-1]["us_lineal"]), float(ef[-1]["us_hash"]), float(ef[-1]["us_avl"])
+    parrafo(doc, f"Las dos estructuras resuelven el problema: con toda la base, la búsqueda lineal tarda "
+                 f"{lin:,.0f} µs y la hash y el AVL tardan unos pocos microsegundos. En nuestra implementación el AVL "
+                 f"resultó un poco más rápido ({av:.1f} µs contra {ha:.1f} µs), porque la función hash recorre el "
+                 f"texto de la clave carácter por carácter en Python. Aun así elegimos la tabla hash para los "
+                 f"duplicados, por tres razones:")
+    vinetas(doc, [
+        "Su costo no depende del tamaño de la base: el del AVL crece con log n, y el de la hash se mantiene.",
+        "La desduplicación busca claves exactas (la celda y sus 8 vecinas), que es justo lo que hace bien una tabla "
+        "hash; no necesita orden.",
+        "Optimizar la función hash es sencillo (por ejemplo, combinar los dos enteros de la clave en lugar de "
+        "recorrer su texto); el AVL ya está en su mejor caso.",
+    ])
+    parrafo(doc, "El AVL se queda para lo que la hash no puede hacer: recorrer los baches en orden y consultar "
+                 "rangos. Así cada estructura se usa donde es mejor.")
+
+
+def pruebas(doc):
+    titulo(doc, "5. Pruebas de correctitud")
+    parrafo(doc, "Las 12 pruebas automáticas (python estructuras/pruebas.py) pasan:")
+    tabla(doc, ["Estructura", "Qué se prueba"], [
+        ["Lista doblemente enlazada", "Insertar, eliminar en medio, fusionar dos listas y recorrer en los dos sentidos"],
+        ["Tabla hash", "Buscar, reemplazar un valor y conservar los datos después del rehash"],
+        ["Árbol AVL", "Que quede balanceado y ordenado al insertar claves en orden (el peor caso) y al azar"],
+        ["Max-heap", "Que siempre extraiga el mayor, que actualizar una prioridad conserve la propiedad de heap y "
+                     "el ejemplo resuelto a mano en el primer avance"],
+        ["Min-heap", "Que extraiga siempre la menor distancia (lo usa Dijkstra)"],
+        ["Grafo", "Dijkstra contra un ejemplo calculado a mano y la conexión de una cuadrícula"],
+        ["Sistema completo", "Que un reporte en la celda vecina cuente como duplicado y uno tras la reparación como "
+                             "reaparición"],
+        ["Pila de decisiones", "Ajustar, deshacer y rehacer, con motivo obligatorio y bitácora completa"],
+    ], [4, 12])
+
+
+def resultados(doc, v, eq, cap):
+    titulo(doc, "6. Resultados: FIFO contra la cola de prioridad")
+    fifo, sipa, cupo = eq["FIFO"], eq["SIPA β=0.10"], eq["SIPA + cupo"]
+    parrafo(doc, f"Simulamos julio a septiembre de 2019 (90 días, reportes reales) con 15 reparaciones por día y "
+                 f"cuatro políticas. La variante con cupo reserva 4 de los 15 lugares diarios para los baches que más "
+                 f"han esperado, usando un segundo max-heap ordenado por antigüedad.")
+    tabla(doc, ["Política", "Rojos ≤ 3 días", "Espera promedio (días)", "Espera p90", "Brecha entre alcaldías",
+                "Pendientes día 90"],
+          [[k.replace("SIPA", "Cola de prioridad"), pct(x["rojos_en_3_dias"]), x["todos"]["espera_promedio"],
+            x["espera_p90"], x["brecha_alcaldias"], f"{x['pendientes_al_final']:,}"] for k, x in eq.items()],
+          [4.2, 2.3, 2.6, 2, 2.6, 2.3])
+    figura(doc, RES / "v1_equidad.png", "Figura 4. Rojos atendidos a tiempo y brecha entre alcaldías por política.", 14)
+    vinetas(doc, [
+        f"La cola de prioridad atiende a tiempo el {pct(sipa['rojos_en_3_dias'])} de los rojos, contra "
+        f"{pct(fifo['rojos_en_3_dias'])} con FIFO, sin cambiar la espera promedio ({sipa['todos']['espera_promedio']} días): "
+        "solo cambia quién espera.",
+        f"Efecto no deseado: priorizar por riesgo alarga la espera en las alcaldías periféricas, que tienen baches de "
+        f"prioridad baja. La brecha entre alcaldías sube de {fifo['brecha_alcaldias']} a {sipa['brecha_alcaldias']} "
+        f"días. El cupo la baja a {cupo['brecha_alcaldias']} sin perder ningún rojo.",
+        "Ninguna regla de orden evita que la cola crezca si llegan más baches de los que se reparan. Con capacidad "
+        "suficiente, en cambio, la brecha casi desaparece:",
+    ])
+    tabla(doc, ["Reparaciones por día", "Brigadas", "Espera promedio", "Brecha", "Pendientes día 90"],
+          [[c["capacidad"], c["brigadas"], c["espera_promedio"], c["brecha_alcaldias"],
+            f"{c['pendientes_al_final']:,}"] for c in cap], [3.5, 2.5, 3, 2.5, 3.5])
+    figura(doc, RES / "v2_capacidad.png", "Figura 5. Baches pendientes al final del periodo según la capacidad.", 13)
+
+
+def viabilidad(doc, v, calc, cont, prob, exp, eq, cap):
+    titulo(doc, "7. Plan de viabilidad")
+    rec = {r["temporada"]: r for r in v["recursos"]}
+    esc = {e["escenario"]: e for e in cont["escenarios"]}
+    dd = exp["desduplicacion"]
+    lluv = {x["meses"]: x for x in calc["tabla_perdida"] if x["temporada"] == "Lluvias"}
+    parrafo(doc, f"El prototipo procesa toda la base (desduplicación de {dd['reportes']:,} reportes) en "
+                 f"{dd['segundos_hash']:.1f} s y simula 90 días en segundos, en una computadora personal. No requiere "
+                 "servidores especiales ni bibliotecas externas para las estructuras.", "Técnica. ")
+    parrafo(doc, f"Con 6 reparaciones por brigada al día, la autoridad necesitaría "
+                 f"{int(rec['lluvias']['brigadas'])} brigadas en lluvias y {int(rec['secas']['brigadas'])} en secas, "
+                 f"y unas {rec['lluvias']['toneladas_mes']:.0f} toneladas de mezcla al mes en lluvias. SIPA lo "
+                 "recomienda; las brigadas son de la autoridad.", "Operativa. ")
+    parrafo(doc, f"Atender los baches abiertos según el semáforo cuesta {mm(esc['preventivo']['costo_total'])} "
+                 f"contra {mm(esc['reactivo']['costo_total'])} si se espera (reparación más reclamaciones por "
+                 f"daños, Contabilidad). Un bache típico cuesta {m(lluv[0]['costo'])} si se repara hoy y "
+                 f"{m(lluv[6]['costo'])} tras 6 meses de lluvias (Cálculo).", "Financiera. ")
+    parrafo(doc, f"El tope de reportes evita que las colonias con más participación digital desplacen a las demás, "
+                 f"y el cupo de equidad reduce la brecha entre alcaldías. La autoridad conserva la decisión final y "
+                 f"cada ajuste queda en la pila de decisiones con su motivo.", "Social. ")
+
+    titulo(doc, "7.1 Contraste entre percepción y evidencia", 2)
+    parrafo(doc, "[PARA EL EQUIPO: escribir aquí, con su fecha real, qué intervenciones consideraba prioritarias "
+                 "el equipo al empezar y por qué. Después, completar la última columna de la tabla con lo que se "
+                 "mantuvo, cambió o se descartó.]")
+    fifo, sipa = eq["FIFO"], eq["SIPA β=0.10"]
+    tabla(doc, ["Percepción frecuente", "Qué mostró el prototipo", "Resultado"], [
+        ["El orden de llegada es lo más justo.",
+         f"FIFO atiende a tiempo el {pct(fifo['rojos_en_3_dias'])} de los rojos; la cola de prioridad, el "
+         f"{pct(sipa['rojos_en_3_dias'])}, con la misma espera promedio.", "Se descarta"],
+        ["Priorizar resuelve la falta de atención.",
+         f"Con 15 reparaciones al día la cola crece con cualquier política ({fifo['pendientes_al_final']:,} pendientes "
+         f"al día 90). Ordenar no sustituye la capacidad.", "Se modifica"],
+        ["Priorizar por riesgo es neutral entre zonas.",
+         f"La brecha entre alcaldías sube de {fifo['brecha_alcaldias']} a {sipa['brecha_alcaldias']} días.",
+         "Surge el cupo de equidad"],
+        ["Cada reporte es un bache distinto.",
+         f"{dd['duplicados']:,} reportes eran duplicados y {dd['reincidencias']:,} reapariciones del mismo bache.",
+         "Surge la desduplicación y el reencarpetado"],
+    ], [4.5, 8.5, 3])
+
+
+def intervenciones(doc, v, calc, exp, eq, cap):
+    titulo(doc, "8. Propuesta de intervenciones públicas priorizadas")
+    fifo, sipa, cupo = eq["FIFO"], eq["SIPA β=0.10"], eq["SIPA + cupo"]
+    ru, dd = exp["rutas"], exp["desduplicacion"]
+    rec = {r["temporada"]: r for r in v["recursos"]}
+    top = v["top_celdas"][0]
+    c15 = next(c for c in cap if c["capacidad"] == 15)
+    c35 = next(c for c in cap if c["capacidad"] == 35)
+    tabla(doc, ["#", "Intervención", "Estructura que la hace posible", "Evidencia", "Indicador"], [
+        [1, "Atender los baches rojos en 72 horas o menos", "Max-heap",
+         f"{pct(sipa['rojos_en_3_dias'])} de rojos a tiempo contra {pct(fifo['rojos_en_3_dias'])} con FIFO",
+         "% de rojos atendidos en 72 h"],
+        [2, "Eliminar los reportes duplicados al registrarlos", "Tabla hash y conjunto",
+         f"{dd['duplicados']:,} duplicados detectados en {dd['segundos_hash']:.1f} s", "Reportes duplicados"],
+        [3, "Cupo de equidad: 4 de cada 15 lugares para los baches que más esperan", "Segundo max-heap por antigüedad",
+         f"Brecha entre alcaldías {sipa['brecha_alcaldias']} → {cupo['brecha_alcaldias']} días sin perder rojos",
+         "Brecha de espera entre alcaldías"],
+        [4, "Rutas diarias por vecino más cercano", "Grafo y Dijkstra",
+         f"{100 * (1 - ru['km_vecino_cercano'] / ru['km_orden_prioridad']):.0f} % menos km en {nombre(ru['alcaldia'])}",
+         "Km por bache reparado"],
+        [5, "Recomendar a la autoridad ajustar sus brigadas por temporada", "Simulación con el max-heap",
+         f"{v['llegadas_por_dia']['lluvias']} baches/día en lluvias; con 15 reparaciones/día quedan "
+         f"{c15['pendientes_al_final']:,} pendientes en 90 días y con 35, solo {c35['pendientes_al_final']}. Se "
+         f"necesitan {int(rec['lluvias']['brigadas'])} brigadas en lluvias y {int(rec['secas']['brigadas'])} en secas",
+         "Pendientes al cierre de mes"],
+        [6, "Reencarpetar las celdas donde el bache reaparece", "Tabla hash (reapariciones)",
+         f"{v['celdas_reincidencia_3']} celdas con 3 o más reapariciones; la peor ({nombre(top['alcaldia'])}) "
+         f"tiene {top['reincidencias']}", "Reapariciones por celda al año"],
+        [7, "Registrar y poder revertir cada ajuste de prioridad", "Pila de decisiones",
+         "Cada ajuste exige motivo y queda en la bitácora", "Ajustes con motivo publicado"],
+        [8, "Bacheo preventivo antes de las lluvias", "Max-heap con envejecimiento",
+         f"Esperar 6 meses de lluvias cuesta {mm(calc['total_baches']['extra_6m'])} más (Cálculo)",
+         "Costo por bache reparado"],
+    ], [0.6, 4, 3.2, 5.4, 2.8])
+    parrafo(doc, "Las intervenciones 1, 2, 3, 4 y 7 no requieren presupuesto adicional: solo cambian cómo se "
+                 "organizan los datos y las decisiones. La 5, la 6 y la 8 requieren inversión de la autoridad, "
+                 "justificada en la sección 7 y en el entregable final del problema prototípico.")
+    filas = leer_csv(RES / "v4_celdas_reencarpetado.csv")[:10]
+    titulo(doc, "Celdas candidatas a reencarpetado", 2)
+    tabla(doc, ["Celda", "Alcaldía", "Baches", "Reapariciones", "Riesgo 72 h"],
+          [[f["celda"], nombre(f["alcaldia"]), f["baches"], f["reincidencias"], f"{float(f['riesgo_72h']):.2f}"]
+           for f in filas], [3, 5, 2.5, 3, 2.5])
+
+
+def limitaciones(doc):
+    titulo(doc, "9. Limitaciones")
+    vinetas(doc, [
+        "La severidad de los baches es sintética (la base abierta no la trae); el IPU del prototipo es una versión "
+        "simplificada del de la base SIPA.",
+        "Las rutas usan una cuadrícula de 250 m, no la red de calles real; el siguiente paso es cargar la red vial "
+        "de OpenStreetMap.",
+        "La productividad de 6 baches por brigada al día es un supuesto que debe calibrar la autoridad.",
+        "Las simulaciones usan 2019; la tasa de llegadas puede ser distinta hoy.",
+        "La función hash recorre el texto de la clave; con una función numérica sería más rápida.",
+    ])
+    titulo(doc, "10. Conclusiones")
+    parrafo(doc, "Sustituir la cola FIFO por estructuras adecuadas cambia el resultado sin cambiar los recursos: el "
+                 "max-heap atiende primero lo urgente, la tabla hash evita trabajar dos veces el mismo bache, el "
+                 "grafo acorta las rutas y la pila deja registro de cada decisión. Todas cumplen las complejidades "
+                 "que pide el incidente y lo comprueban las pruebas y las mediciones. La simulación también mostró "
+                 "los límites: priorizar puede dejar atrás a las zonas periféricas, lo que se corrige con un cupo, y "
+                 "ninguna estructura sustituye la capacidad de reparación, que es una decisión de la autoridad.")
+    titulo(doc, "Referencias")
+    for r in [
+        "Bader, D. (2020). Common Python data structures (guide). Real Python. "
+        "https://realpython.com/python-data-structures/",
+        "Base maestra de solicitudes de bacheo de la Ciudad de México 2019-2022 [Conjunto de datos]. "
+        "Proporcionada para el problema prototípico.",
+        "Cormen, T. H., Leiserson, C. E., Rivest, R. L. y Stein, C. (2022). Introduction to algorithms (4a ed.). "
+        "MIT Press.",
+        "Secretaría de Seguridad Ciudadana de la Ciudad de México. (s. f.). Hechos de tránsito registrados por la "
+        "SSC [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México.",
+    ]:
+        p = doc.add_paragraph(r)
+        p.paragraph_format.left_indent = Cm(1)
+        p.paragraph_format.first_line_indent = Cm(-1)
+    titulo(doc, "Anexo. Cómo ejecutar el prototipo", 2)
+    tabla(doc, ["Comando", "Qué hace"], [
+        ["python estructuras/pruebas.py", "Corre las 12 pruebas de correctitud"],
+        ["python estructuras/experimentos.py", "Mide la eficiencia de búsqueda, desduplica la base, simula FIFO "
+                                               "contra la cola de prioridad y calcula la ruta"],
+        ["python estructuras/viabilidad.py", "Simula 90 días con las variantes de política y de capacidad"],
+    ], [6, 10])
 
 
 def main():
-    exp = leer(ED / "resumen.json")
-    v = leer(ED / "viabilidad.json")
+    exp = leer(RES / "resumen.json")
+    v = leer(RES / "viabilidad.json")
     calc = leer("calculo/resultados/resumen.json")
-    prob = leer("probabilidad/resultados/resumen.json")
     cont = leer("contabilidad/resultados/resumen.json")
-
+    prob = leer("probabilidad/resultados/resumen.json")
+    ef = leer_csv(RES / "t1_eficiencia_busqueda.csv")
     eq = v["equidad"]
-    fifo, sipa, cupo = eq["FIFO"], eq["SIPA β=0.10"], eq["SIPA + cupo"]
-    cap = {c["capacidad"]: c for c in v["capacidad"]}
-    rec = {r["temporada"]: r for r in v["recursos"]}
-    ll = v["llegadas_por_dia"]
-    efi = exp["eficiencia"][-1]
-    dd = exp["desduplicacion"]
-    ru = exp["rutas"]
-    esc = {e["escenario"]: e for e in cont["escenarios"]}
-    pct_reinc = 100 * v["baches_en_celdas_reincidencia_3"] / v["baches_total"]
-    extra_cap = 35 - 15
-    lluv = {x["meses"]: x for x in calc["tabla_perdida"] if x["temporada"] == "Lluvias"}
-    costo_bache, costo_bache_6m = lluv[0]["costo"], lluv[6]["costo"]
-    costo_extra_mes = extra_cap * 30 * costo_bache
-    costo_esperar = calc["total_baches"]["extra_6m"]
+    cap = v["capacidad"]
 
     doc = Document()
     doc.styles["Normal"].font.name = "Calibri"
@@ -108,275 +509,17 @@ def main():
         s.left_margin = s.right_margin = Cm(2.2)
 
     portada(doc)
-
-    parrafo(doc, "Este documento y el código que lo sustenta (estructuras/viabilidad.py y "
-                 "scripts/generar_doc_viabilidad_ED.py) se elaboraron con apoyo de IA generativa "
-                 "(Claude, de Anthropic), con autorización de la docente y dando el crédito "
-                 "correspondiente. El equipo revisó, ejecutó y verificó los resultados, y es "
-                 "responsable de su contenido.", "Declaración de uso de IA. ")
-
-    # 1 -----------------------------------------------------------------
-    titulo(doc, "1. Propósito")
-    parrafo(doc, "Actuamos como un equipo de asesoría técnica que presenta recomendaciones a una "
-                 "administración pública. La pregunta que guía el plan no es «¿qué bache se reportó "
-                 "primero?», sino «¿qué intervención debe realizarse primero para reducir el mayor "
-                 "riesgo y generar el mayor beneficio social con los recursos disponibles?». Cada "
-                 "intervención propuesta se respalda con resultados del prototipo funcional "
-                 "(producto 1) y de los modelos de Cálculo, Probabilidad y Contabilidad.")
-    parrafo(doc, f"Datos: {exp['desduplicacion']['reportes']:,} reportes reales de baches de la CDMX "
-                 f"(2019-2022, sin periodos atípicos), 30,654 accidentes de la SSC y los 1,345 baches "
-                 "pendientes de la base SIPA. La severidad, los costos y la productividad de las "
-                 "brigadas son supuestos declarados en la sección 9.")
-
-    # 2 -----------------------------------------------------------------
-    titulo(doc, "2. Contraste entre percepción y evidencia")
-    parrafo(doc, "La propuesta inicial del equipo (Fase 0) se escribió antes del análisis de "
-                 "datos. En la tabla, la primera columna transcribe esa propuesta y las siguientes "
-                 "la contrastan con la evidencia.")
-    parrafo(doc, "[PENDIENTE DEL EQUIPO: transcribir aquí la propuesta inicial fechada. "
-                 "Las filas siguientes son percepciones frecuentes que el análisis permite poner a "
-                 "prueba; sustituirlas o completarlas con las del equipo.]")
-    tabla(doc, ["Percepción inicial", "Qué mostró la evidencia", "Resultado"], [
-        ["Hay que atender primero los baches con más reportes ciudadanos.",
-         "Varios de los 50 baches con más reportes quedan después del lugar 1,000 por IPU. "
-         "El número de reportes mide la participación, no el riesgo.", "Se modifica"],
-        ["El orden de llegada (FIFO) es lo más justo.",
-         f"Con FIFO solo el {pct(fifo['rojos_en_3_dias'])} de los baches rojos se atiende en 3 días o menos; "
-         f"con SIPA, el {pct(sipa['rojos_en_3_dias'])}, con la misma espera promedio "
-         f"({sipa['todos']['espera_promedio']} días).", "Se descarta"],
-        ["Un sistema de priorización resuelve por sí solo la falta de atención.",
-         f"Con 15 reparaciones/día y {ll['lluvias']} llegadas/día en lluvias, la cola crece igual con "
-         f"cualquier política ({fifo['pendientes_al_final']:,} pendientes al día 90). Ordenar no sustituye a la capacidad.",
-         "Se modifica"],
-        ["Priorizar por riesgo es neutral entre zonas.",
-         f"El heap puro amplía la brecha de espera entre alcaldías de {fifo['brecha_alcaldias']} a "
-         f"{sipa['brecha_alcaldias']} días (Cuajimalpa, Tláhuac y Magdalena Contreras esperan más).",
-         "Surge una intervención nueva (cupo de equidad)"],
-        ["Tapar baches basta.",
-         f"{v['celdas_reincidencia_3']} celdas de 250 m tienen 3 o más reapariciones y concentran "
-         f"{v['baches_en_celdas_reincidencia_3']:,} baches ({pct_reinc:.1f} %). Ahí el bacheo no resuelve.",
-         "Surge una intervención nueva (reencarpetado)"],
-        ["Esperar a tener más presupuesto es prudente.",
-         f"Dejar 6 meses de lluvias los 1,345 baches pendientes cuesta ${costo_esperar / 1e6:.2f} M más (Cálculo) "
-         f"y el esquema reactivo cuesta ${esc['reactivo']['costo_total'] / 1e6:.2f} M contra "
-         f"${esc['preventivo']['costo_total'] / 1e6:.2f} M (Contabilidad).", "Se descarta"],
-    ], [4.5, 9, 3])
-    parrafo(doc, "Preguntas de la rúbrica (responder con base en la Fase 0): ¿qué intervenciones "
-                 "iniciales se mantuvieron?, ¿cuáles dejaron de ser prioritarias y por qué?, ¿qué "
-                 "intervenciones nuevas surgieron? (el cupo de equidad, el ajuste de brigadas por "
-                 "temporada y el reencarpetado de celdas reincidentes) y ¿qué evidencia cambió o "
-                 "confirmó cada decisión? (la tabla anterior).")
-
-    # 3 -----------------------------------------------------------------
-    titulo(doc, "3. Análisis cuantitativo y de riesgo")
-    titulo(doc, "3.1 Clasificación del riesgo", 2)
-    vinetas(doc, [
-        "IPU simplificado del prototipo: severidad (0.45), riesgo de accidente a 72 h (0.40) y "
-        "reportes acotados a 10 (0.15). Semáforo: rojo ≥ 0.60, amarillo ≥ 0.40.",
-        f"Riesgo a 72 h (Probabilidad): N ~ Poisson(λ·RR·3/365), con λ por Bayes empírico y RR = "
-        f"{prob['riesgo']['rr']:.2f}. Un bache profundo en vía rápida tiene P(accidente en 72 h) mediana "
-        f"de {100 * prob['incidente']['p72_accidente_mediana']:.1f} % y de "
-        f"{100 * prob['incidente']['p72_accidente_p90']:.1f} % en el percentil 90.",
-        f"Por alcaldía, Cuauhtémoc (12.4 % de baches en rojo, riesgo medio 0.38) y Venustiano Carranza "
-        f"(9.3 %) concentran el riesgo; Milpa Alta, Tláhuac y Magdalena Contreras están por debajo de 1 %.",
-    ])
-    tabla(doc, ["Alcaldía", "Baches", "% rojos", "% reincidencia", "Riesgo 72 h medio"],
-          [[a["alcaldia"].title(), f"{a['baches']:,}", a["pct_rojos"], a["pct_reincidencia"],
-            a["riesgo_72h_medio"]] for a in v["alcaldias"]], [5.5, 2.5, 2.5, 3, 3.5])
-    titulo(doc, "3.2 Recomendación de materiales y brigadas para la autoridad", 2)
-    parrafo(doc, f"Después de eliminar duplicados con la tabla hash, llegan en promedio {ll['lluvias']} "
-                 f"baches nuevos por día en lluvias (junio a octubre) y {ll['secas']} en secas. Con un bache "
-                 f"típico de 1.71 m² × 9.8 cm ({calc['v0_tipico_m3']:.3f} m³, unas 0.36 t de mezcla) y "
-                 "6 reparaciones por brigada al día, SIPA le recomendaría a la autoridad:")
-    tabla(doc, ["Temporada", "Baches/día", "Brigadas", "Mezcla (t/mes)", "Material ($/mes)"],
-          [[r["temporada"].title(), r["baches_por_dia"], int(r["brigadas"]), r["toneladas_mes"],
-            f"${r['costo_material_mes']:,}"] for r in v["recursos"]], [3, 3, 2.5, 3, 3.5])
-    parrafo(doc, f"La pérdida de material crece de forma exponencial (Cálculo): en lluvias k = "
-                 f"{calc['k_lluvias']:.3f} por mes y el volumen se duplica en "
-                 f"{calc['duplica_lluvias_meses']:.1f} meses. Por eso la capacidad debe subir antes de "
-                 "las lluvias, no después.")
-
-    # 4 -----------------------------------------------------------------
-    titulo(doc, "4. Gestión y optimización de los datos y recursos")
-    titulo(doc, "4.1 Cómo se organizan los datos", 2)
-    tabla(doc, ["Paso", "Estructura", "Complejidad", "Evidencia"], [
-        ["Registro del reporte", "Lista doblemente enlazada", "O(1)", f"{dd['reportes']:,} reportes"],
-        ["¿Ya existe ese bache?", "Tabla hash (celda de 11 m y 8 vecinas)", "O(1) promedio",
-         f"{dd['duplicados']:,} duplicados y {dd['reincidencias']:,} reincidencias en {dd['segundos_hash']} s "
-         f"({dd['busquedas_hash']:,} búsquedas en lugar de {dd['comparaciones_por_pares'] / 1e6:,.0f} M de comparaciones)"],
-        ["Consulta por rango", "Árbol AVL", "O(log n)",
-         f"{efi['comparaciones_avl']} comparaciones (altura {efi['altura_avl']}) contra "
-         f"{efi['comparaciones_lineal']:,.0f} de la búsqueda lineal"],
-        ["Cola de atención", "Max-heap con actualización de prioridad", "O(log n)",
-         "Rojos atendidos primero; prioridad que sube con la espera"],
-        ["Cupo de equidad", "Segundo max-heap por antigüedad, con eliminación perezosa", "O(log n)",
-         "Nuevo en este plan (sección 4.3)"],
-        ["Decisiones de la autoridad", "Pila de deshacer y rehacer", "O(1)", "Cada ajuste exige motivo"],
-        ["Rutas sugeridas a las brigadas", "Grafo, Dijkstra y vecino más cercano", "O((V+E) log V)",
-         f"{ru['vertices']} vértices, {ru['aristas']:,} aristas"],
-    ], [3.3, 4.2, 2.6, 6.4])
-    titulo(doc, "4.2 Rutas de las cuadrillas", 2)
-    parrafo(doc, f"En Coyoacán, visitar los {ru['baches_en_plan']} baches del día en orden de prioridad "
-                 f"recorre {ru['km_orden_prioridad']} km; ordenar la visita por vecino más cercano, con "
-                 f"distancias de Dijkstra, recorre {ru['km_vecino_cercano']} km "
-                 f"(−{100 * (1 - ru['km_vecino_cercano'] / ru['km_orden_prioridad']):.0f} %). El heap decide "
-                 "qué baches entran al plan del día y el grafo decide en qué orden se visitan: así no se "
-                 "sacrifica la prioridad por la ruta.")
-    titulo(doc, "4.3 Capacidad y equidad", 2)
-    parrafo(doc, f"Simulamos julio a septiembre de 2019 (90 días, datos reales) con 15 reparaciones por día "
-                 "y cuatro políticas. La de cupo reserva 4 de los 15 lugares diarios para los baches que "
-                 "más han esperado, después de atender rojos y amarillos.")
-    tabla(doc, ["Política", "Rojos ≤ 3 días", "Espera promedio", "Espera p90", "Brecha entre alcaldías",
-                "Pendientes día 90"],
-          [[n, pct(m["rojos_en_3_dias"]), m["todos"]["espera_promedio"], m["espera_p90"],
-            m["brecha_alcaldias"], f"{m['pendientes_al_final']:,}"] for n, m in eq.items()],
-          [3.2, 2.4, 2.4, 2, 3, 2.6])
-    figura(doc, ED / "v1_equidad.png", "Figura 1. Rojos atendidos a tiempo y brecha entre alcaldías por política.")
-    parrafo(doc, f"Con 15 reparaciones al día, la prioridad garantiza los rojos, pero ninguna regla de "
-                 f"ordenamiento evita que la cola crezca. El cupo reduce la brecha de {sipa['brecha_alcaldias']} "
-                 f"a {cupo['brecha_alcaldias']} días; subir el envejecimiento a β = 0.30 casi no ayuda. "
-                 "Con capacidad suficiente, en cambio, la brecha desaparece:")
-    tabla(doc, ["Reparaciones/día", "Brigadas", "Rojos ≤ 3 días", "Espera promedio", "Espera p90",
-                "Brecha", "Pendientes día 90"],
-          [[c["capacidad"], c["brigadas"], pct(c["rojos_en_3_dias"]), c["espera_promedio"], c["espera_p90"],
-            c["brecha_alcaldias"], f"{c['pendientes_al_final']:,}"] for c in v["capacidad"]],
-          [2.6, 2, 2.4, 2.4, 2, 1.8, 2.6])
-    figura(doc, ED / "v2_capacidad.png", "Figura 2. Baches pendientes al final del periodo según la capacidad diaria.",
-           13)
-
-    # 5 -----------------------------------------------------------------
-    titulo(doc, "5. Viabilidad financiera")
-    tabla(doc, ["Concepto", "Preventivo (SIPA)", "Reactivo"], [
-        ["Costo de reparar los 1,345 baches", f"${esc['preventivo']['costo_reparar'] / 1e6:.2f} M",
-         f"${esc['reactivo']['costo_reparar'] / 1e6:.2f} M"],
-        ["Provisión por reclamaciones (NIF C-9)", f"${esc['preventivo']['provision_total'] / 1e6:.2f} M",
-         f"${esc['reactivo']['provision_total'] / 1e6:.2f} M"],
-        ["Costo total para el erario", f"${esc['preventivo']['costo_total'] / 1e6:.2f} M",
-         f"${esc['reactivo']['costo_total'] / 1e6:.2f} M"],
-        ["Pasivos contingentes probables o posibles", esc["preventivo"]["baches_probable"] + esc["preventivo"]["baches_posible"],
-         esc["reactivo"]["baches_probable"] + esc["reactivo"]["baches_posible"]],
-    ], [7, 4, 4])
-    vinetas(doc, [
-        f"Ahorro del esquema preventivo: ${cont['ahorro_preventivo'] / 1e6:.2f} M; sin contar ponchaduras, "
-        f"${cont['sensibilidad'][0]['ahorro'] / 1e6:.2f} M. La conclusión no depende del supuesto más incierto.",
-        f"Inversión en la plataforma: equipo ${cont['supuestos']['equipo'] / 1e6:.1f} M y software "
-        f"${cont['supuestos']['software'] / 1e6:.2f} M. Se recupera con el ahorro del primer ejercicio.",
-        f"Pasar de 15 a 35 reparaciones/día en lluvias cuesta unos ${costo_extra_mes / 1e3:,.0f} mil "
-        f"al mes en reparaciones. Dejar crecer la cola cuesta más: cada bache que espera 6 meses de lluvias pasa "
-        f"de ${costo_bache:,.0f} a ${costo_bache_6m:,.0f} (Cálculo, con las tarifas de SIPA).",
-        "La infraestructura de cómputo es mínima: la desduplicación de toda la base tarda menos de 2 s y "
-        "la simulación de 90 días, segundos, en una computadora personal.",
-    ])
-
-    # 6 -----------------------------------------------------------------
-    titulo(doc, "6. Equidad social y justificación de las decisiones")
-    vinetas(doc, [
-        "El IPU acota el número de reportes en 10 para que las colonias con más participación digital "
-        "no desplacen a las que reportan menos.",
-        f"El análisis mostró un efecto no deseado: el heap puro alarga la espera en alcaldías periféricas "
-        f"con baches de IPU bajo (Cuajimalpa {sipa['espera_por_alcaldia']['CUAJIMALPA DE MORELOS']} días, "
-        f"Tláhuac {sipa['espera_por_alcaldia']['TLAHUAC']}). El cupo de antigüedad baja Magdalena Contreras "
-        f"de {sipa['espera_por_alcaldia']['LA MAGDALENA CONTRERAS']} a "
-        f"{cupo['espera_por_alcaldia']['LA MAGDALENA CONTRERAS']} días sin perder un solo rojo.",
-        "Transporte público y movilidad: el riesgo a 72 h es mayor en vías rápidas y corredores "
-        "(Cuauhtémoc, Venustiano Carranza, Benito Juárez); atenderlos primero protege a más personas por "
-        "peso invertido. El criterio de transporte del IPU completo espera la carga de GTFS.",
-        "Supervisión humana: SIPA recomienda y la autoridad aprueba cada prioridad; ajustar o rechazar exige motivo y "
-        "queda en la pila de decisiones (y en la base de datos) para rendir cuentas.",
-    ])
-
-    # 7 -----------------------------------------------------------------
-    titulo(doc, "7. Propuesta de intervenciones públicas priorizadas")
-    top = v["top_celdas"][:5]
-    tabla(doc, ["#", "Intervención", "Evidencia", "Recursos", "Indicador de seguimiento"], [
-        [1, "Atender los baches rojos en 72 h o menos con cola de prioridad",
-         f"Rojos ≤ 3 días: {pct(sipa['rojos_en_3_dias'])} con SIPA y {pct(fifo['rojos_en_3_dias'])} con FIFO",
-         "Ninguno adicional: reordena la capacidad actual", "% de rojos cerrados en 72 h"],
-        [2, "Recomendar a la autoridad ajustar sus brigadas por temporada",
-         f"Llegan {ll['lluvias']} baches/día en lluvias y {ll['secas']} en secas; con 15/día quedan "
-         f"{cap[15]['pendientes_al_final']:,} pendientes en 90 días, con 35/día, {cap[35]['pendientes_al_final']}",
-         f"{int(rec['lluvias']['brigadas'])} brigadas en lluvias, {int(rec['secas']['brigadas'])} en secas; "
-         f"{rec['lluvias']['toneladas_mes']} t/mes de mezcla en lluvias", "Pendientes al cierre de mes"],
-        [3, "Reencarpetar las celdas con reincidencia, en lugar de bachearlas",
-         f"{v['celdas_reincidencia_3']} celdas con ≥ 3 reapariciones concentran {pct_reinc:.1f} % de los baches; "
-         f"la peor ({top[0]['alcaldia'].title()}) tiene {top[0]['reincidencias']} reapariciones",
-         "Proyecto de obra por celda; empezar por las 15 del anexo", "Reapariciones por celda al año"],
-        [4, "Cupo de equidad: 4 de cada 15 lugares para los baches que más esperan",
-         f"Brecha entre alcaldías {sipa['brecha_alcaldias']} → {cupo['brecha_alcaldias']} días, rojos al "
-         f"{pct(cupo['rojos_en_3_dias'])}", "Ninguno adicional", "Brecha de espera entre alcaldías"],
-        [5, "Rutas diarias por vecino más cercano sobre el grafo vial",
-         f"−{100 * (1 - ru['km_vecino_cercano'] / ru['km_orden_prioridad']):.0f} % de km en Coyoacán",
-         "Ninguno adicional; ahorra combustible y horas", "Km por bache reparado"],
-        [6, "Desduplicación automática de reportes",
-         f"{dd['duplicados']:,} reportes duplicados que hoy generarían órdenes repetidas", "Ninguno adicional",
-         "Órdenes duplicadas"],
-        [7, "Bacheo preventivo antes de lluvias",
-         f"Esperar 6 meses de lluvias cuesta ${costo_esperar / 1e6:.2f} M más; intervalo preventivo óptimo de "
-         "unos 28 meses (Cálculo)", "Programa de abril-mayo", "Costo por m³ reparado"],
-        [8, "Cargar el riesgo a 72 h en el IPU completo de la base SIPA",
-         "El semáforo a 72 h coincide con el del IPU solo en 36 %; 285 baches están en rojo por riesgo "
-         "sin estar en rojo en el IPU (Probabilidad)", "Carga de datos (vista v_riesgo_72h)",
-         "Coincidencia de semáforos"],
-        [9, "Focalizar la vigilancia en Cuauhtémoc y Venustiano Carranza",
-         "12.4 % y 9.3 % de sus baches en rojo; riesgo medio a 72 h de 0.38 y 0.33",
-         "Recorridos de detección temprana", "Tiempo entre aparición y reporte"],
-    ], [0.7, 3.8, 5, 3.6, 3])
-    parrafo(doc, "Las intervenciones 1, 4, 5 y 6 no requieren presupuesto adicional: solo cambian la "
-                 "forma de organizar los datos y las decisiones. La 2 y la 3 sí requieren inversión, "
-                 "justificada por las secciones 3 y 5.")
-
-    # 8 -----------------------------------------------------------------
-    titulo(doc, "8. Viabilidad técnica de la implementación")
-    tabla(doc, ["Etapa", "Qué se hace", "Plazo"], [
-        ["1. Piloto", "Una alcaldía (Coyoacán): registro, desduplicación, cola de prioridad y rutas", "3 meses"],
-        ["2. Datos", "Cargar riesgo a 72 h, GTFS, CONAPO y reincidencia al IPU completo; acordar pesos (AHP)", "2 meses"],
-        ["3. Escalamiento", "Todas las alcaldías; tablero sobre el Data Warehouse; réplica de solo lectura", "6 meses"],
-        ["4. Evaluación", "Comparar los indicadores de la sección 7 contra el año anterior", "Continuo"],
-    ], [3, 10.5, 2.5])
-    titulo(doc, "Riesgos y mitigación", 2)
-    vinetas(doc, [
-        "Capacidad insuficiente: SIPA prioriza y asesora, pero las brigadas son de la autoridad. Se mitiga con la intervención 2.",
-        "Sesgo territorial: se mitiga con el cupo de equidad y el tope de reportes.",
-        "Calidad de los reportes (ubicaciones imprecisas): la tabla hash revisa la celda y sus 8 vecinas.",
-        "Resistencia al cambio: la autoridad conserva la decisión final y su ajuste queda registrado.",
-    ])
-
-    # 9 -----------------------------------------------------------------
-    titulo(doc, "9. Supuestos y limitaciones")
-    vinetas(doc, [
-        "La severidad de los baches es sintética (la base abierta no la trae).",
-        f"Productividad de 6 baches por brigada al día y costo de ${costo_bache:,.0f} por bache típico (tarifas ilustrativas de SIPA): supuestos por calibrar con la Secretaría de Obras.",
-        "Las simulaciones usan 2019; la tasa de llegadas puede ser distinta hoy.",
-        "Las rutas usan una cuadrícula de 250 m, no la red de calles real.",
-        "Los porcentajes de reclamación de Contabilidad son supuestos; el ahorro se mantiene sin ponchaduras.",
-    ])
-
-    # 10 ----------------------------------------------------------------
-    titulo(doc, "10. Conclusiones")
-    parrafo(doc, "La plataforma es técnicamente viable: con estructuras de datos adecuadas procesa toda la "
-                 "base en segundos y garantiza la atención de los baches de mayor riesgo. Es financieramente "
-                 "viable: el esquema preventivo cuesta una fracción del reactivo. La evidencia también corrigió "
-                 "la idea de que priorizar basta: hace falta ajustar la capacidad a la temporada, reencarpetar "
-                 "donde el bache reaparece y vigilar la equidad entre zonas.")
-
-    titulo(doc, "Anexo. Celdas candidatas a reencarpetado")
-    tabla(doc, ["Celda", "Alcaldía", "Baches", "Reapariciones", "Riesgo 72 h", "Latitud, longitud"],
-          [[c["celda"], c["alcaldia"].title(), c["baches"], c["reincidencias"], c["riesgo_72h"],
-            f"{c['lat']}, {c['lon']}"] for c in v["top_celdas"]], [2.5, 4, 1.8, 2.5, 2.2, 3.8])
-
-    titulo(doc, "Referencias")
-    for ref in [
-        "Agencia Digital de Innovación Pública. (2023). Reportes de baches [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México.",
-        "Cormen, T. H., Leiserson, C. E., Rivest, R. L. y Stein, C. (2022). Introduction to algorithms (4a ed.). MIT Press.",
-        "Gobierno de la Ciudad de México. (2025, 18 de agosto). Presentamos el Plan Integral de Mantenimiento a la Carpeta Asfáltica.",
-        "Secretaría de Seguridad Ciudadana. (2020). Hechos de tránsito registrados por la SSC [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México.",
-    ]:
-        p = doc.add_paragraph(ref)
-        p.paragraph_format.left_indent = Cm(1)
-        p.paragraph_format.first_line_indent = Cm(-1)
-
+    problema(doc, eq["FIFO"], eq["SIPA β=0.10"], v["llegadas_por_dia"])
+    poo(doc)
+    estructuras(doc, exp, ef)
+    hash_vs_avl(doc, ef)
+    pruebas(doc)
+    resultados(doc, v, eq, cap)
+    viabilidad(doc, v, calc, cont, prob, exp, eq, cap)
+    intervenciones(doc, v, calc, exp, eq, cap)
+    limitaciones(doc)
     doc.save(SALIDA)
-    print(f"Generado {SALIDA}")
+    print(f"Documento generado: {SALIDA}")
 
 
 if __name__ == "__main__":

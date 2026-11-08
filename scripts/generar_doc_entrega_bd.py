@@ -26,13 +26,17 @@ SALIDA = "avance2_BD_entrega.docx"
 
 
 def codigo(doc, texto):
+    """Bloque de código con el estilo «Codigo» (Consolas; exportar_pdf.py lo convierte en <pre>)."""
+    if "Codigo" not in [s.name for s in doc.styles]:
+        from docx.enum.style import WD_STYLE_TYPE
+        estilo = doc.styles.add_style("Codigo", WD_STYLE_TYPE.PARAGRAPH)
+        estilo.base_style = doc.styles["Normal"]
+        estilo.font.name = "Consolas"
+        estilo.font.size = Pt(8)
+        estilo.paragraph_format.space_after = Pt(0)
+        estilo.paragraph_format.left_indent = Cm(0.6)
     for linea in texto.strip("\n").split("\n"):
-        p = doc.add_paragraph()
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.left_indent = Cm(0.8)
-        r = p.add_run(linea)
-        r.font.name = "Consolas"
-        r.font.size = Pt(8.5)
+        doc.add_paragraph(linea if linea else " ", style="Codigo")
     doc.add_paragraph()
 
 

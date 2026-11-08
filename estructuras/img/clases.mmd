@@ -1,0 +1,73 @@
+classDiagram
+    direction LR
+    class Reporte {
+        +id_folio
+        +fecha
+        +latitud
+        +longitud
+        +alcaldia
+        +clave_celda() tuple
+    }
+    class Bache {
+        +id
+        +severidad
+        +riesgo_72h
+        +num_reportes
+        +ipu
+        +prioridad
+        +agregar_reporte(reporte)
+        +calcular_ipu() float
+        +prioridad_efectiva(hoy) float
+        +semaforo() str
+    }
+    class Brigada {
+        +id
+        +base
+        +capacidad_diaria
+        +asignar(grafo, destinos)
+    }
+    class SistemaSIPA {
+        +reportes : ListaReportes
+        +por_ubicacion : TablaHash
+        +baches : TablaHash
+        +heap : MaxHeap
+        +registrar(reporte)
+        +envejecer(hoy)
+        +plan_del_dia(capacidad)
+    }
+    class ListaReportes {
+        +insertar_final() O(1)
+        +eliminar(nodo) O(1)
+        +fusionar(otra) O(1)
+    }
+    class TablaHash {
+        +buscar(clave) O(1)
+        +insertar(clave, valor) O(1)
+    }
+    class ArbolAVL {
+        +insertar() O(log n)
+        +buscar() O(log n)
+        +rango(min, max)
+    }
+    class MaxHeap {
+        +insertar() O(log n)
+        +extraer_max() O(log n)
+        +actualizar() O(log n)
+    }
+    class PilaDecisiones {
+        +ajustar(id, prioridad, motivo)
+        +deshacer() O(1)
+        +rehacer() O(1)
+    }
+    class GrafoVial {
+        +dijkstra(origen)
+        +dfs(origen)
+        +recorrido_vecino_cercano()
+    }
+    Reporte "1..*" --> "1" Bache : se agrupa en
+    SistemaSIPA *-- ListaReportes
+    SistemaSIPA *-- TablaHash
+    SistemaSIPA *-- MaxHeap
+    PilaDecisiones --> MaxHeap : actualiza
+    Brigada --> GrafoVial : usa
+    SistemaSIPA ..> ArbolAVL : consultas por rango

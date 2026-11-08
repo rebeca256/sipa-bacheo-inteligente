@@ -20,6 +20,9 @@ import mammoth
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 SALIDA = Path("pdf")
 
+# Los bloques de código (estilo «Codigo» en los .docx) pasan a <pre> para conservar la sangría
+MAPA = "p[style-name='Codigo'] => pre:separator('\\n')"
+
 ESTILO = """
 <style>
   @page { size: Letter; margin: 2cm 2.2cm; }
@@ -32,6 +35,8 @@ ESTILO = """
   tr:first-child td { background: #d9e2ec; font-weight: bold; }
   img { max-width: 100%; height: auto; display: block; margin: .5em auto; }
   p { margin: .35em 0; }
+  pre { font-family: Consolas, monospace; font-size: 8pt; background: #f5f7fa; border: 1px solid #dde3ea;
+        padding: 6px 8px; white-space: pre-wrap; page-break-inside: auto; }
 </style>
 """
 
@@ -43,7 +48,7 @@ def main():
     with tempfile.TemporaryDirectory() as tmp:
         for d in docs:
             with d.open("rb") as f:
-                html = mammoth.convert_to_html(f).value
+                html = mammoth.convert_to_html(f, style_map=MAPA).value
             pagina = Path(tmp) / f"{d.stem}.html"
             pagina.write_text(f"<!doctype html><html lang='es'><head><meta charset='utf-8'>"
                               f"<title>{d.stem}</title>{ESTILO}</head><body>{html}</body></html>",
