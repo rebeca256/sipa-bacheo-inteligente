@@ -1,0 +1,31 @@
+{
+  "accidentes_camino_2023": 206,
+  "accidentes_camino_2010_2023": 963,
+  "vehiculos_edomex_2023": 9988109,
+  "vehiculos_metepec_2023": 185089,
+  "tasa_reclamacion_ordinaria_por_1000_veh": 1.081,
+  "reclamaciones_ordinarias_esperadas": 10793,
+  "casos_viables": 2066.0,
+  "valor_esperado": 58678484.32,
+  "percentil_95": 75382877.34,
+  "percentil_5": 45867867.74,
+  "p_al_menos_un_pago": 1.0,
+  "clasificacion_nif_c9": "Probable (> 50 %): se reconoce provisión",
+  "pasivo_contingente_a_revelar": 16704393.02,
+  "accidentes_por_responsable_2019_2023": {
+    "Estado (Junta de Caminos / SEMOV)": 90,
+    "Municipio": 372
+  },
+  "costo_por_muerte_LFT": 2821456.0,
+  "costo_medio_herido": 109093.33,
+  "fuentes": [
+    "INEGI (2024). Accidentes de tránsito terrestre en zonas urbanas y suburbanas (ATUS) 1997-2023 [conjunto de datos]. https://www.inegi.org.mx/programas/accidentes/",
+    "INEGI (2024). Vehículos de motor registrados en circulación 1980-2023 [conjunto de datos]. https://www.inegi.org.mx/programas/vehiculosmotor/",
+    "Legislatura del Estado de México (2017, reforma 2023). Ley de Responsabilidad Patrimonial para el Estado de México y Municipios, art. 18. https://legislacion.edomex.gob.mx/",
+    "Milenio (8 de octubre de 2024). Te decimos qué municipio del Edomex pagará daños al caer en un bache. https://www.milenio.com/politica/comunidad/te-decimos-que-municipio-del-edomex-pagara-danos-al-caer-en-un-bache",
+    "El Universal Edomex (2024). Edomex: ¿te dañó un bache? Podrías recibir una indemnización. https://www.eluniversaledomex.com.mx/gobierno/edomex-te-dano-un-bache-podrias-recibir-una-indemnizacion/",
+    "Publimetro (8 de febrero de 2024). Choque de auto: cuáles son los estados con más accidentes en México (cifras AMIS). https://www.publimetro.com.mx/noticias/2024/02/08/choque-de-auto-cuales-son-los-estados-con-mas-accidentes-en-mexico/",
+    "El Día Oficial (enero de 2022). Magistrada Arlen Siu Jaime Merlos presentó Informe Anual de Actividades 2021 del TRIJAEM. https://eldiaoficial.com/2022/01/magistrada-arlen-siu-jaime-merlos-presento-informe-anual-de-actividades-2021-del-trijaem/",
+    "Ley Federal del Trabajo, arts. 486, 491, 500 y 502."
+  ]
+}

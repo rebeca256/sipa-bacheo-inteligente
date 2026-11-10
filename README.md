@@ -79,6 +79,8 @@ python -m pytest tablero/pruebas_sitio.py -v    # sitio en línea (python -m htt
 
 Reales: solicitudes de bacheo de la CDMX 2019-2022, datos abiertos de Chalco (reportes, comunidades, Atlas de Riesgo, equipamiento), hechos de tránsito de la SSC, GTFS de SEMOVI e índice de marginación urbana 2020 de CONAPO. Simulados y declarados como tales: severidad y medidas de los baches, decisiones y reparaciones de la autoridad. Las tarifas de reparación son una estimación del equipo.
 
+**Dos territorios.** El nivel operativo de SIPA (qué bache atender primero) se probó en la CDMX, donde hay baches georreferenciados. El nivel financiero (incidente de Contabilidad «Contingencias por daños viales») se estimó para el **Estado de México** con datos del INEGI (ATUS 2010-2023: accidentes por mala condición del camino; vehículos registrados 2023 por municipio) y la Ley de Responsabilidad Patrimonial del Edomex: `python contabilidad/contingencias_edomex.py`. El ZIP completo del ATUS (126 MB) no se sube; se descarga de https://www.inegi.org.mx/contenidos/programas/accidentes/datosabiertos/atus_anual_csv.zip y se guarda en `datos/edomex/raw/`.
+
 ## Equipo
 
 Sandra Luna Altos · Joshua David Aquino · Rebeca Jaimes Cruz · Ithan Felipe Santiago

@@ -328,3 +328,12 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - `avance2_ED_plan_viabilidad.docx` ahora es «Prototipo funcional y plan de viabilidad» y gira alrededor de las estructuras (lo que evalúa la UCA): el problema del FIFO, diagrama de clases (`estructuras/img/clases.png`), una sección por estructura con su código real (extraído del archivo con `ast`), complejidad y medición; decisión hash contra AVL con datos (el AVL resultó más rápido en µs y se explica por qué igual se elige la hash para duplicados); las 12 pruebas; resultados FIFO contra cola de prioridad; plan de viabilidad, contraste percepción-evidencia (pendiente del equipo) e intervenciones ligadas a cada estructura.
 - Quitadas las partes viejas: cargar riesgo 72 h y GTFS (ya hechos), cifras escritas a mano, nombres sin acentos y la referencia dudosa.
 - Los bloques de código usan el estilo «Codigo»; `scripts/exportar_pdf.py` los convierte en `<pre>` para que el PDF conserve la sangría (también en el documento de BD).
+
+## 10 nov 2026 · Contabilidad: incidente «Contingencias por daños viales» (Estado de México)
+- La docente pide datos del **Edomex** (PDF `tablero/AVANCES INCIDENTE CRITICO.pdf`; paso 1 se entrega el 19-11-2026).
+- Datos descargados en `datos/edomex/`: INEGI ATUS 1997-2023 (se extrae el Edomex 2010-2023: 963 accidentes por «mala condición del camino»; 206 en 2023, con 10 fatales), INEGI vehículos registrados 2023 por municipio y la Ley de Responsabilidad Patrimonial del Edomex (art. 18: lesiones y muerte con la LFT).
+- Parámetros con fuente: Metepec (200 reportes, 37 procedentes, hasta $10,000), rango de la docente ($3k-$40k), AMIS, TRIJAEM (81 % de sentencias favorables en 2021). Supuesto: % que reclama en accidentes graves.
+- `contabilidad/contingencias_edomex.py`: valor esperado + Monte Carlo + reparto por municipio + asiento NIF C-9 al 31/12/2026. Resultados en `contabilidad/resultados_edomex/`.
+- Resultado: ≈ 2,066 casos viables al año; provisión (valor esperado) $58.7 M; IC 90 % $45.9-$75.4 M; se revela como pasivo contingente $16.7 M (P95 − VE).
+- `avance_Contabilidad_contingencias_Edomex.docx`, generado con `scripts/generar_doc_contingencias_edomex.py`.
+- Pendiente: pedir por SAIMEX el registro de indemnizaciones (art. 9 de la ley) a Junta de Caminos y ayuntamientos para sustituir supuestos.

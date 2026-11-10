@@ -208,6 +208,14 @@ def introduccion(doc, d):
                  f"{d['paradas']:,} paradas de transporte público (GTFS de SEMOVI), el índice de marginación 2020 "
                  "por colonia (CONAPO) y el Atlas de Riesgo de Chalco. La severidad de los baches y la atención "
                  "que informa la autoridad son simuladas y así se declaran.", "Datos. ")
+    parrafo(doc, "SIPA trabaja en dos niveles. El nivel operativo (qué bache atender primero) se probó en la "
+                 "CDMX, porque ahí hay datos abiertos de baches georreferenciados; lo usan Probabilidad, Cálculo, "
+                 "Estructuras de Datos, Bases de Datos y Pensamiento Complejo. El nivel financiero (cuánto le "
+                 "cuestan al gobierno los baches que no atiende) se estimó para el Estado de México, como pidió el "
+                 "incidente de Contabilidad, con el INEGI (accidentes por mala condición del camino y vehículos "
+                 "registrados por municipio) y la Ley de Responsabilidad Patrimonial del Edomex. El segundo nivel "
+                 "dimensiona el problema en la región de la UNRC Chalco y justifica llevar el piloto ahí.",
+           "Dos territorios. ")
 
 
 def prototipo(doc, d):
@@ -371,6 +379,11 @@ def financiera(doc, d, cont):
                  f"ponchadura, el ahorro es de {mm(cont['sensibilidad'][0]['ahorro'])}, así que la conclusión no "
                  f"depende del supuesto más incierto. La plataforma requiere {mm(sup['equipo'])} en equipo y "
                  f"{mm(sup['software'])} en software, que se recuperan con el ahorro del primer año.")
+    ed = leer("contabilidad/resultados_edomex/resumen.json")
+    parrafo(doc, f"A escala del Estado de México, el valor esperado de las indemnizaciones por daños viales es "
+                 f"{mm(ed['valor_esperado'])} al año (entre {mm(ed['percentil_5'])} y {mm(ed['percentil_95'])} con "
+                 f"90 % de confianza), con unos {ed['casos_viables']:,.0f} casos viables. Es una provisión probable "
+                 "según la NIF C-9 que hoy no aparece en los estados financieros.", "Estado de México. ")
     parrafo(doc, "El beneficio no es solo financiero: menos accidentes y menos tiempo de traslado para quienes "
                  "usan el transporte público, y una cifra auditable de cuánto debe el gobierno por los baches que "
                  "no atiende.")
@@ -533,6 +546,10 @@ def referencias(doc):
         "Highway Research Board. (1962). The AASHO Road Test, Report 5: Pavement Research (Special Report 61E).",
         "Instituto Nacional de Estadística y Geografía. (2024). Estadística de Accidentes de Tránsito Terrestre en "
         "Zonas Urbanas y Suburbanas (ATUS) 2024. INEGI.",
+        "Instituto Nacional de Estadística y Geografía. (2024). Vehículos de motor registrados en circulación "
+        "1980-2023 [Conjunto de datos]. INEGI.",
+        "Legislatura del Estado de México. (2017, reforma 2023). Ley de Responsabilidad Patrimonial para el Estado "
+        "de México y Municipios. Gaceta del Gobierno.",
         "Meadows, D. H. (2008). Thinking in systems: A primer. Chelsea Green Publishing.",
         "Saaty, T. L. (1980). The analytic hierarchy process. McGraw-Hill.",
         "Secretaría de Movilidad. (2021). GTFS [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México. "
@@ -551,13 +568,15 @@ def anexo(doc):
     tabla(doc, ["Paso", "Comando o archivo"], [
         ["1. Construir la base, el Data Warehouse y la réplica", "powershell -File bd\\ejecutar_todo.ps1"],
         ["2. Correr los modelos", "python probabilidad/riesgo_72h.py · python calculo/degradacion.py · "
-                                  "python contabilidad/provisiones.py · python estructuras/viabilidad.py"],
+                                  "python contabilidad/provisiones.py · python contabilidad/contingencias_edomex.py · "
+                                  "python estructuras/viabilidad.py"],
         ["3. Abrir el tablero", "streamlit run tablero/app.py"],
         ["Bases de Datos", "avance2_BD_entrega.docx"],
         ["Estructuras de Datos", "avance2_ED_plan_viabilidad.docx"],
         ["Probabilidad", "avance2_Probabilidad_semaforo72h.docx"],
         ["Cálculo Integral", "avance2_Calculo_degradacion.docx"],
         ["Contabilidad Financiera", "avance2_Contabilidad_NIF_C9.docx"],
+        ["Contabilidad (incidente Edomex)", "avance_Contabilidad_contingencias_Edomex.docx"],
         ["Pensamiento Complejo", "avance2_PensamientoComplejo_argumentacion.docx"],
     ], [6, 10])
 

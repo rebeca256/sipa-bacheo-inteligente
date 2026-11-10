@@ -1,0 +1,5 @@
+tipo,gravedad,eventos_anuales,p_reclama,p_procede,costo_promedio,p_salida_efectivo,casos_viables,valor_esperado
+"Ordinario (llanta, rin, suspensión)",Daño material menor,10792.763481352213,1.0,0.185,17666.666666666668,0.185,1996.6612440501592,35274348.64488615
+Accidente: Sólo daños,Daño material mayor,92.0,0.3,0.81,64333.333333333336,0.243,22.355999999999998,1438236.0
+Accidente: No fatal,Lesiones,104.0,0.5,0.81,186014.35897435897,0.405,42.120000000000005,7834924.800000001
+Accidente: Fatal,Muerte,10.0,0.6,0.81,2907608.0,0.486,4.859999999999999,14130974.879999999
