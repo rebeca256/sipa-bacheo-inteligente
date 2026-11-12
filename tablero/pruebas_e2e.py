@@ -21,6 +21,8 @@ import pytest
 from playwright.sync_api import Page, expect
 
 URL = "http://localhost:8501"
+# El nombre de la gráfica Altair cambia según la versión de Streamlit
+GRAFICA = "[data-testid=stVegaLiteChart], [data-testid=stArrowVegaLiteChart]"
 CAPTURAS = Path("tablero/capturas/pruebas")
 CAPTURAS.mkdir(parents=True, exist_ok=True)
 ESPERA = 120_000  # ms: la primera carga tras reiniciar o cambiar el código puede tardar
@@ -57,8 +59,19 @@ def sin_errores(page):
 
 def elegir(page, etiqueta, opcion):
     """Elige una opción en un selectbox de Streamlit."""
-    page.get_by_role("combobox", name=etiqueta).click()
-    page.get_by_role("option", name=opcion, exact=True).first.click()
+    # La lista desplegable se redibuja y a veces suelta el clic: se reintenta y se comprueba
+    for _ in range(5):
+        caja = page.get_by_role("combobox", name=etiqueta).last   # al redibujar puede haber una copia vieja
+        caja.click()
+        try:
+            page.get_by_role("option", name=opcion, exact=True).first.click(timeout=5000)
+        except Exception:
+            page.keyboard.press("Escape")
+            continue
+        esperar_quieto(page)
+        if page.get_by_role("combobox", name=re.compile(rf"Selected {re.escape(opcion)}\.")).count() > 0:
+            break
+    expect(page.get_by_role("combobox", name=re.compile(rf"Selected {re.escape(opcion)}\.")).last).to_be_visible()
     esperar_quieto(page)
 
 
@@ -91,7 +104,7 @@ def test_resumen_y_mapa(pagina):
     expect(metricas.nth(3)).to_contain_text(re.compile(r"\$\d+\.\d{2} M"))
     # mapa (pydeck dibuja en un canvas) y gráfica de costo pendiente
     expect(pagina.get_by_test_id("stDeckGlJsonChart").locator("canvas").first).to_be_visible(timeout=ESPERA)
-    expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(1)
+    expect(pagina.locator(GRAFICA)).to_have_count(1)
     elegir(pagina, "Territorio", "CHALCO")
     sin_errores(pagina)
     captura(pagina, "01_resumen")
@@ -101,7 +114,7 @@ def test_ciudadano_reporta_y_consulta_folio(pagina):
     abrir(pagina, 1, "Modo ciudadano")
     pagina.get_by_role("textbox", name="Descripción").fill("Prueba Playwright: bache frente a la escuela")
     pagina.get_by_role("button", name="Enviar reporte").click()
-    exito = pagina.get_by_test_id("stAlertContentSuccess")
+    exito = pagina.get_by_role("alert").first
     expect(exito).to_contain_text("Su folio es", timeout=ESPERA)
     folio = re.search(r"folio es (\d+)", exito.inner_text()).group(1)
     captura(pagina, "02_ciudadano_reporte")
@@ -113,7 +126,7 @@ def test_ciudadano_reporta_y_consulta_folio(pagina):
     esperar_quieto(pagina)
     tabla = pagina.get_by_test_id("stDataFrame").first
     expect(tabla).to_be_visible(timeout=ESPERA)
-    expect(pagina.get_by_test_id("stAlertContentInfo")).to_contain_text("Aún sin avances")
+    expect(pagina.get_by_role("alert").first).to_contain_text("Aún sin avances")
     sin_errores(pagina)
     captura(pagina, "03_ciudadano_folio")
 
@@ -124,7 +137,7 @@ def test_folio_inexistente(pagina):
     pagina.get_by_role("spinbutton", name="Folio").press("Enter")
     esperar_quieto(pagina)
     pagina.get_by_role("button", name="Consultar").click()
-    expect(pagina.get_by_test_id("stAlertContentWarning")).to_contain_text("No existe", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("No existe", timeout=ESPERA)
 
 
 def test_recomendacion_y_ficha(pagina):
@@ -134,13 +147,13 @@ def test_recomendacion_y_ficha(pagina):
     expect(metricas).to_have_count(4)
     expect(metricas.nth(0)).to_contain_text(re.compile(r"IPU\s*0\.\d{3}"))
     expect(metricas.nth(3)).to_contain_text("$")
-    expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(1)
+    expect(pagina.locator(GRAFICA)).to_have_count(1)
     elegir(pagina, "Territorio", "COYOACAN")
     expect(metricas.nth(0)).to_contain_text("IPU")
     sin_errores(pagina)
     captura(pagina, "04_recomendacion")
     pagina.get_by_role("button", name="Recalcular el IPU de este bache").click()
-    expect(pagina.get_by_test_id("stAlertContentSuccess")).to_contain_text("recalculado", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("recalculado", timeout=ESPERA)
 
 
 def test_autoridad_reglas_y_avance(pagina):
@@ -151,7 +164,7 @@ def test_autoridad_reglas_y_avance(pagina):
     # 1. Ajustar sin justificación: la base lo rechaza
     pagina.get_by_text("AJUSTAR", exact=True).click()
     pagina.get_by_role("button", name="Registrar decisión").click()
-    error = pagina.get_by_test_id("stAlertContentError")
+    error = pagina.get_by_role("alert").first
     expect(error).to_contain_text("justificación", timeout=ESPERA)
     captura(pagina, "05_autoridad_rechazo")
 
@@ -160,23 +173,23 @@ def test_autoridad_reglas_y_avance(pagina):
     pagina.get_by_role("textbox", name=re.compile("^Justificación")).fill(
         "Frente a una primaria; riesgo para peatones en horario de entrada.")
     pagina.get_by_role("button", name="Registrar decisión").click()
-    expect(pagina.get_by_test_id("stAlertContentSuccess")).to_contain_text("Decisión registrada", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("Decisión registrada", timeout=ESPERA)
 
     # 3. Descartar sin motivo: la transacción se revierte
-    elegir(pagina, re.compile("^De PRIORIZADO a"), "DESCARTADO")
+    elegir(pagina, re.compile(r"(^|. )De PRIORIZADO a"), "DESCARTADO")
     pagina.get_by_role("button", name="Actualizar estado").click()
-    expect(pagina.get_by_test_id("stAlertContentError")).to_contain_text("motivo", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("motivo", timeout=ESPERA)
 
     # 4. Pasar a EN_ATENCION y después a REPARADO con costo
-    elegir(pagina, re.compile("^De PRIORIZADO a"), "EN_ATENCION")
+    elegir(pagina, re.compile(r"(^|. )De PRIORIZADO a"), "EN_ATENCION")
     pagina.get_by_role("button", name="Actualizar estado").click()
-    expect(pagina.get_by_test_id("stAlertContentSuccess")).to_contain_text("EN_ATENCION", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("EN_ATENCION", timeout=ESPERA)
     esperar_quieto(pagina)
-    expect(pagina.get_by_role("combobox", name=re.compile("^De EN_ATENCION a"))).to_be_visible(timeout=ESPERA)
-    elegir(pagina, re.compile("^De EN_ATENCION a"), "REPARADO")
+    expect(pagina.get_by_role("combobox", name=re.compile(r"(^|. )De EN_ATENCION a"))).to_be_visible(timeout=ESPERA)
+    elegir(pagina, re.compile(r"(^|. )De EN_ATENCION a"), "REPARADO")
     pagina.get_by_role("spinbutton", name=re.compile("^Costo real")).fill("1850")
     pagina.get_by_role("button", name="Actualizar estado").click()
-    expect(pagina.get_by_test_id("stAlertContentSuccess")).to_contain_text("notificó", timeout=ESPERA)
+    expect(pagina.get_by_role("alert").first).to_contain_text("notificó", timeout=ESPERA)
     sin_errores(pagina)
     captura(pagina, "06_autoridad_reparado")
 
@@ -184,7 +197,7 @@ def test_autoridad_reglas_y_avance(pagina):
 def test_indicadores(pagina):
     abrir(pagina, 4, "Indicadores")
     expect(pagina.get_by_test_id("stDataFrame")).to_have_count(2, timeout=ESPERA)
-    expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(3, timeout=ESPERA)
+    expect(pagina.locator(GRAFICA)).to_have_count(3, timeout=ESPERA)
     captura(pagina, "07_indicadores")
 
 

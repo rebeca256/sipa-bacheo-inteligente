@@ -348,3 +348,11 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - ED (`estructuras/toluca_ed.py`, sección 6.1): prueba de escala con 74,319 baches (hash 767× más rápida que lista; AVL altura 19). Se conservaron los cambios manuales del equipo (fecha 13-11-2026 y declaración de IA).
 - Pensamiento Complejo y entregable final: Toluca como evidencia de transparencia y siguiente piloto.
 - Todas las entregas con fecha 13 de noviembre de 2026.
+
+## 11 nov 2026 · Revisión visual del tablero
+- Errores corregidos en `tablero/app.py`: el mapa del resumen no cargaba (`height` de pydeck y valores `Decimal` de SQL Server) y el costo estimado salía con ⚠.
+- Gráficas: barras delgadas con el valor al final, altura según el número de barras, top 10 con interruptor "Ver todos" y un estilo común (`estilo()`, `barras()`, `ver_barras()`).
+- "Reportes resueltos por año": barras solo de años con 500 reportes o más (2019–2022); se quitó la línea engañosa que caía a 0 en 2026.
+- Tablas con nombres en español, costos con separador de miles y barras de porcentaje; métricas con títulos cortos y ayuda ("Rojo · amarillo", "Costo pendiente").
+- Ficha de justificación: la tabla de criterios quedó en un desplegable para no repetir la gráfica.
+- `pruebas_e2e.py` ajustado a Streamlit 1.67 (nombres de gráficas y avisos, selectores con reintento): 7/7 pasan. `pruebas_sitio.py`: 5/5. Sitio `docs/` reconstruido.

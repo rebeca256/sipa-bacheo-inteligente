@@ -62,7 +62,7 @@ CONSULTAS = {
                        FROM ind.v_reincidencia_territorio""",
     "causas": "SELECT causa_probable, COUNT(*) AS baches FROM ind.v_causa_probable_bache GROUP BY causa_probable",
     "cobertura": "SELECT territorio, pct_reparados FROM ind.v_cobertura_territorio",
-    "resueltos": """SELECT anio, CAST(100.0 * SUM(resueltos) / SUM(reportes) AS DECIMAL(5,1)) AS pct_resueltos
+    "resueltos": """SELECT anio, SUM(reportes) AS reportes, CAST(100.0 * SUM(resueltos) / SUM(reportes) AS DECIMAL(5,1)) AS pct_resueltos
                     FROM ind.v_cobertura_reportes_anual GROUP BY anio""",
 }
 

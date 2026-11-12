@@ -20,6 +20,8 @@ Uso (desde la carpeta del proyecto):
 import os
 from pathlib import Path
 
+from decimal import Decimal
+
 import altair as alt
 import pandas as pd
 import pydeck as pdk
@@ -72,7 +74,12 @@ def consulta(sql, *params):
     cur = conexion().cursor()
     cur.execute(sql, params)
     columnas = [c[0] for c in cur.description]
-    return pd.DataFrame.from_records(cur.fetchall(), columns=columnas)
+    df = pd.DataFrame.from_records(cur.fetchall(), columns=columnas)
+    # SQL Server devuelve DECIMAL como decimal.Decimal: se pasa a float para tablas, gráficas y mapa
+    for c in df.columns:
+        if df[c].dtype == object and df[c].map(lambda v: isinstance(v, Decimal)).any():
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
 
 
 @st.cache_data
@@ -227,7 +234,8 @@ def cobertura():
 
 def resueltos():
     df = copia("resueltos") if EN_LINEA else consulta(
-        """SELECT anio, CAST(100.0 * SUM(resueltos) / SUM(reportes) AS DECIMAL(5,1)) AS pct_resueltos
+        """SELECT anio, SUM(reportes) AS reportes,
+                  CAST(100.0 * SUM(resueltos) / SUM(reportes) AS DECIMAL(5,1)) AS pct_resueltos
            FROM ind.v_cobertura_reportes_anual GROUP BY anio""")
     df = df.copy()
     df["anio"] = df["anio"].astype(int).astype(str)
@@ -291,22 +299,57 @@ def mostrar_aviso():
         st.success(st.session_state.pop("aviso"))
 
 
-def barras(df, valor, etiqueta, titulo, alto=None, color="#1565C0"):
-    """Barras horizontales ordenadas de mayor a menor."""
-    g = alt.Chart(df).mark_bar(color=color).encode(
-        x=alt.X(f"{valor}:Q", title=titulo),
-        y=alt.Y(f"{etiqueta}:N", sort="-x", title=None, axis=alt.Axis(labelLimit=220)),
-        tooltip=[etiqueta, valor])
-    return g.properties(height=alto) if alto else g
+def estilo(g):
+    """Estilo común: letra legible, cuadrícula suave y sin borde."""
+    return (g.configure_axis(labelFontSize=12, titleFontSize=12, gridColor="#EEEEEE", domain=False,
+                             tickColor="#DDDDDD", labelColor="#444444", titleColor="#666666")
+             .configure_view(strokeWidth=0))
+
+
+def barras(df, valor, etiqueta, titulo, color="#1565C0", formato=",.0f", maximo=None, orden="-x"):
+    """Barras horizontales delgadas, de mayor a menor, con el valor escrito al final.
+    La altura depende del número de barras (24 px cada una)."""
+    df = df.copy()
+    df[valor] = df[valor].astype(float)
+    df = df.sort_values(valor, ascending=False)
+    if maximo:
+        df = df.head(maximo)
+    base = alt.Chart(df).encode(
+        y=alt.Y(f"{etiqueta}:N", sort=list(df[etiqueta]) if orden == "-x" else orden, title=None, axis=alt.Axis(labelLimit=200, ticks=False, labelOverlap=False)),
+        x=alt.X(f"{valor}:Q", title=titulo, scale=alt.Scale(domainMax=float(df[valor].max()) * 1.18 or 1), axis=alt.Axis(tickCount=4, format="~s" if "$" in formato else formato)),
+        tooltip=[alt.Tooltip(f"{etiqueta}:N", title=" "),
+                 alt.Tooltip(f"{valor}:Q", format=formato, title=titulo)])
+    g = base.mark_bar(color=color, size=14, cornerRadiusEnd=3) + base.mark_text(
+        align="left", dx=4, fontSize=11, color="#555555").encode(text=alt.Text(f"{valor}:Q", format=formato))
+    return estilo(g.properties(height=alt.Step(26)))
+
+
+def ver_barras(df, valor, etiqueta, titulo, top=10, **kw):
+    """Muestra las 10 primeras barras y deja ver el resto con un interruptor."""
+    todos = len(df) > top and st.toggle(f"Ver los {len(df)}", key=f"todos_{etiqueta}_{valor}")
+    st.altair_chart(barras(df, valor, etiqueta, titulo, maximo=None if todos else top, **kw),
+                    use_container_width=True)
 
 
 # Formato de las columnas en las tablas
 COLUMNAS = {
     "ipu": st.column_config.NumberColumn("IPU", format="%.3f"),
-    "costo_estimado": st.column_config.NumberColumn("Costo estimado", format="$%,.0f"),
+    "costo_estimado": st.column_config.TextColumn("Costo estimado"),   # ya viene como "$12,345"
     "id_bache": st.column_config.NumberColumn("Bache", format="%d"),
     "semaforo": "Semáforo", "intervencion": "Intervención recomendada", "reportes": "Reportes",
     "estado": "Estado", "lugar": "Lugar",
+    # Indicadores
+    "territorio": "Territorio", "celdas": "Celdas", "celdas_reincidentes": "Reincidentes",
+    "celdas_cronicas": "Crónicas",
+    "pct_reportes_en_cronicas": st.column_config.ProgressColumn(
+        "% reportes en celdas crónicas", format="%.1f %%", min_value=0, max_value=100),
+    "semaforo_final": "Semáforo", "baches": "Baches",
+    "dias_promedio": st.column_config.NumberColumn("Días promedio", format="%.1f"),
+    "meta_dias": st.column_config.NumberColumn("Meta (días)", format="%d"),
+    "pct_en_meta": st.column_config.ProgressColumn("% dentro de la meta", format="%.0f %%",
+                                                   min_value=0, max_value=100),
+    "folio": "Folio", "fecha_solicitud": "Fecha de solicitud", "estado_bache": "Estado del bache",
+    "prioridad_recomendada": "Prioridad recomendada", "prioridad_decidida": "Prioridad decidida",
 }
 
 # Nombre corto de cada tarifa para que quepa en la métrica (el completo va en la ayuda)
@@ -320,6 +363,13 @@ def dinero(x):
     return f"${x:,.0f}" if pd.notna(x) else "—"
 
 
+def miles(df, col="costo_estimado"):
+    """Costo como texto con separador de miles ($12,345) para las tablas."""
+    df = df.copy()
+    df[col] = df[col].astype(float).map(dinero)
+    return df
+
+
 # ---------------------------------------------------------------------------
 # Páginas
 # ---------------------------------------------------------------------------
@@ -331,13 +381,17 @@ def mapa(df, alto=430):
     df["color"] = df["semaforo"].map(COLOR)
     df["radio"] = 40 + df["ipu"] * 160
     df["costo_txt"] = df["costo_estimado"].map(dinero)
+    # pydeck serializa a JSON: solo columnas simples (sin fechas ni Decimal)
+    df = df[["id_bache", "territorio", "ipu", "semaforo", "intervencion", "costo_txt",
+             "latitud", "longitud", "color", "radio"]].copy()
+    df["id_bache"] = df["id_bache"].astype(int)
     capa = pdk.Layer("ScatterplotLayer", df, get_position=["longitud", "latitud"],
                      get_fill_color="color", get_radius="radio", pickable=True, opacity=0.75)
     vista = pdk.ViewState(latitude=float(df["latitud"].mean()), longitude=float(df["longitud"].mean()), zoom=10)
-    st.pydeck_chart(pdk.Deck(layers=[capa], initial_view_state=vista, map_style="light",
+    st.pydeck_chart(pdk.Deck(layers=[capa], initial_view_state=vista, map_style="light", height=alto,
                              tooltip={"text": "Bache {id_bache} · {territorio}\nIPU {ipu} · {semaforo}\n"
                                               "{intervencion}\nCosto estimado {costo_txt}"}),
-                    height=alto, use_container_width=True)
+                    use_container_width=True)
 
 
 def pagina_resumen():
@@ -351,8 +405,12 @@ def pagina_resumen():
     c = st.columns(5)
     c[0].metric("Reportes en la base", f"{total_reportes():,}")
     c[1].metric("Baches abiertos", f"{len(abiertos):,}")
-    c[2].metric("En rojo / amarillo", f"{(abiertos.semaforo == 'ROJO').sum()} / {(abiertos.semaforo == 'AMARILLO').sum()}")
-    c[3].metric("Costo para atender lo abierto", f"${abiertos['costo_estimado'].astype(float).sum() / 1e6:,.2f} M")
+    n = abiertos["semaforo"].value_counts()
+    c[2].metric("Rojo · amarillo", f"{n.get('ROJO', 0)} · {n.get('AMARILLO', 0)}",
+                help=f"Baches abiertos por semáforo ({n.get('VERDE', 0):,} más en verde). Si no hay rojos es porque todos los rojos ya "
+                     "pasaron a reparación (decisiones simuladas en bd/08).")
+    c[3].metric("Costo pendiente", f"${abiertos['costo_estimado'].astype(float).sum() / 1e6:,.2f} M",
+                help="Costo estimado para atender todos los baches abiertos.")
     c[4].metric("Rojos reparados en ≤ 3 días", f"{float(rojos_meta.iloc[0]):.0f} %" if len(rojos_meta) else "—")
 
     izq, der = st.columns([3, 2])
@@ -367,8 +425,7 @@ def pagina_resumen():
         st.subheader("Costo pendiente por territorio")
         cp = costo_pendiente().copy()
         cp["costo_total"] = cp["costo_total"].astype(float)
-        st.altair_chart(barras(cp, "costo_total", "territorio", "Costo estimado ($)", alto=430, color="#EF6C00"),
-                        use_container_width=True)
+        ver_barras(cp, "costo_total", "territorio", "Costo estimado", color="#EF6C00", formato="$,.0f")
 
 
 def pagina_ciudadano():
@@ -402,7 +459,7 @@ def pagina_ciudadano():
             if cab.empty:
                 st.warning("No existe ese folio.")
             else:
-                st.dataframe(cab.fillna("Sin calcular"), hide_index=True)
+                st.dataframe(cab.fillna("Sin calcular"), hide_index=True, column_config=COLUMNAS)
                 st.write("Avance informado por la autoridad:")
                 if hist.empty:
                     st.info("Aún sin avances.")
@@ -422,11 +479,10 @@ def ficha(id_bache):
         det = detalle(int(b.id_calculo))
         st.write("**Ficha de justificación:** cuánto aporta cada criterio al IPU. Un valor de 0.5 indica "
                  "que no hay dato para ese criterio (neutral).")
-        st.altair_chart(alt.Chart(det).mark_bar(color="#1565C0").encode(
-            x=alt.X("aporte:Q", title="Aporte al IPU (valor × peso)"),
-            y=alt.Y("criterio:N", sort="-x", title=None, axis=alt.Axis(labelLimit=260)),
-            tooltip=["criterio", "valor", "peso", "aporte"]).properties(height=300), use_container_width=True)
-        st.dataframe(det, hide_index=True)
+        st.altair_chart(barras(det, "aporte", "criterio", "Aporte al IPU (valor × peso)", formato=".3f"),
+                        use_container_width=True)
+        with st.expander("Ver los valores y pesos de cada criterio"):
+            st.dataframe(det, hide_index=True)
     st.caption(f"{b.territorio} · celda {b.celda_id} · severidad {b.severidad} · {b.profundidad_cm} cm · "
                f"{b.area_m2} m² · {b.reportes} reportes · estado {b.estado}")
 
@@ -439,8 +495,8 @@ def pagina_ranking():
     territorio = st.selectbox("Territorio", territorios, index=territorios.index("CHALCO"))
     rank = abiertos[abiertos["territorio"] == territorio].sort_values("ipu", ascending=False)
     rank.insert(0, "lugar", range(1, len(rank) + 1))
-    st.dataframe(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "reportes",
-                       "estado"]], hide_index=True, height=280, column_config=COLUMNAS)
+    st.dataframe(miles(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion", "costo_estimado",
+                             "reportes", "estado"]]), hide_index=True, height=280, column_config=COLUMNAS)
     st.caption("Fíjese en la columna de reportes: más reportes no significa más prioridad.")
     id_bache = st.selectbox("Ver la ficha del bache", rank["id_bache"])
     ficha(id_bache)
@@ -464,7 +520,7 @@ def pagina_autoridad():
     mios = df[(df["territorio"] == u.territorio) & df["estado"].isin(["REPORTADO", "VALIDADO", "PRIORIZADO",
                                                                       "EN_ATENCION"])]
     mios = mios.sort_values("ipu", ascending=False)
-    st.dataframe(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "estado"]],
+    st.dataframe(miles(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "estado"]]),
                  hide_index=True, height=240, column_config=COLUMNAS)
     if mios.empty:
         st.info("No hay baches abiertos en este territorio.")
@@ -517,17 +573,25 @@ def pagina_indicadores():
     a, b = st.columns(2)
     with a:
         st.subheader("Reincidencia: celdas donde el bache vuelve a salir")
-        st.dataframe(reincidencia(), hide_index=True)
+        st.dataframe(reincidencia()[["territorio", "celdas", "celdas_reincidentes", "celdas_cronicas",
+                                     "pct_reportes_en_cronicas"]], hide_index=True, column_config=COLUMNAS)
         st.subheader("Causa probable del daño (hipótesis)")
-        st.altair_chart(barras(causas(), "baches", "causa_probable", "Baches"), use_container_width=True)
+        ver_barras(causas(), "baches", "causa_probable", "Baches", color="#6D4C41")
     with b:
         st.subheader("Tiempo de respuesta por semáforo")
-        st.dataframe(tiempos(), hide_index=True)
+        st.dataframe(tiempos()[["semaforo_final", "baches", "dias_promedio", "meta_dias", "pct_en_meta"]],
+                     hide_index=True, column_config=COLUMNAS)
         st.subheader("Cobertura: baches reparados por territorio")
-        st.altair_chart(barras(cobertura(), "pct_reparados", "territorio", "% de baches reparados", alto=420),
-                        use_container_width=True)
+        ver_barras(cobertura(), "pct_reparados", "territorio", "% de baches reparados", color="#2E7D32",
+                   formato=".0f")
         st.subheader("Reportes ciudadanos resueltos por año")
-        st.line_chart(resueltos().set_index("anio"))
+        res = resueltos()
+        if "reportes" in res.columns:
+            res = res[res["reportes"].astype(float) >= 500]
+        st.altair_chart(barras(res.rename(columns={"anio": "Año"}), "pct_resueltos", "Año", "% resueltos",
+                               formato=".1f", orden="ascending"), use_container_width=True)
+        st.caption("Solo años con 500 reportes o más (CDMX 2019–2022). 2025–2026 son pocos reportes de "
+                   "Chalco aún en curso y no son comparables.")
 
 
 PAGINAS = {"Resumen y mapa": pagina_resumen, "Modo ciudadano": pagina_ciudadano,
