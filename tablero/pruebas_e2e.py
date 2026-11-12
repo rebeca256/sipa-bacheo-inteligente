@@ -25,6 +25,8 @@ URL = "http://localhost:8501"
 GRAFICA = "[data-testid=stVegaLiteChart], [data-testid=stArrowVegaLiteChart]"
 # Avisos (éxito, error, info): stAlertContent… en 1.67, stNotification en 1.32
 AVISO = "[data-testid^=stAlertContent], [data-testid=stNotification]"
+# Tarjetas de cifras: shadcn (local) o HTML propio (sitio stlite)
+KPI = ".kpi, [class*=st-key-kpi_]"
 CAPTURAS = Path("tablero/capturas/pruebas")
 CAPTURAS.mkdir(parents=True, exist_ok=True)
 ESPERA = 120_000  # ms: la primera carga tras reiniciar o cambiar el código puede tardar
@@ -107,7 +109,7 @@ def captura(page, nombre):
 
 def test_resumen_y_mapa(pagina):
     abrir(pagina, 0, "Resumen ejecutivo")
-    metricas = pagina.locator(".kpi")
+    metricas = pagina.locator(KPI)
     expect(metricas).to_have_count(4)
     expect(metricas.nth(1)).to_contain_text(re.compile(r"Baches abiertos\s*1,\d{3}"))
     expect(metricas.nth(2)).to_contain_text(re.compile(r"\$\d+\.\d{2} M"))
@@ -152,7 +154,7 @@ def test_folio_inexistente(pagina):
 def test_recomendacion_y_ficha(pagina):
     abrir(pagina, 2, "Recomendación de SIPA")
     expect(pagina.get_by_test_id("stDataFrame").first).to_be_visible(timeout=ESPERA)
-    metricas = pagina.locator(".kpi")
+    metricas = pagina.locator(KPI)
     expect(metricas).to_have_count(4)
     expect(metricas.nth(0)).to_contain_text(re.compile(r"IPU\s*0\.\d{3}"))
     expect(metricas.nth(3)).to_contain_text("$")

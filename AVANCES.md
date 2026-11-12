@@ -369,3 +369,8 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Autoridad: filtros en una fila, cifras del territorio, pasos 1 y 2 numerados con su estado.
 - Tablas con el alto justo para ver todas las filas; cifras de las tarjetas sin cortar palabras en celular.
 - Pruebas: e2e 7/7 y sitio 5/5; base reconstruida y `docs/` regenerado.
+
+## 11 nov 2026 · Componentes shadcn/ui en el tablero local
+- `streamlit-shadcn-ui` 1.5 (en `requirements.txt`): tarjetas de cifras (`ui.metric_card`) y pestañas de navegación (`ui.tabs`).
+- Respaldo: si la librería no está (sitio en línea con stlite), se usan las tarjetas HTML y las pestañas propias; el sitio no cambia.
+- Pruebas: e2e 7/7 (reconocen ambos tipos de tarjeta) y sitio 5/5. Base reconstruida y `docs/` regenerado.

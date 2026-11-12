@@ -27,6 +27,11 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
+try:                                   # componentes shadcn/ui; si no están (sitio stlite), se usa el HTML propio
+    import streamlit_shadcn_ui as ui
+except ImportError:
+    ui = None
+
 try:                                   # en el navegador (stlite) no hay pyodbc ni SQL Server
     import pyodbc
 except ImportError:
@@ -546,8 +551,20 @@ def encabezado(titulo, subtitulo=None):
         st.markdown(f'<div class="subtitulo">{subtitulo}</div>', unsafe_allow_html=True)
 
 
+_N_KPI = 0
+
+
 def kpis(items):
     """Tarjetas de cifras clave. items: (etiqueta, valor, contexto, (tipo, texto) o None, ayuda)."""
+    if ui is not None:
+        global _N_KPI
+        cols = st.columns(len(items), gap="small")
+        for col, (et, val, ctx, chip, ayuda) in zip(cols, items):
+            _N_KPI += 1
+            with col, st.container(key=f"kpi_{_N_KPI}"):
+                ui.metric_card(et, val, description=ctx, delta=chip[1] if chip else None,
+                               key=f"metrica_{_N_KPI}")
+        return
     html = ""
     for et, val, ctx, chip, ayuda in items:
         c = f'<div class="chip {chip[0]}">{chip[1]}</div>' if chip else ""
@@ -941,6 +958,10 @@ banda()
 # ?p=2 abre directamente la tercera sección (útil para capturas y para la exposición)
 inicial = int(st.query_params.get("p", 0)) if str(st.query_params.get("p", 0)).isdigit() else 0
 with st.container(key="nav"):
-    pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1), horizontal=True)
+    if ui is not None:
+        pagina = ui.tabs(list(PAGINAS), value=list(PAGINAS)[min(inicial, len(PAGINAS) - 1)], key="nav_tabs",
+                         label="Sección")
+    else:
+        pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1), horizontal=True)
 mostrar_aviso()
 PAGINAS[pagina]()
