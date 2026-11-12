@@ -363,3 +363,9 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Gráficas: un solo azul para el dato principal, gris como contexto (el territorio elegido se destaca), colores del semáforo solo para el semáforo y etiquetas solo en las 3 barras principales. Tiempo de respuesta como barra contra la meta, reincidencia como gráfica (con la tabla en un desplegable) y causas como barra segmentada de 100 %. La paleta pasó el validador de daltonismo; el % va escrito en la leyenda por el aviso de contraste.
 - El tablero local debe correrse con `python -m streamlit` (1.67): el comando `streamlit` de Anaconda es 1.32.
 - Pruebas compatibles con Streamlit 1.32 y 1.67: e2e 7/7 y sitio 5/5. Base reconstruida y `docs/` regenerado.
+
+## 11 nov 2026 · Rediseño del tablero, fase 4 (pulido por pantalla)
+- Recomendación: filtros en una fila, semáforo con ícono y nombre en el ranking, ficha del bache como expediente (cabecera con lugar en el ranking, chips de semáforo y estado, cifras, datos del bache) y tarjeta "Por qué ocupa este lugar" con los tres criterios que más pesan.
+- Autoridad: filtros en una fila, cifras del territorio, pasos 1 y 2 numerados con su estado.
+- Tablas con el alto justo para ver todas las filas; cifras de las tarjetas sin cortar palabras en celular.
+- Pruebas: e2e 7/7 y sitio 5/5; base reconstruida y `docs/` regenerado.

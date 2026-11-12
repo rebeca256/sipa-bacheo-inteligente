@@ -106,7 +106,8 @@ h3 { font-size: 16px !important; font-weight: 600 !important; color: #0b0b0b; }
 @media (max-width: 640px) {
   .st-key-nav div[role="radiogroup"] { flex-wrap: nowrap !important; overflow-x: auto; }
   .st-key-nav [data-testid="stRadioOption"], .st-key-nav label[data-baseweb="radio"] { white-space: nowrap; }
-  .kpi .k-val { font-size: 24px; }
+  .kpi .k-val { font-size: 19px; }
+  .kpi { padding: 12px; }
   .sipa-banda .sub { display: none; }
 }
 
@@ -120,7 +121,7 @@ h3 { font-size: 16px !important; font-weight: 600 !important; color: #0b0b0b; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 14px; }
 .kpi { background: #fff; border: 1px solid #e6e6e3; border-radius: 12px; padding: 14px 16px; }
 .kpi .k-et { color: #52514e; font-size: 13px; font-weight: 500; }
-.kpi .k-val { color: #0b0b0b; font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin: 4px 0 2px;
+.kpi .k-val { word-break: keep-all; overflow-wrap: normal; hyphens: none; color: #0b0b0b; font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin: 4px 0 2px;
   line-height: 1.15; }
 .kpi .k-ctx { color: #8a8984; font-size: 12.5px; }
 .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
@@ -132,6 +133,25 @@ h3 { font-size: 16px !important; font-weight: 600 !important; color: #0b0b0b; }
 /* Hallazgo principal de cada página */
 .hallazgo { background: #fff; border: 1px solid #e6e6e3; border-left: 4px solid #2a78d6; border-radius: 10px;
   padding: 12px 16px; color: #0b0b0b; font-size: 14.5px; margin: 2px 0 14px; }
+
+/* Expediente del bache */
+.exp-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.exp-tit { font-size: 20px; font-weight: 700; color: #0b0b0b; }
+.exp-sub { color: #52514e; font-size: 13px; margin-top: 2px; }
+.exp-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.exp-chips .chip { margin-top: 0; }
+.chip.neutro { background: #eef0f3; color: #33322f; }
+.datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
+  margin: 14px 0 4px; padding: 12px 0 0; border-top: 1px solid #efefec; }
+.datos div { font-size: 12px; color: #8a8984; }
+.datos b { display: block; font-size: 15px; color: #0b0b0b; font-weight: 600; margin-top: 2px; }
+.porque { font-size: 14px; color: #33322f; line-height: 1.55; }
+.porque ol { padding-left: 18px; margin: 6px 0 0; }
+/* Pasos de la autoridad */
+.paso { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.paso .num { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #2a78d6; color: #fff;
+  align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-right: 8px; }
+.paso .t { font-weight: 600; font-size: 15.5px; color: #0b0b0b; display: inline-flex; align-items: center; }
 
 /* Leyenda del semáforo */
 .leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #52514e; margin: 2px 0 8px; }
@@ -587,6 +607,27 @@ def dinero(x):
     return f"${x:,.0f}" if pd.notna(x) else "—"
 
 
+ICONO = {"ROJO": "🔴 Rojo", "AMARILLO": "🟡 Amarillo", "VERDE": "🟢 Verde"}
+CHIP = {"ROJO": ("alerta", "● Rojo · 3 días"), "AMARILLO": ("medio", "● Amarillo · 15 días"),
+        "VERDE": ("ok", "● Verde · 60 días")}
+
+
+def con_icono(df, col="semaforo"):
+    """Semáforo con ícono y nombre (el color nunca va solo)."""
+    df = df.copy()
+    df[col] = df[col].map(lambda v: ICONO.get(v, v))
+    return df
+
+
+def alto_tabla(filas, maximo=420):
+    """Alto justo para ver todas las filas (35 px cada una), con tope."""
+    return min(35 * (filas + 1) + 3, maximo)
+
+
+def chip_html(tipo, texto):
+    return f'<span class="chip {tipo}">{texto}</span>'
+
+
 def miles(df, col="costo_estimado"):
     """Costo como texto con separador de miles ($12,345) para las tablas."""
     df = df.copy()
@@ -701,30 +742,52 @@ def pagina_ciudadano():
                     st.dataframe(hist, hide_index=True)
 
 
-def ficha(id_bache):
+def ficha(id_bache, lugar=None, total=None):
+    """Expediente del bache: cabecera, cifras, datos del bache y por qué ocupa su lugar."""
     b = baches().set_index("id_bache").loc[id_bache]
     sem = b.semaforo if pd.notna(b.semaforo) else None
-    chip = {"ROJO": ("alerta", "● Rojo · 3 días"), "AMARILLO": ("medio", "● Amarillo · 15 días"),
-            "VERDE": ("ok", "● Verde · 60 días")}.get(sem)
-    kpis([
-        ("IPU", f"{float(b.ipu):.3f}" if pd.notna(b.ipu) else "—", "índice de prioridad (0 a 1)", None, None),
-        ("Semáforo", sem.capitalize() if sem else "—", "prioridad recomendada", chip, None),
-        ("Intervención", CORTO.get(b.intervencion, b.intervencion if pd.notna(b.intervencion) else "—"),
-         b.intervencion if pd.notna(b.intervencion) else "", None, None),
-        ("Costo estimado", dinero(float(b.costo_estimado)) if pd.notna(b.costo_estimado) else "—",
-         "tarifa SIPA por m²", None, None),
-    ])
+    chips = (chip_html(*CHIP[sem]) if sem in CHIP else "") + chip_html("neutro", f"Estado: {b.estado}")
+    lugar_txt = f"Lugar {lugar} de {total} en {str(b.territorio).title()}" if lugar else str(b.territorio).title()
+    with tarjeta("expediente"):
+        st.markdown(f"""<div class="exp-cab"><div><div class="exp-tit">Bache {id_bache}</div>
+            <div class="exp-sub">{lugar_txt} · celda {b.celda_id}</div></div>
+            <div class="exp-chips">{chips}</div></div>""", unsafe_allow_html=True)
+        kpis([
+            ("IPU", f"{float(b.ipu):.3f}" if pd.notna(b.ipu) else "—", "índice de prioridad (0 a 1)", None, None),
+            ("Semáforo", sem.capitalize() if sem else "—", "prioridad recomendada", None, None),
+            ("Intervención", CORTO.get(b.intervencion, b.intervencion if pd.notna(b.intervencion) else "—"),
+             b.intervencion if pd.notna(b.intervencion) else "", None, None),
+            ("Costo estimado", dinero(float(b.costo_estimado)) if pd.notna(b.costo_estimado) else "—",
+             "tarifa SIPA por m²", None, None),
+        ])
+        num = lambda v, f: f.format(float(v)) if pd.notna(v) else "—"
+        st.markdown(f"""<div class="datos">
+            <div>Severidad<b>{num(b.severidad, "{:.1f}")}</b></div>
+            <div>Profundidad<b>{num(b.profundidad_cm, "{:.1f} cm")}</b></div>
+            <div>Área<b>{num(b.area_m2, "{:.2f} m²")}</b></div>
+            <div>Reportes<b>{int(b.reportes) if pd.notna(b.reportes) else "—"}</b></div>
+            <div>Territorio<b>{str(b.territorio).title()}</b></div></div>""", unsafe_allow_html=True)
     if pd.notna(b.id_calculo):
         det = detalle(int(b.id_calculo))
-        with tarjeta("justificacion", "Ficha de justificación",
-                     "Cuánto aporta cada criterio al IPU (valor × peso). Un valor de 0.5 indica que no hay "
-                     "dato para ese criterio (neutral)."):
+        izq, der = st.columns([3, 2], gap="medium")
+        with izq, tarjeta("justificacion", "Ficha de justificación",
+                          "Cuánto aporta cada criterio al IPU (valor × peso). Un valor de 0.5 indica que no "
+                          "hay dato para ese criterio (neutral)."):
             st.altair_chart(barras(det, "aporte", "criterio", "Aporte al IPU", formato=".3f"),
                             use_container_width=True)
             with st.expander("Ver los valores y pesos de cada criterio"):
                 st.dataframe(det, hide_index=True)
-    st.caption(f"{b.territorio} · celda {b.celda_id} · severidad {b.severidad} · {b.profundidad_cm} cm · "
-               f"{b.area_m2} m² · {b.reportes} reportes · estado {b.estado}")
+        with der, tarjeta("porque", "Por qué ocupa este lugar"):
+            top = det.assign(aporte=det["aporte"].astype(float)).sort_values("aporte", ascending=False).head(3)
+            total_ipu = float(b.ipu) if pd.notna(b.ipu) else top["aporte"].sum()
+            items = "".join(f"<li><b>{c}</b>: {a:.3f} ({a / total_ipu:.0%} del IPU)</li>"
+                            for c, a in zip(top["criterio"], top["aporte"]))
+            st.markdown(f'<div class="porque">Los tres criterios que más pesan:<ol>{items}</ol></div>',
+                        unsafe_allow_html=True)
+            st.markdown('<div class="porque" style="margin-top:10px">El número de reportes está acotado: '
+                        'un bache muy reportado no sube solo por eso.</div>', unsafe_allow_html=True)
+            return True
+    return False
 
 
 def pagina_ranking():
@@ -733,15 +796,19 @@ def pagina_ranking():
     df = baches()
     abiertos = df[df["estado"].isin(["VALIDADO", "PRIORIZADO", "EN_ATENCION"]) & df["ipu"].notna()].copy()
     territorios = sorted(abiertos["territorio"].dropna().unique())
-    territorio = st.selectbox("Territorio", territorios, index=territorios.index("CHALCO"))
+    f1, f2 = st.columns(2)
+    territorio = f1.selectbox("Territorio", territorios, index=territorios.index("CHALCO"))
     rank = abiertos[abiertos["territorio"] == territorio].sort_values("ipu", ascending=False)
     rank.insert(0, "lugar", range(1, len(rank) + 1))
+    id_bache = f2.selectbox("Ver la ficha del bache", rank["id_bache"],
+                            format_func=lambda x: f"{x}")
     with tarjeta("ranking", f"Ranking de {territorio.title()}",
                  "Fíjese en la columna de reportes: más reportes no significa más prioridad."):
-        st.dataframe(miles(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion", "costo_estimado",
-                                 "reportes", "estado"]]), hide_index=True, height=280, column_config=COLUMNAS)
-    id_bache = st.selectbox("Ver la ficha del bache", rank["id_bache"])
-    ficha(id_bache)
+        st.dataframe(con_icono(miles(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion",
+                                           "costo_estimado", "reportes", "estado"]])),
+                     hide_index=True, height=alto_tabla(len(rank)), column_config=COLUMNAS)
+    lugar = int(rank.loc[rank["id_bache"] == id_bache, "lugar"].iloc[0])
+    ficha(id_bache, lugar, len(rank))
     if st.button("Recalcular el IPU de este bache"):
         ok, msg, _ = recalcular_ipu(id_bache)
         if ok:
@@ -754,23 +821,38 @@ def pagina_autoridad():
     encabezado("Modo autoridad", "La autoridad decide sobre la recomendación y repara con sus propios "
                                  "recursos; en SIPA solo informa el avance.")
     usuarios = autoridades()
-    nombre = st.selectbox("Entrar como", usuarios["nombre"],
+    f1, f2 = st.columns(2)
+    nombre = f1.selectbox("Entrar como", usuarios["nombre"],
                           index=int((usuarios["territorio"] == "CHALCO").idxmax()))
     u = usuarios[usuarios["nombre"] == nombre].iloc[0]
     df = baches()
     mios = df[(df["territorio"] == u.territorio) & df["estado"].isin(["REPORTADO", "VALIDADO", "PRIORIZADO",
                                                                       "EN_ATENCION"])]
     mios = mios.sort_values("ipu", ascending=False)
-    with tarjeta("pendientes", f"Baches abiertos de {u.territorio.title()}", "Ordenados por IPU"):
-        st.dataframe(miles(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "estado"]]),
-                     hide_index=True, height=240, column_config=COLUMNAS)
     if mios.empty:
-        st.info("No hay baches abiertos en este territorio.")
+        with tarjeta("pendientes", f"Baches abiertos de {u.territorio.title()}"):
+            st.info("No hay baches abiertos en este territorio.")
         return
-    id_bache = st.selectbox("Bache", mios["id_bache"], key=f"bache_autoridad_{u.id_usuario}")
+    id_bache = f2.selectbox("Bache", mios["id_bache"], key=f"bache_autoridad_{u.id_usuario}")
     b = mios.set_index("id_bache").loc[id_bache]
+    n = mios["semaforo"].value_counts()
+    kpis([
+        ("Baches abiertos", f"{len(mios):,}", f"en {u.territorio.title()}", None, None),
+        ("Por semáforo", f"{n.get('ROJO', 0)} · {n.get('AMARILLO', 0)} · {n.get('VERDE', 0)}",
+         "rojo · amarillo · verde", None, None),
+        ("Costo estimado", f"${mios['costo_estimado'].astype(float).sum():,.0f}", "para atender todo lo abierto",
+         None, None),
+    ])
+    with tarjeta("pendientes", f"Baches abiertos de {u.territorio.title()}", "Ordenados por IPU"):
+        st.dataframe(con_icono(miles(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado",
+                                           "estado"]])),
+                     hide_index=True, height=alto_tabla(len(mios)), column_config=COLUMNAS)
+    sem = b.semaforo if pd.notna(b.semaforo) else None
     izq, der = st.columns(2, gap="medium")
-    with izq, tarjeta("decidir", "1 · Decidir sobre la recomendación"):
+    with izq, tarjeta("decidir"):
+        st.markdown(f'<div class="paso"><span class="t"><span class="num">1</span>Decidir sobre la recomendación'
+                    f'</span>{chip_html(*CHIP[sem]) if sem in CHIP else chip_html("neutro", "Sin IPU")}</div>',
+                    unsafe_allow_html=True)
         if pd.isna(b.id_calculo):
             st.info("El bache aún no tiene IPU calculado.")
         else:
@@ -786,7 +868,9 @@ def pagina_autoridad():
                     if ok:
                         aviso_y_recargar(f"Decisión registrada para el bache {id_bache}: {decision}.")
                     st.error(f"No se registró: {msg}")
-    with der, tarjeta("avance", "2 · Informar el avance"):
+    with der, tarjeta("avance"):
+        st.markdown(f'<div class="paso"><span class="t"><span class="num">2</span>Informar el avance</span>'
+                    f'{chip_html("neutro", "Estado: " + b.estado)}</div>', unsafe_allow_html=True)
         actual = {v: k for k, v in ESTADOS.items()}[b.estado]
         opciones = [ESTADOS[x] for x in TRANSICIONES.get(actual, [])]
         with st.form(f"estado_{id_bache}_{b.estado}"):
