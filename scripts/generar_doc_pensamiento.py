@@ -165,7 +165,7 @@ def caratula(doc):
         ("Ithan Felipe Santiago · Matrícula: [matrícula]", False),
         ("", False),
         ("Docente: [nombre de la persona docente]", False),
-        ("1 de noviembre de 2026", False),
+        ("13 de noviembre de 2026", False),
     ]:
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -226,6 +226,16 @@ def main():
              "y Chalco 75 en 17 meses. Pocas quejas no significan pocos baches; pueden significar que la gente no "
              "tiene cómo reportar o ya no confía en que se atiendan. Un sistema que solo cuenta reportes hace "
              "invisibles a esas comunidades.")
+    par(doc, "El contraste con Toluca lo confirma. Su gobierno municipal publica un tablero con los 74,319 baches "
+             "que reparó entre 2025 y 2026, cada uno con su colonia, sus medidas y fotos de antes y después. "
+             "Con esos datos pudimos medir los baches reales del Estado de México, algo imposible donde la "
+             "información no se publica. La transparencia también es un ciclo de retroalimentación: cuando la "
+             "autoridad muestra lo que hace, la ciudadanía puede verificarlo, y el debate deja de ser entre "
+             "percepciones para apoyarse en evidencia común.")
+    par(doc, "Por eso SIPA trabaja en dos niveles: el operativo (qué bache atender primero) se probó en la CDMX, "
+             "y el financiero (cuánto cuestan los baches no atendidos) se estimó para el Estado de México con datos "
+             "del INEGI y de Toluca. Toluca es el siguiente piloto natural, porque ya publica los datos que el "
+             "sistema necesita.")
 
     # 3 -----------------------------------------------------------------
     h1(doc, "Agentes que intervienen en el fenómeno")
@@ -409,6 +419,8 @@ def main():
     for ref in [
         "Fisher, R., Ury, W., & Patton, B. (2011). Obtenga el sí: El arte de negociar sin ceder (3.ª ed.). Gestión 2000.",
         "Galtung, J. (1998). Tras la violencia, 3R: Reconstrucción, reconciliación, resolución. Bakeaz; Gernika Gogoratuz.",
+        "Dirección General de Obras Públicas de Toluca. (2026). Tablero de bacheo [Datos públicos]. "
+        "https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php",
         "Goleman, D. (1995). La inteligencia emocional. Javier Vergara.",
         "Morin, E. (1998). Introducción al pensamiento complejo. Gedisa.",
         "Saaty, T. L. (1980). The analytic hierarchy process. McGraw-Hill.",

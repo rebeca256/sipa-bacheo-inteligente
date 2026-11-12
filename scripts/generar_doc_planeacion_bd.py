@@ -116,7 +116,7 @@ def portada(doc):
            ["Docente", "Rosa Graciela Castro Carrera"],
            ["Grupo", "302"],
            ["Gestor de base de datos", "Microsoft SQL Server 2025"],
-           ["Fecha de entrega", "1 de noviembre de 2026"]], [4.5, 7])
+           ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
 
 

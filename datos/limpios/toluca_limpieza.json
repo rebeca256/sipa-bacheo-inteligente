@@ -1,0 +1,22 @@
+{
+  "baches_descargados": 74319,
+  "baches_limpios": 74319,
+  "duplicados": 0,
+  "tipos": {
+    "SUPERFICIAL": 45572,
+    "PROFUNDO": 28728,
+    "SIN_CLASIFICAR": 19
+  },
+  "sin_coordenadas": 521,
+  "fecha_min": "2025-01-08",
+  "fecha_max": "2026-11-03",
+  "medidas_muestra": 1500,
+  "medidas_negativas_o_vacias": 1,
+  "medidas_mayores_50m2": 8,
+  "medidas_limpias": 1491,
+  "con_profundidad": 1209,
+  "area_mediana": 3.62,
+  "area_media": 4.72,
+  "profundidad_mediana_cm": 7.0,
+  "fuente": "Dirección General de Obras Públicas de Toluca, tablero de bacheo https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php (consultado el 11-11-2026)"
+}

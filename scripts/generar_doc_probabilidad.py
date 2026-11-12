@@ -76,7 +76,7 @@ def portada(doc):
           [["UCA", "Probabilidad (LCDN3PRO8)"],
            ["Docente", "María Guadalupe Sierra Hernández"],
            ["Grupo", "302"],
-           ["Fecha de entrega", "1 de noviembre de 2026"]], [4.5, 7])
+           ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
 
 
@@ -313,6 +313,38 @@ def main():
                  "llena con el valor normalizado v_riesgo_72h, que ya se calcula para cada celda.")
     figura(doc, "g6_ipu_vs_72h.png", "Figura 6. Baches pendientes según el semáforo del IPU y el de riesgo a 72 h.",
            ancho=11)
+
+    # 8.1 Toluca ---------------------------------------------------------
+    tl = json.loads(Path("probabilidad/resultados_toluca/resumen.json").read_text(encoding="utf-8"))
+    bi, ln, we, co, tc = tl["binomial"], tl["lognormal"], tl["welch"], tl["conteos"], tl["tlc"]
+    titulo(doc, "8.1 Validación con baches reales del Estado de México (Toluca)", 2)
+    parrafo(doc, f"El tablero público de bacheo de Toluca registra {bi['n']:,} baches reparados (2025-2026) con su "
+                 f"tipo y, por folio, sus medidas. Con esos datos reales y una muestra aleatoria de {tc['n']:,} "
+                 "medidas se aplicaron las mismas herramientas del curso:")
+    tabla(doc, ["Herramienta", "Resultado con datos de Toluca"], [
+        ["Binomial: proporción de baches profundos",
+         f"p = {pc(bi['p'], 1)} (IC 95 %: {pc(bi['ic95'][0], 1)} a {pc(bi['ic95'][1], 1)}). En una cuadrilla de 10 "
+         f"baches, P(al menos 5 profundos) = {pc(bi['p_al_menos_5_de_10'], 1)}"],
+        ["Lognormal: área del bache",
+         f"mediana {ln['mediana']} m², media {ln['media_teorica']} m²; P(área > 10 m²) = "
+         f"{pc(ln['p_mayor_10m2'], 1)} según el modelo y {pc(ln['p_mayor_10m2_observada'], 1)} observada. "
+         f"Prueba K-S: D = {ln['ks_D']}, p = {ln['ks_p']}"],
+        ["t de Welch (sobre log del área)",
+         f"profundos {we['media_profundo']} m² frente a superficiales {we['media_superficial']} m²; "
+         f"t = {we['t']}, p = {we['p']:.1e}: los profundos son más grandes"],
+        ["Poisson frente a binomial negativa",
+         f"baches por colonia y mes: media {co['media']}, varianza {co['varianza']:,.0f} (dispersión "
+         f"{co['dispersion']:.0f}). P(0 baches) = {pc(co['p_cero_poisson'], 1)} con Poisson, "
+         f"{pc(co['p_cero_binneg'], 1)} con binomial negativa y {pc(co['p_cero_observada'], 1)} observada"],
+        ["TLC e intervalo t", f"área media {tc['media']} m², IC 95 % de {tc['ic95'][0]} a {tc['ic95'][1]} m²"],
+    ], [5, 11])
+    figura(doc, "../resultados_toluca/g1_area_y_meses.png",
+           "Figura 7. Área de los baches de Toluca con la lognormal ajustada y baches reparados por mes.")
+    parrafo(doc, "La lognormal describe bien la forma del área, aunque con 1,491 datos la prueba K-S detecta "
+                 "diferencias pequeñas (sobrestima un poco la cola). Los conteos confirman lo que vimos con los "
+                 "accidentes de la CDMX: hay mucha sobredispersión, por eso la binomial negativa es el modelo "
+                 "adecuado y Poisson no lo es. Estos datos reemplazan los tamaños simulados del proyecto.",
+           "Interpretación. ")
 
     # 9 -----------------------------------------------------------------
     titulo(doc, "9. Respuesta al incidente crítico")

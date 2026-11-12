@@ -29,3 +29,6 @@ Investigacion_drenaje_pluvial_Chalco_fuentes_academicas.pdf
 # ATUS completo del INEGI (126 MB, supera el límite de GitHub). Descarga:
 # https://www.inegi.org.mx/contenidos/programas/accidentes/datosabiertos/atus_anual_csv.zip
 datos/edomex/raw/atus_1997_2023.zip
+
+# Páginas crudas del tablero de Toluca (solo para reanudar la descarga)
+datos/toluca/paginas/

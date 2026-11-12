@@ -6,7 +6,7 @@ $scripts = "01_crear_bd.sql", "02_catalogos.sql", "03_carga_base_maestra.sql",
            "04_datos_sinteticos.sql", "05_procedimientos_transacciones.sql", "05b_riesgo_72h.sql", "05c_transporte_marginacion.sql", "06_carga_chalco.sql",
            "07_demo_y_consultas.sql", "08_simular_operacion.sql",
            "09_dw_crear.sql", "10_dw_etl.sql", "11_dw_consultas_olap.sql",
-           "12_replicacion.sql", "13_vistas_indicadores.sql"
+           "12_replicacion.sql", "13_vistas_indicadores.sql", "14_carga_toluca.sql"
 
 foreach ($s in $scripts) {
     Write-Host "== $s" -ForegroundColor Cyan

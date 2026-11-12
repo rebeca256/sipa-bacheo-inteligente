@@ -18,6 +18,15 @@
   },
   "costo_por_muerte_LFT": 2821456.0,
   "costo_medio_herido": 109093.33,
+  "toluca": {
+    "baches_2025": 47454,
+    "costo_reparar_2025": 172092162.87,
+    "costo_reparar_ic95": 5570164.6,
+    "area_media": 4.72,
+    "muestra": 1491,
+    "provision_toluca": 3093750.18,
+    "costo_por_bache": 3626.5
+  },
   "fuentes": [
     "INEGI (2024). Accidentes de tránsito terrestre en zonas urbanas y suburbanas (ATUS) 1997-2023 [conjunto de datos]. https://www.inegi.org.mx/programas/accidentes/",
     "INEGI (2024). Vehículos de motor registrados en circulación 1980-2023 [conjunto de datos]. https://www.inegi.org.mx/programas/vehiculosmotor/",
@@ -26,6 +35,7 @@
     "El Universal Edomex (2024). Edomex: ¿te dañó un bache? Podrías recibir una indemnización. https://www.eluniversaledomex.com.mx/gobierno/edomex-te-dano-un-bache-podrias-recibir-una-indemnizacion/",
     "Publimetro (8 de febrero de 2024). Choque de auto: cuáles son los estados con más accidentes en México (cifras AMIS). https://www.publimetro.com.mx/noticias/2024/02/08/choque-de-auto-cuales-son-los-estados-con-mas-accidentes-en-mexico/",
     "El Día Oficial (enero de 2022). Magistrada Arlen Siu Jaime Merlos presentó Informe Anual de Actividades 2021 del TRIJAEM. https://eldiaoficial.com/2022/01/magistrada-arlen-siu-jaime-merlos-presento-informe-anual-de-actividades-2021-del-trijaem/",
-    "Ley Federal del Trabajo, arts. 486, 491, 500 y 502."
+    "Ley Federal del Trabajo, arts. 486, 491, 500 y 502.",
+    "Dirección General de Obras Públicas de Toluca (2026). Tablero de bacheo [datos públicos]. https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php"
   ]
 }

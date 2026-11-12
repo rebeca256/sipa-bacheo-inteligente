@@ -210,6 +210,33 @@ def graficas(serie, sim, ve, p95, mun):
     fig.tight_layout(); fig.savefig(RES / "g3_municipios.png", dpi=150); plt.close(fig)
 
 
+def toluca(mun):
+    """Costo real de reparar en Toluca (m² medidos × tarifas SIPA) frente a su provisión estimada."""
+    tar = {t["clave"]: t for t in json.loads((RAIZ / "datos/costos/tarifas_reparacion.json")
+                                             .read_text(encoding="utf-8"))["tarifas"]}
+    clave = {"SUPERFICIAL": "BACHEO_SUPERFICIAL", "PROFUNDO": "BACHEO_PROFUNDO"}
+    med = pd.read_csv(RAIZ / "datos/limpios/toluca_medidas.csv")
+    med = med[med.tipo.isin(clave)]
+    t_ = med.tipo.map(clave)
+    med["costo"] = [tar[c]["costo_fijo"] + tar[c]["costo_m2"] * max(a, tar[c]["area_minima_m2"])
+                    for c, a in zip(t_, med.area_m2)]
+    b = pd.read_csv(RAIZ / "datos/limpios/toluca_baches.csv")
+    b = b[b.tipo.isin(clave)]
+    n = b[b.anio == 2025].groupby("tipo").size()
+    c = med.groupby("tipo").agg(muestra=("costo", "size"), area_media=("area_m2", "mean"),
+                                costo_medio=("costo", "mean"), costo_de=("costo", "std"))
+    c["baches_2025"] = n
+    c["costo_2025"] = c.baches_2025 * c.costo_medio
+    c["error_est_95"] = 1.96 * c.costo_de / np.sqrt(c.muestra) * c.baches_2025
+    prov = float(mun.loc[mun.municipio == "Toluca", "provision"].iloc[0])
+    c.to_csv(RES / "t7_costo_reparar_toluca_2025.csv")
+    return dict(baches_2025=int(n.sum()), costo_reparar_2025=round(float(c.costo_2025.sum()), 2),
+                costo_reparar_ic95=round(float(np.sqrt((c.error_est_95 ** 2).sum())), 2),
+                area_media=round(float(med.area_m2.mean()), 2), muestra=int(len(med)),
+                provision_toluca=round(prov, 2),
+                costo_por_bache=round(float(c.costo_2025.sum() / n.sum()), 2))
+
+
 def main():
     e, camino, v, nombres = cargar()
     serie, graves, v, tasa, veh_metepec = volumen(e, camino, v)
@@ -230,6 +257,7 @@ def main():
     mun = mun.sort_values("provision", ascending=False).reset_index()
 
     resp = rec.groupby("responsable").size()
+    tol = toluca(mun)
 
     # sensibilidad
     sens = []
@@ -263,7 +291,9 @@ def main():
         pasivo_contingente_a_revelar=round(float(revelar), 2),
         accidentes_por_responsable_2019_2023={k: int(x) for k, x in resp.items()},
         costo_por_muerte_LFT=round(MUERTO, 2), costo_medio_herido=round(tri_media(*HERIDO), 2),
-        fuentes=FUENTES,
+        toluca=tol,
+        fuentes=FUENTES + ["Dirección General de Obras Públicas de Toluca (2026). Tablero de bacheo "
+                           "[datos públicos]. https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php"],
     )
     (RES / "resumen.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
     print(t.round(3).to_string())

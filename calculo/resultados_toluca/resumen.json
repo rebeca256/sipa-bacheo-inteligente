@@ -1,0 +1,46 @@
+{
+  "tipico": {
+    "area_real": 3.62,
+    "prof_real_cm": 7.0,
+    "v0_real": 0.2531,
+    "area_sim": 1.72,
+    "prof_sim_cm": 9.5,
+    "v0_sim": 0.13631,
+    "k_lluvias": 0.1437,
+    "perdida_6m_real_m3": 0.3464,
+    "perdida_6m_riemann": 0.3464,
+    "crece_6m_pct": 136.8
+  },
+  "costo_esperado": {
+    "SUPERFICIAL": {
+      "sigma": 0.908,
+      "mediana": 3.04,
+      "riemann": {
+        "10": 2819.28,
+        "100": 2651.48,
+        "1000": 2643.93
+      },
+      "exacto": 2648.35,
+      "muestra": 2590.15,
+      "n": 889
+    },
+    "PROFUNDO": {
+      "sigma": 0.796,
+      "mediana": 3.83,
+      "riemann": {
+        "10": 6196.09,
+        "100": 5286.24,
+        "1000": 5291.95
+      },
+      "exacto": 5298.71,
+      "muestra": 5198.02,
+      "n": 602
+    }
+  },
+  "mezcla_2025": {
+    "baches": 47454,
+    "volumen_medio_m3": 0.3185,
+    "toneladas": 39907.0,
+    "toneladas_espera_6m": 94518.0
+  }
+}

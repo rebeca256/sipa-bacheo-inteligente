@@ -337,3 +337,14 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Resultado: ≈ 2,066 casos viables al año; provisión (valor esperado) $58.7 M; IC 90 % $45.9-$75.4 M; se revela como pasivo contingente $16.7 M (P95 − VE).
 - `avance_Contabilidad_contingencias_Edomex.docx`, generado con `scripts/generar_doc_contingencias_edomex.py`.
 - Pendiente: pedir por SAIMEX el registro de indemnizaciones (art. 9 de la ley) a Junta de Caminos y ayuntamientos para sustituir supuestos.
+
+## 11 nov 2026 · Datos reales de Toluca en todas las materias
+- Fuente: tablero público de bacheo de la DGOP de Toluca (https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php). Servicios: `ajax/buscar_tablero_bacheo.php` (tabla paginada), `ws/ListadoMarkers.php` (coordenadas), `ws/obtenerMarker.php?folio=` (largo, ancho, profundidad, fotos).
+- `scripts/descargar_toluca.py`: 74,319 baches reparados (ene 2025 – nov 2026) y medidas de una muestra aleatoria de 1,500. `scripts/limpiar_toluca.py` → `datos/limpios/toluca_*.csv` (1,491 medidas válidas; mediana 3.6 m² y 7 cm; 39 % profundos).
+- Contabilidad: costo real de reparar en Toluca 2025 ≈ $172 M (tarifas SIPA) frente a $3.1 M de provisión (sección 4.4).
+- Probabilidad (`probabilidad/toluca.py`, sección 8.1): binomial de profundos, lognormal del área, t de Welch, Poisson vs binomial negativa (dispersión 128), IC del área media.
+- Cálculo (`calculo/toluca.py`, sección 4.1): bache real vs simulado, P(6) exacta y Riemann, costo esperado como integral con densidad lognormal, mezcla de un año (≈ 39,900 t).
+- BD: `bd/14_carga_toluca.sql` (esquema `ext`, 2 tablas y 3 vistas), agregado a `ejecutar_todo.ps1`; sección 9.1.
+- ED (`estructuras/toluca_ed.py`, sección 6.1): prueba de escala con 74,319 baches (hash 767× más rápida que lista; AVL altura 19). Se conservaron los cambios manuales del equipo (fecha 13-11-2026 y declaración de IA).
+- Pensamiento Complejo y entregable final: Toluca como evidencia de transparencia y siguiente piloto.
+- Todas las entregas con fecha 13 de noviembre de 2026.

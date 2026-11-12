@@ -79,7 +79,7 @@ def portada(doc):
           [["UCA", "Contabilidad Financiera (LCDN3CON8)"],
            ["Docente", "Yesenia Biffano Rodríguez"],
            ["Grupo", "302"],
-           ["Fecha de entrega", "1 de noviembre de 2026"]], [4.5, 7])
+           ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
 
 

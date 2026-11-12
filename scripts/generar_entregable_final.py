@@ -168,7 +168,7 @@ def portada(doc):
         ["UCA que integra", "Fundamentos de Bases de Datos, Estructuras de Datos, Probabilidad, Cálculo Integral, "
                             "Contabilidad Financiera y Pensamiento Complejo para la Argumentación"],
         ["Grupo", "302"],
-        ["Fecha de entrega", "[POR DEFINIR]"],
+        ["Fecha de entrega", "13 de noviembre de 2026"],
     ], [4, 9.5])
     doc.add_page_break()
 
@@ -216,6 +216,13 @@ def introduccion(doc, d):
                  "registrados por municipio) y la Ley de Responsabilidad Patrimonial del Edomex. El segundo nivel "
                  "dimensiona el problema en la región de la UNRC Chalco y justifica llevar el piloto ahí.",
            "Dos territorios. ")
+    parrafo(doc, "El tablero público de bacheo de Toluca publica 74,319 baches reparados (2025-2026) con colonia, "
+                 "coordenadas y, por folio, largo, ancho y profundidad. Los descargamos y los usamos en todas las "
+                 "materias para validar con datos reales del Edomex: costo real de reparar (Contabilidad), "
+                 "distribución del área y conteos (Probabilidad), volumen y mezcla asfáltica (Cálculo), un esquema "
+                 "externo en la base (Bases de Datos) y una prueba de escala de las estructuras (Estructuras de "
+                 "Datos). El bache real mide 3.6 m² y 7 cm de profundidad (mediana), contra 1.7 m² y 9.5 cm del "
+                 "bache simulado. Toluca es el siguiente piloto natural de SIPA.", "Toluca. ")
 
 
 def prototipo(doc, d):
@@ -550,6 +557,8 @@ def referencias(doc):
         "1980-2023 [Conjunto de datos]. INEGI.",
         "Legislatura del Estado de México. (2017, reforma 2023). Ley de Responsabilidad Patrimonial para el Estado "
         "de México y Municipios. Gaceta del Gobierno.",
+        "Dirección General de Obras Públicas de Toluca. (2026). Tablero de bacheo [Datos públicos]. "
+        "https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php",
         "Meadows, D. H. (2008). Thinking in systems: A primer. Chelsea Green Publishing.",
         "Saaty, T. L. (1980). The analytic hierarchy process. McGraw-Hill.",
         "Secretaría de Movilidad. (2021). GTFS [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México. "

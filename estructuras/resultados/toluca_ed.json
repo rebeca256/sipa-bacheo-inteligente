@@ -1,0 +1,42 @@
+{
+  "n": 74319,
+  "hash": {
+    "segundos_insertar": 0.283,
+    "factor_carga": 0.567,
+    "cubeta_mas_larga": 7,
+    "us_por_busqueda_hash": 2.78,
+    "us_por_busqueda_lista": 2132.8,
+    "veces_mas_rapida": 767
+  },
+  "avl": {
+    "segundos_insertar": 0.424,
+    "altura": 19,
+    "log2n": 16.18,
+    "limite_avl": 23.3,
+    "balanceado": true,
+    "baches_lluvias_2025": 5762,
+    "ms_consulta_rango": 1.91
+  },
+  "heap": {
+    "segundos_insertar": 0.198,
+    "valido": true,
+    "segundos_sorted_python": 0.028,
+    "primeros": [
+      {
+        "folio": "20118-1RA",
+        "prioridad": 2,
+        "fecha": "20250109"
+      },
+      {
+        "folio": "20115-1RA",
+        "prioridad": 2,
+        "fecha": "20250109"
+      },
+      {
+        "folio": "20100-1RA",
+        "prioridad": 2,
+        "fecha": "20250109"
+      }
+    ]
+  }
+}

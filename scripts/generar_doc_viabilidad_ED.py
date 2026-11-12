@@ -151,11 +151,10 @@ def portada(doc):
           [["UCA", "Estructuras de Datos (LCDN3EST8)"],
            ["Docente", "Luisa Reyna Beatriz Ayon Muñoz"],
            ["Grupo", "302"],
-           ["Fecha de entrega", "[POR DEFINIR]"]], [4.5, 7])
+           ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
     parrafo(doc, "El código del prototipo (carpeta estructuras/) y este documento se elaboraron con apoyo "
-                 "de IA generativa (Claude, de Anthropic), con autorización de la docente y dando el crédito "
-                 "correspondiente. El equipo revisó, ejecutó y probó el código, y es responsable de su contenido. "
+                 "de IA generativa (Claude, de Anthropic). El equipo revisó, ejecutó y probó el código, y es responsable de su contenido. "
                  "Todas las estructuras están programadas desde cero, sin heapq, dict de Python como tabla hash "
                  "ni otras bibliotecas que ya las resuelvan.", "Declaración de uso de IA. ")
 
@@ -363,6 +362,29 @@ def resultados(doc, v, eq, cap):
           [[c["capacidad"], c["brigadas"], c["espera_promedio"], c["brecha_alcaldias"],
             f"{c['pendientes_al_final']:,}"] for c in cap], [3.5, 2.5, 3, 2.5, 3.5])
     figura(doc, RES / "v2_capacidad.png", "Figura 5. Baches pendientes al final del periodo según la capacidad.", 13)
+    tl = json.loads((RES / "toluca_ed.json").read_text(encoding="utf-8"))
+    h, a, hp = tl["hash"], tl["avl"], tl["heap"]
+    titulo(doc, "6.1 Prueba de escala con baches reales de Toluca", 2)
+    parrafo(doc, f"Para probar las estructuras con datos reales del Estado de México cargamos los {tl['n']:,} baches "
+                 "reparados que publica el tablero de bacheo de Toluca (2025-2026) en las mismas estructuras "
+                 "programadas desde cero (estructuras/toluca_ed.py):")
+    tabla(doc, ["Estructura", "Resultado"], [
+        ["Tabla hash (clave = folio)",
+         f"inserta todo en {h['segundos_insertar']} s; factor de carga {h['factor_carga']}, cubeta más larga "
+         f"{h['cubeta_mas_larga']}. Búsqueda: {h['us_por_busqueda_hash']} µs contra {h['us_por_busqueda_lista']:,} µs "
+         f"en una lista, {h['veces_mas_rapida']} veces más rápida"],
+        ["Árbol AVL (clave = fecha, folio)",
+         f"altura {a['altura']} con log₂ n = {a['log2n']} (el límite teórico del AVL es {a['limite_avl']}); "
+         f"balanceado: {'sí' if a['balanceado'] else 'no'}. La consulta por rango de julio a septiembre de 2025 "
+         f"devuelve {a['baches_lluvias_2025']:,} baches en {a['ms_consulta_rango']} ms"],
+        ["Max-heap (profundo primero, después el más antiguo)",
+         f"{tl['n']:,} inserciones en {hp['segundos_insertar']} s; propiedad de heap válida. sorted() de Python "
+         f"tarda {hp['segundos_sorted_python']} s porque está escrito en C, pero el heap permite insertar y extraer "
+         "uno por uno sin volver a ordenar todo cuando llega un bache nuevo"],
+    ], [4.5, 11.5])
+    parrafo(doc, "Con diez veces más datos que la simulación de la CDMX, las estructuras se comportan como predice "
+                 "su complejidad: la búsqueda en la tabla hash no crece con n y la altura del AVL crece como log n.",
+           "Interpretación. ")
 
 
 def viabilidad(doc, v, calc, cont, prob, exp, eq, cap):

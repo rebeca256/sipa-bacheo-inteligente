@@ -76,7 +76,7 @@ def portada(doc):
           [["UCA", "Cálculo Integral (LCDN3CAL8)"],
            ["Docente", "María Guadalupe Sierra Hernández"],
            ["Grupo", "302"],
-           ["Fecha de entrega", "1 de noviembre de 2026"]], [4.5, 7])
+           ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
 
 
@@ -251,6 +251,34 @@ def main():
     if ch:
         filas.append(["CHALCO", int(ch["baches"]), m(ch["costo_hoy"]), m(ch["extra_6m"])])
     tabla(doc, ["Territorio", "Baches", "Costo hoy", "Costo extra a 6 meses"], filas, [5, 2.5, 4, 4.5])
+
+    # 4.1 Toluca --------------------------------------------------------
+    tl = json.loads(Path("calculo/resultados_toluca/resumen.json").read_text(encoding="utf-8"))
+    ti, ce, mz = tl["tipico"], tl["costo_esperado"], tl["mezcla_2025"]
+    titulo(doc, "4.1 Validación con baches reales del Estado de México (Toluca)", 2)
+    parrafo(doc, "El tablero público de bacheo de Toluca publica el largo, ancho y profundidad de cada bache "
+                 "reparado. Con una muestra aleatoria de 1,491 baches medidos comparamos el bache típico simulado "
+                 "del proyecto con el real:")
+    tabla(doc, ["", "Simulado (SIPA)", "Real (Toluca)"], [
+        ["Área", f"{ti['area_sim']} m²", f"{ti['area_real']} m²"],
+        ["Profundidad", f"{ti['prof_sim_cm']} cm", f"{ti['prof_real_cm']} cm"],
+        ["Volumen V0", f"{ti['v0_sim']:.3f} m³", f"{ti['v0_real']:.3f} m³"],
+    ], [4, 4, 4])
+    parrafo(doc, f"El bache real es más ancho y menos profundo. Con la misma tasa de lluvias (k = {ti['k_lluvias']}), "
+                 f"en 6 meses pierde P(6) = V0(e^(6k) − 1) = {ti['perdida_6m_real_m3']:.3f} m³; la suma de Riemann "
+                 f"con 100 rectángulos da {ti['perdida_6m_riemann']:.3f} m³. El bache crece {ti['crece_6m_pct']} %.")
+    titulo(doc, "Costo esperado como integral", 3)
+    ecuacion(doc, "E[c] = ∫₀^∞ c(a) · f(a) da,   c(a) = F + c_m² · máx(a, a_mín),   f = densidad lognormal del área")
+    tabla(doc, ["Tipo", "Riemann n = 10", "n = 100", "n = 1000", "Exacto", "Promedio de la muestra"],
+          [[t.capitalize(), m(x["riemann"]["10"]), m(x["riemann"]["100"]), m(x["riemann"]["1000"]),
+            m(x["exacto"]), m(x["muestra"])] for t, x in ce.items()], [2.5, 2.7, 2.3, 2.3, 2.3, 3.5])
+    parrafo(doc, "Al aumentar n, la suma de Riemann converge al valor exacto de la integral, y este coincide con "
+                 "el promedio de la muestra con una diferencia menor al 3 %: la integral es una forma de calcular "
+                 "un costo promedio cuando se conoce la distribución.")
+    parrafo(doc, f"Mezcla asfáltica de un año: Toluca reparó {mz['baches']:,} baches en 2025, con volumen medio de "
+                 f"{mz['volumen_medio_m3']} m³. Con densidad 2.4 t/m³ y 10 % de desperdicio se necesitaron unas "
+                 f"{mz['toneladas']:,.0f} t. Si cada bache hubiera esperado 6 meses de lluvias, serían "
+                 f"{mz['toneladas_espera_6m']:,.0f} t.", "Aplicación. ")
 
     # 5 -----------------------------------------------------------------
     titulo(doc, "5. Respuesta al incidente crítico")

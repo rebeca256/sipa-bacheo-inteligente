@@ -65,7 +65,7 @@ def portada(doc):
            [3, "Rebeca Jaimes Cruz"], [4, "Ithan Felipe Santiago"]], [1.5, 10])
     tabla(doc, ["Dato", ""],
           [["UCA", "Contabilidad Financiera (LCDN3CON8)"], ["Docente", "Yesenia Biffano Rodríguez"],
-           ["Grupo", "302"], ["Fecha de entrega", "19 de noviembre de 2026 (paso 1)"]], [4.5, 7])
+           ["Grupo", "302"], ["Fecha de entrega", "13 de noviembre de 2026"]], [4.5, 7])
     doc.add_page_break()
 
 
@@ -119,6 +119,8 @@ def main():
          "$40,000; reparación de auto de $2,000 a $20,000", "Rango del costo de los casos menores"],
         ["AMIS (Publimetro, 2024)", "Colisión promedio $15,000-$28,000; daños mayores $100,000-$150,000",
          "Costo de los accidentes con solo daños"],
+        ["Tablero de bacheo de Toluca (DGOP)", "74,319 baches reparados 2025-2026 con tipo, colonia, coordenadas "
+         "y medidas por folio", "Costo real de reparar en Toluca (sección 4.4)"],
         ["TRIJAEM, informe 2021", "2,909 sentencias, 81 % favorables a la ciudadanía",
          "Probabilidad de que un juicio por accidente grave prospere"],
     ], [4.5, 6.5, 5])
@@ -185,6 +187,28 @@ def main():
         parrafo(doc, f"Chalco, sede del proyecto, ocupa el lugar {fila_chalco.index[0] + 1} de 125, con "
                      f"{int(c.accidentes_camino_2019_2023)} accidentes por mala condición del camino y una provisión "
                      f"estimada de {mm(c.provision)}.")
+
+    tol = r["toluca"]
+    ct = pd.read_csv(RES / "t7_costo_reparar_toluca_2025.csv")
+    titulo(doc, "4.4 Caso Toluca: costo de reparar frente a costo de indemnizar", 2)
+    parrafo(doc, f"El tablero público de bacheo de la Dirección General de Obras Públicas de Toluca registra cada "
+                 f"bache reparado con su tipo, colonia, coordenadas y, por folio, su largo, ancho y profundidad. "
+                 f"Descargamos los 74,319 registros (enero 2025 a noviembre 2026) y las medidas de una muestra "
+                 f"aleatoria de {tol['muestra']:,} baches (área media {tol['area_media']} m²). Con las tarifas de "
+                 "SIPA se estimó cuánto costó reparar los baches de 2025:")
+    tabla(doc, ["Tipo", "Baches 2025", "Área media", "Costo medio", "Costo 2025"],
+          [[x.tipo.capitalize(), f"{x.baches_2025:,.0f}", f"{x.area_media:.2f} m²", m(x.costo_medio),
+            mm(x.costo_2025)] for x in ct.itertuples()]
+          + [["Total", f"{tol['baches_2025']:,}", "", m(tol['costo_por_bache']), mm(tol['costo_reparar_2025'])]],
+          [3, 2.5, 2.5, 3, 3])
+    parrafo(doc, f"Con 95 % de confianza el costo de 2025 está en {mm(tol['costo_reparar_2025'])} ± "
+                 f"{mm(tol['costo_reparar_ic95'])}. La provisión por reclamaciones estimada para Toluca es "
+                 f"{mm(tol['provision_toluca'])}: reparar cuesta mucho más que indemnizar, pero no reparar genera "
+                 "un pasivo que crece y que no se ve en los estados financieros. El argumento contable de SIPA no "
+                 "es evitar reparaciones, sino ordenarlas para que el gasto en bacheo reduzca primero los baches que "
+                 "más reclamaciones producen.", "Interpretación. ")
+    parrafo(doc, "Las tarifas son una estimación ilustrativa del equipo; deben sustituirse por el tabulador de "
+                 "precios unitarios del municipio, que también puede pedirse por SAIMEX.", "Nota. ")
 
     titulo(doc, "5. Paso 2: provisión NIF C-9 al 31 de diciembre")
     tabla(doc, ["Requisito NIF C-9", "Cumplimiento"], [

@@ -296,7 +296,28 @@ def resultados(doc):
         "La autoridad cambió la recomendación en 31 de 301 casos, y cada cambio quedó justificado.",
         "En Chalco, los primeros baches por atender están en Unión de Guadalupe y San Miguel Jacalones II, cerca de "
         "zonas inundables y con muchos servicios alrededor.",
+        "Toluca (fuente externa, esquema ext): de 74,319 baches reparados en 2025-2026, el 39 % fueron profundos; "
+        "en San Mateo Otzacatipan y San Pablo Autopan más de la mitad, y en el Centro Histórico solo el 12 %. El "
+        "bache medido promedia 4.4 m² si es superficial y 5.1 m² si es profundo.",
     ])
+    titulo(doc, "9.1 Fuente externa: baches reales de Toluca", 2)
+    parrafo(doc, "El tablero público de bacheo de la Dirección General de Obras Públicas de Toluca expone sus datos "
+                 "por servicios web. Los descargamos (scripts/descargar_toluca.py), los limpiamos "
+                 "(scripts/limpiar_toluca.py: tipos unificados, medidas negativas o mayores de 50 m² descartadas) y "
+                 "los cargamos en un esquema aparte, ext, para no mezclarlos con la operación de SIPA "
+                 "(bd/14_carga_toluca.sql):")
+    tabla(doc, ["Objeto", "Contenido"], [
+        ["ext.toluca_bache", "74,319 baches: folio (PK), tipo (CHECK), calle, colonia, delegación, estatus, fecha y "
+         "coordenadas"],
+        ["ext.toluca_medida", "1,491 medidas de una muestra aleatoria: largo, ancho, profundidad; área como columna "
+         "calculada persistida; FK a toluca_bache"],
+        ["ext.v_toluca_delegacion", "Baches y porcentaje de profundos por delegación"],
+        ["ext.v_toluca_mes", "Baches por año, mes y tipo"],
+        ["ext.v_toluca_costo_tipo", "Área, profundidad y costo medio por tipo con las tarifas de SIPA"],
+    ], [5, 11])
+    parrafo(doc, "La carga se hace en una transacción: si falla una fila, no queda nada a medias. Al cargar "
+                 "encontramos 5 baches sin estatus, que la restricción NOT NULL rechazó; se marcaron como «Sin dato» "
+                 "en la limpieza en lugar de inventar un valor.")
 
 
 def cierre(doc):
@@ -328,6 +349,7 @@ def cierre(doc):
         ["bd/08 a 11", "Atención simulada, Data Warehouse, ETL y consultas OLAP"],
         ["bd/12_replicacion.sql", "Réplica de solo lectura y su demostración"],
         ["bd/13_vistas_indicadores.sql", "Indicadores de reincidencia, tiempo de respuesta, cobertura y costo pendiente"],
+        ["bd/14_carga_toluca.sql", "Fuente externa: baches y medidas reales de Toluca (esquema ext)"],
         ["datos/costos/tarifas_reparacion.json", "Tarifas de reparación (editables por la autoridad)"],
         ["bd/ejecutar_todo.ps1", "Reconstruye todas las bases desde cero"],
     ], [6, 10])
