@@ -35,7 +35,14 @@ except ImportError:
 CONEXION = ("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA;"
             "Trusted_Connection=yes")
 DATOS = Path(__file__).parent / "datos"
-COLOR = {"ROJO": [211, 47, 47], "AMARILLO": [249, 168, 37], "VERDE": [56, 142, 60]}
+# --- Sistema visual (paleta validada para daltonismo; ver skill dataviz) -------
+AZUL = "#2a78d6"          # dato principal de cada gráfica
+MARINO = "#0d366b"        # banda superior
+GRIS = "#c9c8c3"          # contexto: lo que no se destaca
+TINTA, TINTA_2, TINTA_3 = "#0b0b0b", "#52514e", "#8a8984"
+ESTADO = {"ROJO": "#d03b3b", "AMARILLO": "#fab219", "VERDE": "#0ca30c"}   # solo para el semáforo
+CATEGORIAS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"]       # orden fijo, nunca ciclado
+COLOR = {k: [int(v[i:i + 2], 16) for i in (1, 3, 5)] for k, v in ESTADO.items()}   # para el mapa
 ESTADOS = {1: "REPORTADO", 2: "VALIDADO", 3: "PRIORIZADO", 4: "EN_ATENCION", 5: "REPARADO", 6: "DESCARTADO"}
 TRANSICIONES = {1: [2, 6], 2: [6], 3: [4, 5, 6], 4: [5, 6]}
 # Restricciones de la base y su explicación para quien usa el tablero
@@ -49,7 +56,113 @@ REGLAS = {
 AVISO_DEMO = ("(Versión en línea de solo consulta: las reglas se revisan igual que en la base, "
               "pero no se guarda ningún cambio.)")
 
-st.set_page_config(page_title="SIPA · Tablero", page_icon="🛣️", layout="wide")
+st.set_page_config(page_title="SIPA · Portal ejecutivo", page_icon="🛣️", layout="wide",
+                   initial_sidebar_state="collapsed")
+
+CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+html, body, .stApp { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.stApp { background: #f4f5f7; }
+[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
+[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"],
+#MainMenu, footer { display: none !important; }
+[data-testid="stMainBlockContainer"], .block-container { padding-top: 0 !important; max-width: 1320px; }
+
+/* Banda superior a todo lo ancho */
+.sipa-banda { background: #0d366b; color: #fff; box-shadow: 0 0 0 100vmax #0d366b; clip-path: inset(0 -100vmax);
+  padding: 16px 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 4px; }
+.sipa-banda .marca { display: flex; align-items: center; gap: 14px; }
+.sipa-banda .logo { background: #fff; color: #0d366b; font-weight: 700; letter-spacing: .5px;
+  border-radius: 8px; padding: 6px 10px; font-size: 15px; }
+.sipa-banda .nombre { font-weight: 600; font-size: 17px; line-height: 1.2; }
+.sipa-banda .sub { font-size: 12.5px; opacity: .78; margin-top: 2px; }
+.sipa-banda .modo { font-size: 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
+  padding: 4px 12px; white-space: nowrap; }
+
+/* Pestañas de navegación (radio horizontal) */
+.st-key-nav { border-bottom: 1px solid #e3e3e0; margin-bottom: 6px; }
+.st-key-nav [data-testid="stWidgetLabel"] { display: none; }
+.st-key-nav div[role="radiogroup"] { gap: 2px; flex-wrap: wrap; }
+.st-key-nav label[data-baseweb="radio"] { padding: 10px 14px 9px; margin: 0; border-bottom: 3px solid transparent; }
+.st-key-nav label[data-baseweb="radio"] > div:first-child { display: none; }
+.st-key-nav label[data-baseweb="radio"] p { color: #52514e; font-size: 14.5px; font-weight: 500; }
+.st-key-nav label[data-baseweb="radio"]:has(input:checked) { border-bottom-color: #2a78d6; }
+.st-key-nav label[data-baseweb="radio"]:has(input:checked) p { color: #0b0b0b; font-weight: 600; }
+/* Streamlit 1.67 (react-aria): misma idea con otros nombres */
+.st-key-nav [data-testid="stRadioOption"] { padding: 10px 14px 9px; margin: 0; border-bottom: 3px solid transparent; }
+.st-key-nav [data-testid="stRadioOption"] > div > div:not([data-testid]) { display: none; }
+.st-key-nav [data-testid="stRadioOption"] p { color: #52514e; font-size: 14.5px; font-weight: 500; }
+.st-key-nav [data-testid="stRadioOption"][data-selected="true"] { border-bottom-color: #2a78d6; }
+.st-key-nav [data-testid="stRadioOption"][data-selected="true"] p { color: #0b0b0b; font-weight: 600; }
+/* el bloque que solo carga estos estilos no debe ocupar espacio */
+[data-testid="stElementContainer"]:has(style), .element-container:has(style) { display: none; }
+
+/* Títulos */
+h1 { font-size: 26px !important; font-weight: 700 !important; color: #0b0b0b; padding: 14px 0 0 !important; }
+h3 { font-size: 16px !important; font-weight: 600 !important; color: #0b0b0b; }
+.subtitulo { color: #52514e; font-size: 14px; margin: 2px 0 14px; }
+@media (max-width: 640px) {
+  .st-key-nav div[role="radiogroup"] { flex-wrap: nowrap !important; overflow-x: auto; }
+  .st-key-nav [data-testid="stRadioOption"], .st-key-nav label[data-baseweb="radio"] { white-space: nowrap; }
+  .kpi .k-val { font-size: 24px; }
+  .sipa-banda .sub { display: none; }
+}
+
+/* Tarjetas */
+[class*="st-key-card_"] { background: #fff; border: 1px solid #e6e6e3; border-radius: 12px;
+  padding: 18px 20px 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+.t-tit { font-weight: 600; font-size: 15.5px; color: #0b0b0b; }
+.t-nota { color: #8a8984; font-size: 12.5px; margin-top: 2px; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 14px; }
+.kpi { background: #fff; border: 1px solid #e6e6e3; border-radius: 12px; padding: 14px 16px; }
+.kpi .k-et { color: #52514e; font-size: 13px; font-weight: 500; }
+.kpi .k-val { color: #0b0b0b; font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin: 4px 0 2px;
+  line-height: 1.15; }
+.kpi .k-ctx { color: #8a8984; font-size: 12.5px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
+  border-radius: 999px; padding: 2px 9px; margin-top: 6px; }
+.chip.ok { background: #e7f6e7; color: #076b07; }
+.chip.alerta { background: #fdecec; color: #a12a2a; }
+.chip.medio { background: #fff4dc; color: #7a5300; }
+
+/* Hallazgo principal de cada página */
+.hallazgo { background: #fff; border: 1px solid #e6e6e3; border-left: 4px solid #2a78d6; border-radius: 10px;
+  padding: 12px 16px; color: #0b0b0b; font-size: 14.5px; margin: 2px 0 14px; }
+
+/* Leyenda del semáforo */
+.leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #52514e; margin: 2px 0 8px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.leyenda b { color: #0b0b0b; }
+</style>
+"""
+st.markdown(CSS, unsafe_allow_html=True)
+
+
+def tema_altair():
+    """Tema común de Altair: tinta neutra, cuadrícula casi invisible, sin bordes."""
+    return {"config": {
+        "font": "Inter, system-ui, sans-serif",
+        "background": "transparent",
+        "view": {"stroke": None},
+        "axis": {"labelColor": TINTA_2, "titleColor": TINTA_3, "labelFontSize": 12, "titleFontSize": 11.5,
+                 "titleFontWeight": 500, "gridColor": "#efefec", "domain": False, "ticks": False,
+                 "labelPadding": 6},
+        "legend": {"labelColor": TINTA_2, "labelFontSize": 12, "titleColor": TINTA_3, "titleFontSize": 11.5,
+                   "orient": "top", "symbolType": "circle"},
+        "text": {"color": TINTA_2, "fontSize": 11.5},
+    }}
+
+
+try:
+    alt.themes.register("sipa", tema_altair)
+    alt.themes.enable("sipa")
+except AttributeError:              # Altair 5.5+ / 6
+    alt.theme.register("sipa", enable=True)(tema_altair)
 
 
 # ---------------------------------------------------------------------------
@@ -299,29 +412,34 @@ def mostrar_aviso():
         st.success(st.session_state.pop("aviso"))
 
 
-def estilo(g):
-    """Estilo común: letra legible, cuadrícula suave y sin borde."""
-    return (g.configure_axis(labelFontSize=12, titleFontSize=12, gridColor="#EEEEEE", domain=False,
-                             tickColor="#DDDDDD", labelColor="#444444", titleColor="#666666")
-             .configure_view(strokeWidth=0))
-
-
-def barras(df, valor, etiqueta, titulo, color="#1565C0", formato=",.0f", maximo=None, orden="-x"):
-    """Barras horizontales delgadas, de mayor a menor, con el valor escrito al final.
-    La altura depende del número de barras (24 px cada una)."""
+def barras(df, valor, etiqueta, titulo, formato=",.0f", maximo=None, orden="-x", destacar=None,
+           etiquetas=3):
+    """Barras horizontales delgadas en un solo azul (una sola serie).
+    - destacar: si se da, esa barra va en azul y las demás en gris (contexto).
+    - etiquetas: cuántas barras llevan su valor escrito (las primeras); el resto, en el tooltip."""
     df = df.copy()
     df[valor] = df[valor].astype(float)
     df = df.sort_values(valor, ascending=False)
     if maximo:
         df = df.head(maximo)
+    df["_rango"] = range(len(df))
+    if destacar is not None:
+        df["_color"] = [AZUL if v == destacar else GRIS for v in df[etiqueta]]
+        df["_rotulo"] = df[etiqueta] == destacar
+    else:
+        df["_color"] = AZUL
+        df["_rotulo"] = df["_rango"] < etiquetas
     base = alt.Chart(df).encode(
-        y=alt.Y(f"{etiqueta}:N", sort=list(df[etiqueta]) if orden == "-x" else orden, title=None, axis=alt.Axis(labelLimit=200, ticks=False, labelOverlap=False)),
-        x=alt.X(f"{valor}:Q", title=titulo, scale=alt.Scale(domainMax=float(df[valor].max()) * 1.18 or 1), axis=alt.Axis(tickCount=4, format="~s" if "$" in formato else formato)),
+        y=alt.Y(f"{etiqueta}:N", sort=list(df[etiqueta]) if orden == "-x" else orden, title=None,
+                axis=alt.Axis(labelLimit=190, labelOverlap=False)),
+        x=alt.X(f"{valor}:Q", title=titulo, scale=alt.Scale(domainMax=float(df[valor].max()) * (1.32 if "$" in formato else 1.2) or 1),
+                axis=alt.Axis(tickCount=4, format="$~s" if "$" in formato else formato)),
         tooltip=[alt.Tooltip(f"{etiqueta}:N", title=" "),
                  alt.Tooltip(f"{valor}:Q", format=formato, title=titulo)])
-    g = base.mark_bar(color=color, size=14, cornerRadiusEnd=3) + base.mark_text(
-        align="left", dx=4, fontSize=11, color="#555555").encode(text=alt.Text(f"{valor}:Q", format=formato))
-    return estilo(g.properties(height=alt.Step(26)))
+    g = base.mark_bar(size=12, cornerRadiusEnd=4).encode(color=alt.Color("_color:N", scale=None)) + \
+        base.transform_filter("datum._rotulo").mark_text(align="left", dx=6, fontWeight=600, color=TINTA) \
+            .encode(text=alt.Text(f"{valor}:Q", format=formato))
+    return g.properties(height=alt.Step(26))
 
 
 def ver_barras(df, valor, etiqueta, titulo, top=10, **kw):
@@ -329,6 +447,112 @@ def ver_barras(df, valor, etiqueta, titulo, top=10, **kw):
     todos = len(df) > top and st.toggle(f"Ver los {len(df)}", key=f"todos_{etiqueta}_{valor}")
     st.altair_chart(barras(df, valor, etiqueta, titulo, maximo=None if todos else top, **kw),
                     use_container_width=True)
+
+
+def barra_contra_meta(df):
+    """Tiempo de respuesta: barra de días promedio (color del semáforo) y una marca en la meta."""
+    df = df.copy()
+    for c in ("dias_promedio", "meta_dias", "pct_en_meta"):
+        df[c] = df[c].astype(float)
+    df["color"] = df["semaforo_final"].map(ESTADO)
+    df["texto"] = df.apply(lambda f: f"{f.dias_promedio:.1f} días · meta {f.meta_dias:.0f} · "
+                                     f"{f.pct_en_meta:.0f} % en meta", axis=1)
+    y = alt.Y("semaforo_final:N", title=None, sort=list(df["semaforo_final"]))
+    tip = [alt.Tooltip("semaforo_final:N", title="Semáforo"), alt.Tooltip("baches:Q", title="Baches"),
+           alt.Tooltip("dias_promedio:Q", title="Días promedio", format=".1f"),
+           alt.Tooltip("meta_dias:Q", title="Meta (días)"), alt.Tooltip("pct_en_meta:Q", title="% en meta",
+                                                                         format=".0f")]
+    tope = float(max(df["dias_promedio"].max(), df["meta_dias"].max())) * 1.9
+    barra = alt.Chart(df).mark_bar(size=14, cornerRadiusEnd=4).encode(
+        y=y, x=alt.X("dias_promedio:Q", title="Días para reparar (promedio)", scale=alt.Scale(domain=[0, tope])),
+        color=alt.Color("color:N", scale=None), tooltip=tip)
+    meta = alt.Chart(df).mark_tick(color=TINTA, thickness=2, size=26).encode(y=y, x="meta_dias:Q", tooltip=tip)
+    texto = alt.Chart(df).mark_text(align="left", dx=8, color=TINTA_2).encode(
+        y=y, x=alt.X("max_x:Q"), text="texto:N").transform_calculate(
+        max_x="max(datum.dias_promedio, datum.meta_dias)")
+    return (barra + meta + texto).properties(height=alt.Step(40))
+
+
+def barra_segmentada(df, valor, etiqueta):
+    """Un todo partido en partes (100 %), con los colores categóricos en orden fijo."""
+    df = df.copy()
+    df[valor] = df[valor].astype(float)
+    df = df.sort_values(valor, ascending=False)
+    df["pct"] = df[valor] / df[valor].sum()
+    # el % va en la leyenda: tres colores tienen poco contraste y no deben cargar solos el dato
+    df[etiqueta] = [f"{n.replace('_', ' ').capitalize()} · {p:.0%}" for n, p in zip(df[etiqueta], df["pct"])]
+    orden = list(df[etiqueta])
+    df["fin"] = df["pct"].cumsum()
+    df["inicio"] = df["fin"] - df["pct"]
+    colores = alt.Scale(domain=orden, range=CATEGORIAS[:len(orden)])
+    return alt.Chart(df).mark_bar(height=30, stroke="#ffffff", strokeWidth=2, cornerRadius=3).encode(
+        x=alt.X("inicio:Q", title=None, scale=alt.Scale(domain=[0, 1]), axis=None),
+        x2="fin:Q",
+        color=alt.Color(f"{etiqueta}:N", scale=colores, sort=orden, title=None,
+                        legend=None),
+        tooltip=[alt.Tooltip(f"{etiqueta}:N", title="Causa"), alt.Tooltip(f"{valor}:Q", title="Baches")],
+    ).properties(height=34)
+
+
+def leyenda_segmentada(df, valor, etiqueta):
+    """Leyenda en HTML con el % escrito (Streamlit recorta la leyenda de Vega en gráficas bajas)."""
+    df = df.copy()
+    df[valor] = df[valor].astype(float)
+    df = df.sort_values(valor, ascending=False)
+    total = df[valor].sum()
+    items = "".join(
+        f'<span><i style="background:{CATEGORIAS[k]}"></i>{n.replace("_", " ").capitalize()} · '
+        f'<b>{v / total:.0%}</b> ({v:,.0f})</span>'
+        for k, (n, v) in enumerate(zip(df[etiqueta], df[valor])))
+    st.markdown(f'<div class="leyenda">{items}</div>', unsafe_allow_html=True)
+
+
+# --- Piezas de la interfaz -----------------------------------------------------
+
+def banda():
+    modo = "Copia de solo consulta (en línea)" if EN_LINEA else "Datos en vivo · SQL Server"
+    st.markdown(f"""<div class="sipa-banda"><div class="marca"><span class="logo">SIPA</span><div>
+        <div class="nombre">Sistema Inteligente de Priorización Asfáltica</div>
+        <div class="sub">Portal ejecutivo · Piloto CDMX y Chalco (Edomex) · UNRC LCDN 2026-2</div></div></div>
+        <span class="modo">{modo}</span></div>""", unsafe_allow_html=True)
+    if EN_LINEA:
+        st.caption("Versión en línea de solo consulta (copia de los datos). Las acciones revisan las reglas, "
+                   "pero no guardan cambios.")
+
+
+def encabezado(titulo, subtitulo=None):
+    st.title(titulo, anchor=False)
+    if subtitulo:
+        st.markdown(f'<div class="subtitulo">{subtitulo}</div>', unsafe_allow_html=True)
+
+
+def kpis(items):
+    """Tarjetas de cifras clave. items: (etiqueta, valor, contexto, (tipo, texto) o None, ayuda)."""
+    html = ""
+    for et, val, ctx, chip, ayuda in items:
+        c = f'<div class="chip {chip[0]}">{chip[1]}</div>' if chip else ""
+        html += (f'<div class="kpi" title="{ayuda or ""}"><div class="k-et">{et}</div>'
+                 f'<div class="k-val">{val}</div><div class="k-ctx">{ctx}</div>{c}</div>')
+    st.markdown(f'<div class="kpis">{html}</div>', unsafe_allow_html=True)
+
+
+def hallazgo(texto):
+    st.markdown(f'<div class="hallazgo">{texto}</div>', unsafe_allow_html=True)
+
+
+def tarjeta(clave, titulo=None, nota=None):
+    """Contenedor blanco con borde (el estilo sale de la clase st-key-card_…)."""
+    c = st.container(key=f"card_{clave}")
+    if titulo:
+        c.markdown(f'<div class="t-tit">{titulo}</div>' + (f'<div class="t-nota">{nota}</div>' if nota else ""),
+                   unsafe_allow_html=True)
+    return c
+
+
+LEYENDA = ('<div class="leyenda">' + "".join(
+    f'<span><i style="background:{ESTADO[k]}"></i>{k.capitalize()} · {t}</span>'
+    for k, t in [("ROJO", "atender en 3 días"), ("AMARILLO", "en 15"), ("VERDE", "programar en 60")])
+    + "<span>· El tamaño del punto crece con el IPU</span></div>")
 
 
 # Formato de las columnas en las tablas
@@ -395,45 +619,56 @@ def mapa(df, alto=430):
 
 
 def pagina_resumen():
-    st.title("SIPA · Sistema Inteligente de Priorización Asfáltica")
-    st.caption("SIPA asesora: recomienda qué bache atender primero, por qué y cuánto costaría. "
-               "La reparación la hace la autoridad.")
+    encabezado("Resumen ejecutivo", "SIPA recomienda qué bache atender primero, por qué y cuánto costaría. "
+                                    "La reparación la decide y la hace la autoridad.")
     df = baches()
     abiertos = df[df["estado"].isin(["VALIDADO", "PRIORIZADO", "EN_ATENCION"])]
     tr = tiempos()
     rojos_meta = tr.loc[tr["semaforo_final"] == "ROJO", "pct_en_meta"]
-    c = st.columns(5)
-    c[0].metric("Reportes en la base", f"{total_reportes():,}")
-    c[1].metric("Baches abiertos", f"{len(abiertos):,}")
+    pct_rojos = float(rojos_meta.iloc[0]) if len(rojos_meta) else None
     n = abiertos["semaforo"].value_counts()
-    c[2].metric("Rojo · amarillo", f"{n.get('ROJO', 0)} · {n.get('AMARILLO', 0)}",
-                help=f"Baches abiertos por semáforo ({n.get('VERDE', 0):,} más en verde). Si no hay rojos es porque todos los rojos ya "
-                     "pasaron a reparación (decisiones simuladas en bd/08).")
-    c[3].metric("Costo pendiente", f"${abiertos['costo_estimado'].astype(float).sum() / 1e6:,.2f} M",
-                help="Costo estimado para atender todos los baches abiertos.")
-    c[4].metric("Rojos reparados en ≤ 3 días", f"{float(rojos_meta.iloc[0]):.0f} %" if len(rojos_meta) else "—")
+    costo = abiertos["costo_estimado"].astype(float).sum()
+    cp = costo_pendiente().copy()
+    cp["costo_total"] = cp["costo_total"].astype(float)
+    cp = cp.sort_values("costo_total", ascending=False)
+    top4 = cp.head(4)["costo_total"].sum() / cp["costo_total"].sum() * 100
 
-    izq, der = st.columns([3, 2])
+    kpis([
+        ("Reportes ciudadanos", f"{total_reportes():,}", "CDMX 2019–2022 y Chalco 2025–2026", None, None),
+        ("Baches abiertos", f"{len(abiertos):,}", f"{n.get('ROJO', 0)} rojos · {n.get('AMARILLO', 0)} amarillos · "
+                                                  f"{n.get('VERDE', 0):,} verdes", None,
+         "Si no hay rojos abiertos es porque ya pasaron a reparación (decisiones simuladas en bd/08)."),
+        ("Costo pendiente", f"${costo / 1e6:,.2f} M", "estimado para atender lo abierto", None,
+         "Suma del costo estimado de todos los baches abiertos."),
+        ("Rojos reparados en ≤ 3 días", f"{pct_rojos:.0f} %" if pct_rojos is not None else "—", "meta: 100 %",
+         (("ok", "✓ En meta") if pct_rojos and pct_rojos >= 90 else ("alerta", "! Debajo de la meta"))
+         if pct_rojos is not None else None, None),
+    ])
+    hallazgo(f"<b>Hallazgo:</b> el costo pendiente es <b>${costo / 1e6:,.2f} M</b> y el "
+             f"<b>{top4:.0f} %</b> se concentra en 4 territorios ({', '.join(cp.head(4)['territorio'].str.title())}). "
+             f"El {pct_rojos:.0f} % de los rojos se reparó dentro de los 3 días de la meta." if pct_rojos is not None
+             else f"<b>Hallazgo:</b> el costo pendiente es <b>${costo / 1e6:,.2f} M</b>.")
+
+    izq, der = st.columns([3, 2], gap="medium")
     with izq:
-        st.subheader("Mapa de prioridades (baches abiertos)")
-        territorio = st.selectbox("Territorio", ["Todos"] + sorted(abiertos["territorio"].dropna().unique()))
-        vista = abiertos if territorio == "Todos" else abiertos[abiertos["territorio"] == territorio]
-        mapa(vista)
-        st.caption("Rojo: atender en 3 días · Amarillo: en 15 · Verde: programar en 60. "
-                   "El tamaño del punto crece con el IPU.")
+        with tarjeta("mapa", "Mapa de prioridades", "Baches abiertos, coloreados por semáforo"):
+            territorio = st.selectbox("Territorio", ["Todos"] + sorted(abiertos["territorio"].dropna().unique()))
+            st.markdown(LEYENDA, unsafe_allow_html=True)
+            vista = abiertos if territorio == "Todos" else abiertos[abiertos["territorio"] == territorio]
+            mapa(vista)
     with der:
-        st.subheader("Costo pendiente por territorio")
-        cp = costo_pendiente().copy()
-        cp["costo_total"] = cp["costo_total"].astype(float)
-        ver_barras(cp, "costo_total", "territorio", "Costo estimado", color="#EF6C00", formato="$,.0f")
+        nota = ("Territorio elegido en azul" if territorio != "Todos"
+                else "Los 10 territorios con más costo; el resto con el interruptor")
+        with tarjeta("costo", "Costo pendiente por territorio", nota):
+            ver_barras(cp, "costo_total", "territorio", "Costo estimado", formato="$,.0f",
+                       destacar=territorio if territorio != "Todos" else None)
 
 
 def pagina_ciudadano():
-    st.title("Modo ciudadano")
-    st.caption("No necesita cuenta. El reporte se liga al bache que ya exista en la misma celda de 250 m.")
-    izq, der = st.columns(2)
-    with izq:
-        st.subheader("Reportar un bache")
+    encabezado("Modo ciudadano", "No necesita cuenta. El reporte se liga al bache que ya exista en la misma "
+                                 "celda de 250 m.")
+    izq, der = st.columns(2, gap="medium")
+    with izq, tarjeta("reportar", "Reportar un bache", "Ubicación y una descripción breve"):
         cols = colonias()
         with st.form("reporte"):
             col = st.selectbox("Colonia", cols["nombre"],
@@ -451,8 +686,7 @@ def pagina_ciudadano():
                     aviso_y_recargar(f"Reporte recibido. Su folio es **{num}** (bache {bache}).")
                 else:
                     st.error(msg)
-    with der:
-        st.subheader("Consultar mi folio")
+    with der, tarjeta("folio", "Consultar mi folio", "El avance lo informa la autoridad"):
         num = st.number_input("Folio", min_value=1, value=35698, step=1)
         if st.button("Consultar"):
             cab, hist = folio(int(num))
@@ -469,35 +703,43 @@ def pagina_ciudadano():
 
 def ficha(id_bache):
     b = baches().set_index("id_bache").loc[id_bache]
-    c = st.columns(4)
-    c[0].metric("IPU", f"{float(b.ipu):.3f}" if pd.notna(b.ipu) else "—")
-    c[1].metric("Semáforo", b.semaforo if pd.notna(b.semaforo) else "—")
-    c[2].metric("Intervención", CORTO.get(b.intervencion, b.intervencion if pd.notna(b.intervencion) else "—"),
-                help=b.intervencion if pd.notna(b.intervencion) else None)
-    c[3].metric("Costo estimado", dinero(float(b.costo_estimado)) if pd.notna(b.costo_estimado) else "—")
+    sem = b.semaforo if pd.notna(b.semaforo) else None
+    chip = {"ROJO": ("alerta", "● Rojo · 3 días"), "AMARILLO": ("medio", "● Amarillo · 15 días"),
+            "VERDE": ("ok", "● Verde · 60 días")}.get(sem)
+    kpis([
+        ("IPU", f"{float(b.ipu):.3f}" if pd.notna(b.ipu) else "—", "índice de prioridad (0 a 1)", None, None),
+        ("Semáforo", sem.capitalize() if sem else "—", "prioridad recomendada", chip, None),
+        ("Intervención", CORTO.get(b.intervencion, b.intervencion if pd.notna(b.intervencion) else "—"),
+         b.intervencion if pd.notna(b.intervencion) else "", None, None),
+        ("Costo estimado", dinero(float(b.costo_estimado)) if pd.notna(b.costo_estimado) else "—",
+         "tarifa SIPA por m²", None, None),
+    ])
     if pd.notna(b.id_calculo):
         det = detalle(int(b.id_calculo))
-        st.write("**Ficha de justificación:** cuánto aporta cada criterio al IPU. Un valor de 0.5 indica "
-                 "que no hay dato para ese criterio (neutral).")
-        st.altair_chart(barras(det, "aporte", "criterio", "Aporte al IPU (valor × peso)", formato=".3f"),
-                        use_container_width=True)
-        with st.expander("Ver los valores y pesos de cada criterio"):
-            st.dataframe(det, hide_index=True)
+        with tarjeta("justificacion", "Ficha de justificación",
+                     "Cuánto aporta cada criterio al IPU (valor × peso). Un valor de 0.5 indica que no hay "
+                     "dato para ese criterio (neutral)."):
+            st.altair_chart(barras(det, "aporte", "criterio", "Aporte al IPU", formato=".3f"),
+                            use_container_width=True)
+            with st.expander("Ver los valores y pesos de cada criterio"):
+                st.dataframe(det, hide_index=True)
     st.caption(f"{b.territorio} · celda {b.celda_id} · severidad {b.severidad} · {b.profundidad_cm} cm · "
                f"{b.area_m2} m² · {b.reportes} reportes · estado {b.estado}")
 
 
 def pagina_ranking():
-    st.title("Recomendación de SIPA")
+    encabezado("Recomendación de SIPA", "Ranking por IPU de los baches abiertos de un territorio y la ficha que "
+                                        "justifica cada lugar.")
     df = baches()
     abiertos = df[df["estado"].isin(["VALIDADO", "PRIORIZADO", "EN_ATENCION"]) & df["ipu"].notna()].copy()
     territorios = sorted(abiertos["territorio"].dropna().unique())
     territorio = st.selectbox("Territorio", territorios, index=territorios.index("CHALCO"))
     rank = abiertos[abiertos["territorio"] == territorio].sort_values("ipu", ascending=False)
     rank.insert(0, "lugar", range(1, len(rank) + 1))
-    st.dataframe(miles(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion", "costo_estimado",
-                             "reportes", "estado"]]), hide_index=True, height=280, column_config=COLUMNAS)
-    st.caption("Fíjese en la columna de reportes: más reportes no significa más prioridad.")
+    with tarjeta("ranking", f"Ranking de {territorio.title()}",
+                 "Fíjese en la columna de reportes: más reportes no significa más prioridad."):
+        st.dataframe(miles(rank[["lugar", "id_bache", "ipu", "semaforo", "intervencion", "costo_estimado",
+                                 "reportes", "estado"]]), hide_index=True, height=280, column_config=COLUMNAS)
     id_bache = st.selectbox("Ver la ficha del bache", rank["id_bache"])
     ficha(id_bache)
     if st.button("Recalcular el IPU de este bache"):
@@ -509,9 +751,8 @@ def pagina_ranking():
 
 
 def pagina_autoridad():
-    st.title("Modo autoridad")
-    st.caption("La autoridad decide sobre la recomendación y repara con sus propios recursos; "
-               "en SIPA solo informa el avance.")
+    encabezado("Modo autoridad", "La autoridad decide sobre la recomendación y repara con sus propios "
+                                 "recursos; en SIPA solo informa el avance.")
     usuarios = autoridades()
     nombre = st.selectbox("Entrar como", usuarios["nombre"],
                           index=int((usuarios["territorio"] == "CHALCO").idxmax()))
@@ -520,16 +761,16 @@ def pagina_autoridad():
     mios = df[(df["territorio"] == u.territorio) & df["estado"].isin(["REPORTADO", "VALIDADO", "PRIORIZADO",
                                                                       "EN_ATENCION"])]
     mios = mios.sort_values("ipu", ascending=False)
-    st.dataframe(miles(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "estado"]]),
-                 hide_index=True, height=240, column_config=COLUMNAS)
+    with tarjeta("pendientes", f"Baches abiertos de {u.territorio.title()}", "Ordenados por IPU"):
+        st.dataframe(miles(mios[["id_bache", "ipu", "semaforo", "intervencion", "costo_estimado", "estado"]]),
+                     hide_index=True, height=240, column_config=COLUMNAS)
     if mios.empty:
         st.info("No hay baches abiertos en este territorio.")
         return
     id_bache = st.selectbox("Bache", mios["id_bache"], key=f"bache_autoridad_{u.id_usuario}")
     b = mios.set_index("id_bache").loc[id_bache]
-    izq, der = st.columns(2)
-    with izq:
-        st.subheader("1. Decidir sobre la recomendación")
+    izq, der = st.columns(2, gap="medium")
+    with izq, tarjeta("decidir", "1 · Decidir sobre la recomendación"):
         if pd.isna(b.id_calculo):
             st.info("El bache aún no tiene IPU calculado.")
         else:
@@ -545,8 +786,7 @@ def pagina_autoridad():
                     if ok:
                         aviso_y_recargar(f"Decisión registrada para el bache {id_bache}: {decision}.")
                     st.error(f"No se registró: {msg}")
-    with der:
-        st.subheader("2. Informar el avance")
+    with der, tarjeta("avance", "2 · Informar el avance"):
         actual = {v: k for k, v in ESTADOS.items()}[b.estado]
         opciones = [ESTADOS[x] for x in TRANSICIONES.get(actual, [])]
         with st.form(f"estado_{id_bache}_{b.estado}"):
@@ -567,45 +807,56 @@ def pagina_autoridad():
 
 
 def pagina_indicadores():
-    st.title("Indicadores")
-    st.caption("Las decisiones, reparaciones y tiempos son simulados (bd/08); reincidencia y reportes "
-               "resueltos salen de datos reales.")
-    a, b = st.columns(2)
+    encabezado("Indicadores", "Reincidencia, causas y reportes resueltos salen de datos reales; decisiones, "
+                              "reparaciones y tiempos son simulados (bd/08).")
+    rein = reincidencia()
+    tr = tiempos()
+    cau = causas()
+    res = resueltos()
+    if "reportes" in res.columns:
+        res = res[res["reportes"].astype(float) >= 500]
+    peor = rein.iloc[0]
+    sin = cau.set_index("causa_probable")["baches"].astype(float)
+    pct_sin = sin.get("SIN_INDICIOS", 0) / sin.sum() * 100
+    hallazgo(f"<b>Hallazgo:</b> en <b>{peor.territorio.title()}</b> el {float(peor.pct_reportes_en_cronicas):.0f} % "
+             f"de los reportes cae en celdas crónicas (el bache vuelve a salir). En el {pct_sin:.0f} % de los "
+             f"baches no hay indicios de causa: ahí la reparación superficial basta.")
+
+    a, b = st.columns(2, gap="medium")
     with a:
-        st.subheader("Reincidencia: celdas donde el bache vuelve a salir")
-        st.dataframe(reincidencia()[["territorio", "celdas", "celdas_reincidentes", "celdas_cronicas",
-                                     "pct_reportes_en_cronicas"]], hide_index=True, column_config=COLUMNAS)
-        st.subheader("Causa probable del daño (hipótesis)")
-        ver_barras(causas(), "baches", "causa_probable", "Baches", color="#6D4C41")
+        with tarjeta("reincidencia", "Reincidencia por territorio",
+                     "% de reportes que caen en celdas crónicas (el bache vuelve a salir)"):
+            ver_barras(rein, "pct_reportes_en_cronicas", "territorio", "% de reportes en celdas crónicas",
+                       formato=".1f")
+            with st.expander("Ver la tabla completa"):
+                st.dataframe(rein[["territorio", "celdas", "celdas_reincidentes", "celdas_cronicas",
+                                   "pct_reportes_en_cronicas"]], hide_index=True, column_config=COLUMNAS)
+        with tarjeta("causas", "Causa probable del daño", "Hipótesis por cruce con lluvia, drenaje y tránsito"):
+            st.altair_chart(barra_segmentada(cau, "baches", "causa_probable"), use_container_width=True)
+            leyenda_segmentada(cau, "baches", "causa_probable")
     with b:
-        st.subheader("Tiempo de respuesta por semáforo")
-        st.dataframe(tiempos()[["semaforo_final", "baches", "dias_promedio", "meta_dias", "pct_en_meta"]],
-                     hide_index=True, column_config=COLUMNAS)
-        st.subheader("Cobertura: baches reparados por territorio")
-        ver_barras(cobertura(), "pct_reparados", "territorio", "% de baches reparados", color="#2E7D32",
-                   formato=".0f")
-        st.subheader("Reportes ciudadanos resueltos por año")
-        res = resueltos()
-        if "reportes" in res.columns:
-            res = res[res["reportes"].astype(float) >= 500]
-        st.altair_chart(barras(res.rename(columns={"anio": "Año"}), "pct_resueltos", "Año", "% resueltos",
-                               formato=".1f", orden="ascending"), use_container_width=True)
-        st.caption("Solo años con 500 reportes o más (CDMX 2019–2022). 2025–2026 son pocos reportes de "
-                   "Chalco aún en curso y no son comparables.")
+        with tarjeta("tiempos", "Tiempo de respuesta contra la meta",
+                     "Barra: días promedio para reparar · marca negra: meta del semáforo"):
+            st.altair_chart(barra_contra_meta(tr), use_container_width=True)
+            with st.expander("Ver la tabla"):
+                st.dataframe(tr[["semaforo_final", "baches", "dias_promedio", "meta_dias", "pct_en_meta"]],
+                             hide_index=True, column_config=COLUMNAS)
+        with tarjeta("cobertura", "Cobertura: baches reparados por territorio", "% del total de cada territorio"):
+            ver_barras(cobertura(), "pct_reparados", "territorio", "% de baches reparados", formato=".0f")
+        with tarjeta("resueltos", "Reportes ciudadanos resueltos por año",
+                     "Solo años con 500 reportes o más (CDMX 2019–2022); 2025–2026 son pocos reportes de "
+                     "Chalco aún en curso"):
+            st.altair_chart(barras(res.rename(columns={"anio": "Año"}), "pct_resueltos", "Año", "% resueltos",
+                                   formato=".1f", orden="ascending", etiquetas=4), use_container_width=True)
 
 
-PAGINAS = {"Resumen y mapa": pagina_resumen, "Modo ciudadano": pagina_ciudadano,
+PAGINAS = {"Resumen": pagina_resumen, "Modo ciudadano": pagina_ciudadano,
            "Recomendación de SIPA": pagina_ranking, "Modo autoridad": pagina_autoridad,
            "Indicadores": pagina_indicadores}
-with st.sidebar:
-    st.header("SIPA")
-    # ?p=2 abre directamente la tercera sección (útil para capturas y para la exposición)
-    inicial = int(st.query_params.get("p", 0)) if str(st.query_params.get("p", 0)).isdigit() else 0
-    pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1))
-    st.divider()
-    if EN_LINEA:
-        st.info("Versión en línea de solo consulta (copia de los datos). Las acciones revisan las reglas, "
-                "pero no guardan cambios.")
-    st.caption("Prototipo funcional · Bacheo inteligente y priorización urbana · UNRC LCDN 2026-2")
+banda()
+# ?p=2 abre directamente la tercera sección (útil para capturas y para la exposición)
+inicial = int(st.query_params.get("p", 0)) if str(st.query_params.get("p", 0)).isdigit() else 0
+with st.container(key="nav"):
+    pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1), horizontal=True)
 mostrar_aviso()
 PAGINAS[pagina]()

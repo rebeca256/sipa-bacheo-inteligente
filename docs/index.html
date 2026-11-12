@@ -31,7 +31,7 @@
           requirements: ["pydeck"],
           entrypoint: "app.py",
           files,
-          streamlitConfig: { "client.toolbarMode": "viewer" },
+          streamlitConfig: { "client.toolbarMode": "viewer", "theme.base": "light", "theme.primaryColor": "#2a78d6", "theme.backgroundColor": "#f4f5f7", "theme.secondaryBackgroundColor": "#eef0f3", "theme.textColor": "#0b0b0b" },
         },
         document.getElementById("root"),
       );

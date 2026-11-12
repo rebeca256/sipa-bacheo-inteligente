@@ -56,7 +56,7 @@ python probabilidad/riesgo_72h.py
 python calculo/degradacion.py
 python contabilidad/provisiones.py
 python estructuras/viabilidad.py
-streamlit run tablero/app.py                                        # tablero completo
+python -m streamlit run tablero/app.py                              # tablero completo (Streamlit 1.67)
 ```
 
 Las rutas de los archivos de datos están en los scripts de `bd/` (variable `@carpeta` o `@archivo`); ajústalas a la carpeta donde clones el proyecto.

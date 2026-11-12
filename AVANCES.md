@@ -356,3 +356,10 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Tablas con nombres en español, costos con separador de miles y barras de porcentaje; métricas con títulos cortos y ayuda ("Rojo · amarillo", "Costo pendiente").
 - Ficha de justificación: la tabla de criterios quedó en un desplegable para no repetir la gráfica.
 - `pruebas_e2e.py` ajustado a Streamlit 1.67 (nombres de gráficas y avisos, selectores con reintento): 7/7 pasan. `pruebas_sitio.py`: 5/5. Sitio `docs/` reconstruido.
+
+## 11 nov 2026 · Rediseño del tablero como portal ejecutivo (fases 1–3)
+- Identidad: tema propio (`.streamlit/config.toml` y el mismo tema en el sitio stlite), banda superior azul marino con la marca SIPA, pestañas arriba en lugar de la barra lateral, tarjetas blancas para cada bloque y tipografía Inter.
+- Cifras clave: tarjetas de KPI con contexto y estado ("Debajo de la meta"), y un hallazgo principal en Resumen e Indicadores.
+- Gráficas: un solo azul para el dato principal, gris como contexto (el territorio elegido se destaca), colores del semáforo solo para el semáforo y etiquetas solo en las 3 barras principales. Tiempo de respuesta como barra contra la meta, reincidencia como gráfica (con la tabla en un desplegable) y causas como barra segmentada de 100 %. La paleta pasó el validador de daltonismo; el % va escrito en la leyenda por el aviso de contraste.
+- El tablero local debe correrse con `python -m streamlit` (1.67): el comando `streamlit` de Anaconda es 1.32.
+- Pruebas compatibles con Streamlit 1.32 y 1.67: e2e 7/7 y sitio 5/5. Base reconstruida y `docs/` regenerado.

@@ -35,14 +35,14 @@ def pagina():
         errores = []
         page.on("pageerror", lambda e: errores.append(str(e)))
         page.goto(URL)
-        expect(page.get_by_test_id("stMetric").first).to_be_visible(timeout=CARGA)
+        expect(page.locator(".kpi").first).to_be_visible(timeout=CARGA)
         page.errores = errores
         yield page
         navegador.close()
 
 
 def ir(page, seccion, titulo):
-    page.get_by_test_id("stSidebar").get_by_text(seccion, exact=True).click()
+    page.locator(".st-key-nav").get_by_text(seccion, exact=True).click()
     expect(page.get_by_role("heading", name=titulo).first).to_be_visible(timeout=ESPERA)
     quieto(page)
     sin_errores(page)
@@ -74,12 +74,12 @@ def captura(page, nombre):
 # ---------------------------------------------------------------------------
 
 def test_carga_y_resumen(pagina):
-    expect(pagina.get_by_test_id("stSidebar")).to_contain_text("Versión en línea de solo consulta")
-    metricas = pagina.get_by_test_id("stMetric")
-    expect(metricas).to_have_count(5)
+    expect(pagina.get_by_test_id("stMain")).to_contain_text("Versión en línea de solo consulta")
+    metricas = pagina.locator(".kpi")
+    expect(metricas).to_have_count(4)
     expect(metricas.nth(0)).to_contain_text("35,700")
     expect(metricas.nth(1)).to_contain_text("1,345")
-    expect(metricas.nth(3)).to_contain_text("$4.61 M")
+    expect(metricas.nth(2)).to_contain_text("$4.61 M")
     expect(pagina.get_by_test_id("stDeckGlJsonChart").locator("canvas").first).to_be_visible(timeout=ESPERA)
     expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(1)
     sin_errores(pagina)
@@ -109,7 +109,7 @@ def test_ciudadano(pagina):
 
 def test_recomendacion(pagina):
     ir(pagina, "Recomendación de SIPA", "Recomendación de SIPA")
-    metricas = pagina.get_by_test_id("stMetric")
+    metricas = pagina.locator(".kpi")
     expect(metricas.nth(0)).to_contain_text(re.compile(r"IPU\s*0\.\d{3}"), timeout=ESPERA)
     expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(1)
     elegir(pagina, "Territorio", "COYOACAN")
@@ -136,7 +136,6 @@ def test_autoridad(pagina):
 
 def test_indicadores(pagina):
     ir(pagina, "Indicadores", "Indicadores")
-    expect(pagina.get_by_test_id("stDataFrame")).to_have_count(2, timeout=ESPERA)
-    expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(3, timeout=ESPERA)
+    expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(5, timeout=ESPERA)
     sin_errores(pagina)
     captura(pagina, "05_indicadores")
