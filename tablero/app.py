@@ -27,11 +27,6 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
-try:                                   # componentes shadcn/ui; si no están (sitio stlite), se usa el HTML propio
-    import streamlit_shadcn_ui as ui
-except ImportError:
-    ui = None
-
 try:                                   # en el navegador (stlite) no hay pyodbc ni SQL Server
     import pyodbc
 except ImportError:
@@ -62,107 +57,130 @@ AVISO_DEMO = ("(Versión en línea de solo consulta: las reglas se revisan igual
               "pero no se guarda ningún cambio.)")
 
 st.set_page_config(page_title="SIPA · Portal ejecutivo", page_icon="🛣️", layout="wide",
-                   initial_sidebar_state="collapsed")
+                   initial_sidebar_state="expanded")
 
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-html, body, .stApp { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-.stApp { background: #f4f5f7; }
-[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
-[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"],
+/* Estilo inspirado en AdminLTE 3 (plantilla MIT): menú lateral oscuro, small boxes, tarjetas con borde superior */
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+html, body, .stApp { font-family: 'Source Sans 3', 'Source Sans Pro', system-ui, sans-serif; }
+.stApp { background: #f4f6f9; }
+[data-testid="stDecoration"], [data-testid="stToolbarActions"], [data-testid="stMainMenu"], .stDeployButton,
 #MainMenu, footer { display: none !important; }
-[data-testid="stMainBlockContainer"], .block-container { padding-top: 0 !important; max-width: 1320px; }
+[data-testid="stHeader"] { background: transparent; }
+[data-testid="stMainBlockContainer"], .block-container { padding-top: 1.2rem !important; max-width: 1400px; }
 
-/* Banda superior a todo lo ancho */
-.sipa-banda { background: #0d366b; color: #fff; box-shadow: 0 0 0 100vmax #0d366b; clip-path: inset(0 -100vmax);
-  padding: 16px 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  flex-wrap: wrap; margin-bottom: 4px; }
-.sipa-banda .marca { display: flex; align-items: center; gap: 14px; }
-.sipa-banda .logo { background: #fff; color: #0d366b; font-weight: 700; letter-spacing: .5px;
-  border-radius: 8px; padding: 6px 10px; font-size: 15px; }
-.sipa-banda .nombre { font-weight: 600; font-size: 17px; line-height: 1.2; }
-.sipa-banda .sub { font-size: 12.5px; opacity: .78; margin-top: 2px; }
-.sipa-banda .modo { font-size: 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
-  padding: 4px 12px; white-space: nowrap; }
+/* ---- Menú lateral oscuro ---- */
+[data-testid="stSidebar"] { background: #343a40; }
+[data-testid="stSidebar"] > div { background: #343a40; }
+[data-testid="stSidebar"] * { color: #c2c7d0; }
+[data-testid="stSidebarUserContent"] { padding-top: 0 !important; }
+.sb-marca { display: flex; align-items: center; gap: 10px; padding: 14px 6px 14px; border-bottom: 1px solid #4b545c;
+  margin: 0 -6px 10px; }
+.sb-logo { width: 34px; height: 34px; border-radius: 50%; background: #007bff; color: #fff !important;
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  box-shadow: 0 3px 6px rgba(0,0,0,.16); }
+.sb-nombre { font-size: 20px; font-weight: 300; color: #fff !important; }
+.sb-nombre b { font-weight: 700; color: #fff !important; }
+.sb-usuario { display: flex; align-items: center; gap: 10px; padding: 4px 6px 12px; border-bottom: 1px solid #4b545c;
+  margin: 0 -6px 12px; font-size: 14px; }
+.sb-usuario i { font-size: 26px; color: #adb5bd !important; }
+.sb-seccion { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #8a939b !important;
+  margin: 4px 0 6px 8px; }
+.sb-pie { font-size: 11.5px; color: #8a939b !important; margin-top: 24px; line-height: 1.5; }
+[data-testid="stSidebar"] .st-key-nav [data-testid="stWidgetLabel"] { display: none; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] { gap: 3px; flex-direction: column; }
+[data-testid="stSidebar"] .st-key-nav [data-testid="stRadioOption"] { width: 100%; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > * { width: 100%; margin: 0; padding: 9px 12px;
+  border-radius: 4px; cursor: pointer; transition: background .15s; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:hover { background: rgba(255,255,255,.1); }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > label > div:first-child:not([data-testid]),
+[data-testid="stSidebar"] .st-key-nav [data-testid="stRadioOption"] > div > div:not([data-testid]) { display: none; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > * p { font-size: 15.5px; color: #c2c7d0; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > * p::before { font-family: 'bootstrap-icons';
+  margin-right: 10px; font-size: 15px; display: inline-block; width: 18px; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:has(input:checked),
+[data-testid="stSidebar"] .st-key-nav [data-testid="stRadioOption"][data-selected="true"] {
+  background: #007bff; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24); }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:has(input:checked) p,
+[data-testid="stSidebar"] .st-key-nav [data-testid="stRadioOption"][data-selected="true"] p { color: #fff; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:nth-child(1) p::before { content: "\\f422"; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:nth-child(2) p::before { content: "\\f4da"; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:nth-child(3) p::before { content: "\\f586"; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:nth-child(4) p::before { content: "\\f531"; }
+[data-testid="stSidebar"] .st-key-nav [role="radiogroup"] > *:nth-child(5) p::before { content: "\\f17a"; }
 
-/* Pestañas de navegación (radio horizontal) */
-.st-key-nav { border-bottom: 1px solid #e3e3e0; margin-bottom: 6px; }
-.st-key-nav [data-testid="stWidgetLabel"] { display: none; }
-.st-key-nav div[role="radiogroup"] { gap: 2px; flex-wrap: wrap; }
-.st-key-nav label[data-baseweb="radio"] { padding: 10px 14px 9px; margin: 0; border-bottom: 3px solid transparent; }
-.st-key-nav label[data-baseweb="radio"] > div:first-child { display: none; }
-.st-key-nav label[data-baseweb="radio"] p { color: #52514e; font-size: 14.5px; font-weight: 500; }
-.st-key-nav label[data-baseweb="radio"]:has(input:checked) { border-bottom-color: #2a78d6; }
-.st-key-nav label[data-baseweb="radio"]:has(input:checked) p { color: #0b0b0b; font-weight: 600; }
-/* Streamlit 1.67 (react-aria): misma idea con otros nombres */
-.st-key-nav [data-testid="stRadioOption"] { padding: 10px 14px 9px; margin: 0; border-bottom: 3px solid transparent; }
-.st-key-nav [data-testid="stRadioOption"] > div > div:not([data-testid]) { display: none; }
-.st-key-nav [data-testid="stRadioOption"] p { color: #52514e; font-size: 14.5px; font-weight: 500; }
-.st-key-nav [data-testid="stRadioOption"][data-selected="true"] { border-bottom-color: #2a78d6; }
-.st-key-nav [data-testid="stRadioOption"][data-selected="true"] p { color: #0b0b0b; font-weight: 600; }
-/* el bloque que solo carga estos estilos no debe ocupar espacio */
-[data-testid="stElementContainer"]:has(style), .element-container:has(style) { display: none; }
+/* ---- Barra superior y encabezado de página ---- */
+.topbar { background: #fff; border-bottom: 1px solid #dee2e6; margin: -1.2rem 0 0; padding: 10px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  box-shadow: 0 0 0 100vmax #fff; clip-path: inset(0 -100vmax); }
+.topbar .ruta { color: #6c757d; font-size: 14px; }
+.topbar .ruta b { color: #212529; font-weight: 600; }
+.topbar .modo { font-size: 12px; background: #e9ecef; color: #495057; border-radius: 4px; padding: 3px 8px; }
+.topbar .modo.vivo { background: #d4edda; color: #155724; }
+h1 { font-size: 1.8rem !important; font-weight: 400 !important; color: #212529; padding: 18px 0 0 !important; }
+.subtitulo { color: #6c757d; font-size: 14.5px; margin: 0 0 14px; }
 
-/* Títulos */
-h1 { font-size: 26px !important; font-weight: 700 !important; color: #0b0b0b; padding: 14px 0 0 !important; }
-h3 { font-size: 16px !important; font-weight: 600 !important; color: #0b0b0b; }
-.subtitulo { color: #52514e; font-size: 14px; margin: 2px 0 14px; }
-@media (max-width: 640px) {
-  .st-key-nav div[role="radiogroup"] { flex-wrap: nowrap !important; overflow-x: auto; }
-  .st-key-nav [data-testid="stRadioOption"], .st-key-nav label[data-baseweb="radio"] { white-space: nowrap; }
-  .kpi .k-val { font-size: 19px; }
-  .kpi { padding: 12px; }
-  .sipa-banda .sub { display: none; }
-}
+/* ---- Small boxes (cifras clave) ---- */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 6px 0 16px; }
+.kpi { position: relative; border-radius: 4px; overflow: hidden; color: #fff;
+  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2); display: flex; flex-direction: column; }
+.kpi .k-in { padding: 12px 14px 10px; position: relative; z-index: 1; flex: 1; }
+.kpi .k-val { font-size: 2.1rem; font-weight: 700; line-height: 1.15; margin: 0 0 4px; white-space: nowrap;
+  word-break: keep-all; }
+.kpi .k-et { font-size: 15px; }
+.kpi .k-ico { position: absolute; right: 14px; top: 10px; font-size: 64px; line-height: 1; color: rgba(0,0,0,.15);
+  z-index: 0; transition: transform .3s; }
+.kpi:hover .k-ico { transform: scale(1.1); }
+.kpi .k-pie { background: rgba(0,0,0,.1); color: rgba(255,255,255,.85); font-size: 13px; text-align: center;
+  padding: 4px 8px; position: relative; z-index: 1; }
+.kpi.info { background: #17a2b8; } .kpi.primary { background: #007bff; } .kpi.success { background: #28a745; }
+.kpi.danger { background: #dc3545; } .kpi.secondary { background: #6c757d; }
+.kpi.warning { background: #ffc107; color: #1f2d3d; } .kpi.warning .k-pie { color: rgba(31,45,61,.85); }
 
-/* Tarjetas */
-[class*="st-key-card_"] { background: #fff; border: 1px solid #e6e6e3; border-radius: 12px;
-  padding: 18px 20px 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-.t-tit { font-weight: 600; font-size: 15.5px; color: #0b0b0b; }
-.t-nota { color: #8a8984; font-size: 12.5px; margin-top: 2px; }
+/* ---- Tarjetas (card-outline) ---- */
+[class*="st-key-card_"] { background: #fff; border-top: 3px solid #007bff; border-radius: 4px;
+  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2); padding: 0 20px 14px; }
+.t-cab { margin: 0 -20px 12px; padding: 11px 20px; border-bottom: 1px solid rgba(0,0,0,.125); }
+.t-tit { font-weight: 400; font-size: 1.1rem; color: #212529; }
+.t-tit::before { font-family: 'bootstrap-icons'; content: "\\f28c"; margin-right: 8px; color: #6c757d; font-size: 15px; }
+.t-nota { color: #6c757d; font-size: 13px; margin-top: 2px; }
 
-/* KPIs */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 14px; }
-.kpi { background: #fff; border: 1px solid #e6e6e3; border-radius: 12px; padding: 14px 16px; }
-.kpi .k-et { color: #52514e; font-size: 13px; font-weight: 500; }
-.kpi .k-val { word-break: keep-all; overflow-wrap: normal; hyphens: none; color: #0b0b0b; font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin: 4px 0 2px;
-  line-height: 1.15; }
-.kpi .k-ctx { color: #8a8984; font-size: 12.5px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
-  border-radius: 999px; padding: 2px 9px; margin-top: 6px; }
-.chip.ok { background: #e7f6e7; color: #076b07; }
-.chip.alerta { background: #fdecec; color: #a12a2a; }
-.chip.medio { background: #fff4dc; color: #7a5300; }
+/* ---- Badges y callout ---- */
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 4px; padding: 3px 7px; }
+.chip.ok { background: #28a745; color: #fff; } .chip.alerta { background: #dc3545; color: #fff; }
+.chip.medio { background: #ffc107; color: #1f2d3d; } .chip.neutro { background: #6c757d; color: #fff; }
+.hallazgo { background: #fff; border-left: 5px solid #117a8b; border-radius: 4px; padding: 14px 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24); color: #212529; font-size: 15px;
+  margin: 2px 0 16px; }
 
-/* Hallazgo principal de cada página */
-.hallazgo { background: #fff; border: 1px solid #e6e6e3; border-left: 4px solid #2a78d6; border-radius: 10px;
-  padding: 12px 16px; color: #0b0b0b; font-size: 14.5px; margin: 2px 0 14px; }
-
-/* Expediente del bache */
-.exp-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-.exp-tit { font-size: 20px; font-weight: 700; color: #0b0b0b; }
-.exp-sub { color: #52514e; font-size: 13px; margin-top: 2px; }
+/* ---- Expediente y pasos ---- */
+.exp-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+  padding-top: 14px; }
+.exp-tit { font-size: 1.4rem; font-weight: 600; color: #212529; }
+.exp-sub { color: #6c757d; font-size: 13.5px; margin-top: 2px; }
 .exp-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.exp-chips .chip { margin-top: 0; }
-.chip.neutro { background: #eef0f3; color: #33322f; }
 .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
-  margin: 14px 0 4px; padding: 12px 0 0; border-top: 1px solid #efefec; }
-.datos div { font-size: 12px; color: #8a8984; }
-.datos b { display: block; font-size: 15px; color: #0b0b0b; font-weight: 600; margin-top: 2px; }
-.porque { font-size: 14px; color: #33322f; line-height: 1.55; }
+  margin: 6px 0 4px; padding: 12px 0 0; border-top: 1px solid #e9ecef; }
+.datos div { font-size: 12.5px; color: #6c757d; }
+.datos b { display: block; font-size: 16px; color: #212529; font-weight: 600; margin-top: 2px; }
+.porque { font-size: 14.5px; color: #212529; line-height: 1.55; }
 .porque ol { padding-left: 18px; margin: 6px 0 0; }
-/* Pasos de la autoridad */
-.paso { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.paso .num { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #2a78d6; color: #fff;
+.paso { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  margin: 0 -20px 12px; padding: 11px 20px; border-bottom: 1px solid rgba(0,0,0,.125); }
+.paso .num { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #007bff; color: #fff;
   align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-right: 8px; }
-.paso .t { font-weight: 600; font-size: 15.5px; color: #0b0b0b; display: inline-flex; align-items: center; }
+.paso .t { font-weight: 400; font-size: 1.1rem; color: #212529; display: inline-flex; align-items: center; }
 
-/* Leyenda del semáforo */
-.leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #52514e; margin: 2px 0 8px; }
+/* ---- Leyenda del semáforo ---- */
+.leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #495057; margin: 2px 0 8px; }
 .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
 .leyenda i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-.leyenda b { color: #0b0b0b; }
+.leyenda b { color: #212529; }
+
+[data-testid="stElementContainer"]:has(style), .element-container:has(style) { display: none; }
+@media (max-width: 640px) { .kpi .k-val { font-size: 1.6rem; } .kpi .k-ico { font-size: 48px; } }
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
@@ -534,15 +552,28 @@ def leyenda_segmentada(df, valor, etiqueta):
 
 # --- Piezas de la interfaz -----------------------------------------------------
 
-def banda():
-    modo = "Copia de solo consulta (en línea)" if EN_LINEA else "Datos en vivo · SQL Server"
-    st.markdown(f"""<div class="sipa-banda"><div class="marca"><span class="logo">SIPA</span><div>
-        <div class="nombre">Sistema Inteligente de Priorización Asfáltica</div>
-        <div class="sub">Portal ejecutivo · Piloto CDMX y Chalco (Edomex) · UNRC LCDN 2026-2</div></div></div>
-        <span class="modo">{modo}</span></div>""", unsafe_allow_html=True)
+def barra_superior(pagina):
+    modo = ('<span class="modo">Copia de solo consulta</span>' if EN_LINEA
+            else '<span class="modo vivo">● En vivo · SQL Server</span>')
+    st.markdown(f'<div class="topbar"><span class="ruta">Inicio / <b>{pagina}</b></span>{modo}</div>',
+                unsafe_allow_html=True)
     if EN_LINEA:
         st.caption("Versión en línea de solo consulta (copia de los datos). Las acciones revisan las reglas, "
                    "pero no guardan cambios.")
+
+
+def menu_lateral(inicial):
+    with st.sidebar:
+        st.markdown('<div class="sb-marca"><span class="sb-logo">SIPA</span>'
+                    '<span class="sb-nombre"><b>SIPA</b> Portal</span></div>'
+                    '<div class="sb-usuario"><i class="bi bi-person-circle"></i>'
+                    '<span>Panel ejecutivo<br><small>Piloto CDMX y Chalco</small></span></div>'
+                    '<div class="sb-seccion">Navegación</div>', unsafe_allow_html=True)
+        with st.container(key="nav"):
+            pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1))
+        st.markdown('<div class="sb-pie">Sistema Inteligente de Priorización Asfáltica<br>'
+                    'Bacheo inteligente · UNRC LCDN 2026-2</div>', unsafe_allow_html=True)
+    return pagina
 
 
 def encabezado(titulo, subtitulo=None):
@@ -551,25 +582,29 @@ def encabezado(titulo, subtitulo=None):
         st.markdown(f'<div class="subtitulo">{subtitulo}</div>', unsafe_allow_html=True)
 
 
-_N_KPI = 0
+# Color e ícono de cada small box (por etiqueta); un estado (chip) manda sobre el color
+ESTILO_KPI = [("Reportes", "info", "megaphone-fill"), ("Baches abiertos", "primary", "cone-striped"),
+              ("Costo", "warning", "cash-stack"), ("Rojos", "success", "stopwatch-fill"),
+              ("IPU", "info", "speedometer2"), ("Intervención", "primary", "cone-striped"),
+              ("Por semáforo", "secondary", "bar-chart-fill")]
+COLOR_CHIP = {"ok": "success", "alerta": "danger", "medio": "warning"}
+COLOR_SEMAFORO = {"Rojo": "danger", "Amarillo": "warning", "Verde": "success"}
 
 
 def kpis(items):
-    """Tarjetas de cifras clave. items: (etiqueta, valor, contexto, (tipo, texto) o None, ayuda)."""
-    if ui is not None:
-        global _N_KPI
-        cols = st.columns(len(items), gap="small")
-        for col, (et, val, ctx, chip, ayuda) in zip(cols, items):
-            _N_KPI += 1
-            with col, st.container(key=f"kpi_{_N_KPI}"):
-                ui.metric_card(et, val, description=ctx, delta=chip[1] if chip else None,
-                               key=f"metrica_{_N_KPI}")
-        return
+    """Small boxes al estilo AdminLTE. items: (etiqueta, valor, contexto, (tipo, texto) o None, ayuda)."""
     html = ""
-    for et, val, ctx, chip, ayuda in items:
-        c = f'<div class="chip {chip[0]}">{chip[1]}</div>' if chip else ""
-        html += (f'<div class="kpi" title="{ayuda or ""}"><div class="k-et">{et}</div>'
-                 f'<div class="k-val">{val}</div><div class="k-ctx">{ctx}</div>{c}</div>')
+    for i, (et, val, ctx, chip, ayuda) in enumerate(items):
+        color, icono = next(((c, ic) for pref, c, ic in ESTILO_KPI if et.startswith(pref)),
+                            (["info", "success", "warning", "danger"][i % 4], "clipboard-data"))
+        if et == "Semáforo":
+            color, icono = COLOR_SEMAFORO.get(val, "secondary"), "circle-fill"
+        if chip:
+            color = COLOR_CHIP.get(chip[0], color)
+        pie = ctx + (f" · {chip[1]}" if chip else "")
+        html += (f'<div class="kpi {color}" title="{ayuda or ""}"><div class="k-in"><div class="k-val">{val}</div>'
+                 f'<div class="k-et">{et}</div></div><i class="bi bi-{icono} k-ico"></i>'
+                 f'<div class="k-pie">{pie} <i class="bi bi-arrow-right-circle"></i></div></div>')
     st.markdown(f'<div class="kpis">{html}</div>', unsafe_allow_html=True)
 
 
@@ -581,8 +616,8 @@ def tarjeta(clave, titulo=None, nota=None):
     """Contenedor blanco con borde (el estilo sale de la clase st-key-card_…)."""
     c = st.container(key=f"card_{clave}")
     if titulo:
-        c.markdown(f'<div class="t-tit">{titulo}</div>' + (f'<div class="t-nota">{nota}</div>' if nota else ""),
-                   unsafe_allow_html=True)
+        c.markdown(f'<div class="t-cab"><div class="t-tit">{titulo}</div>'
+                   + (f'<div class="t-nota">{nota}</div>' if nota else "") + '</div>', unsafe_allow_html=True)
     return c
 
 
@@ -954,14 +989,9 @@ def pagina_indicadores():
 PAGINAS = {"Resumen": pagina_resumen, "Modo ciudadano": pagina_ciudadano,
            "Recomendación de SIPA": pagina_ranking, "Modo autoridad": pagina_autoridad,
            "Indicadores": pagina_indicadores}
-banda()
 # ?p=2 abre directamente la tercera sección (útil para capturas y para la exposición)
 inicial = int(st.query_params.get("p", 0)) if str(st.query_params.get("p", 0)).isdigit() else 0
-with st.container(key="nav"):
-    if ui is not None:
-        pagina = ui.tabs(list(PAGINAS), value=list(PAGINAS)[min(inicial, len(PAGINAS) - 1)], key="nav_tabs",
-                         label="Sección")
-    else:
-        pagina = st.radio("Sección", list(PAGINAS), index=min(inicial, len(PAGINAS) - 1), horizontal=True)
+pagina = menu_lateral(inicial)
+barra_superior(pagina)
 mostrar_aviso()
 PAGINAS[pagina]()

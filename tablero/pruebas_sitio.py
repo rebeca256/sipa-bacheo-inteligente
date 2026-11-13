@@ -110,7 +110,7 @@ def test_ciudadano(pagina):
 def test_recomendacion(pagina):
     ir(pagina, "Recomendación de SIPA", "Recomendación de SIPA")
     metricas = pagina.locator(".kpi")
-    expect(metricas.nth(0)).to_contain_text(re.compile(r"IPU\s*0\.\d{3}"), timeout=ESPERA)
+    expect(metricas.nth(0)).to_contain_text(re.compile(r"0\.\d{3}\s*IPU"), timeout=ESPERA)
     expect(pagina.get_by_test_id("stVegaLiteChart")).to_have_count(1)
     elegir(pagina, "Territorio", "COYOACAN")
     expect(metricas.nth(3)).to_contain_text("$")

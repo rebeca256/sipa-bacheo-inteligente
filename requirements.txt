@@ -1,7 +1,6 @@
 pandas>=2.0
 numpy>=1.24
 streamlit>=1.40
-streamlit-shadcn-ui>=1.5   # tarjetas y pestañas del tablero local (opcional)
 pydeck
 altair
 pyodbc

@@ -111,7 +111,7 @@ def test_resumen_y_mapa(pagina):
     abrir(pagina, 0, "Resumen ejecutivo")
     metricas = pagina.locator(KPI)
     expect(metricas).to_have_count(4)
-    expect(metricas.nth(1)).to_contain_text(re.compile(r"Baches abiertos\s*1,\d{3}"))
+    expect(metricas.nth(1)).to_contain_text(re.compile(r"1,\d{3}\s*Baches abiertos"))
     expect(metricas.nth(2)).to_contain_text(re.compile(r"\$\d+\.\d{2} M"))
     # mapa (pydeck dibuja en un canvas) y gráfica de costo pendiente
     expect(pagina.get_by_test_id("stDeckGlJsonChart").locator("canvas").first).to_be_visible(timeout=ESPERA)
@@ -156,7 +156,7 @@ def test_recomendacion_y_ficha(pagina):
     expect(pagina.get_by_test_id("stDataFrame").first).to_be_visible(timeout=ESPERA)
     metricas = pagina.locator(KPI)
     expect(metricas).to_have_count(4)
-    expect(metricas.nth(0)).to_contain_text(re.compile(r"IPU\s*0\.\d{3}"))
+    expect(metricas.nth(0)).to_contain_text(re.compile(r"0\.\d{3}\s*IPU"))
     expect(metricas.nth(3)).to_contain_text("$")
     expect(pagina.locator(GRAFICA)).to_have_count(1)
     elegir(pagina, "Territorio", "COYOACAN")

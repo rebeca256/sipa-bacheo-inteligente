@@ -374,3 +374,8 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - `streamlit-shadcn-ui` 1.5 (en `requirements.txt`): tarjetas de cifras (`ui.metric_card`) y pestañas de navegación (`ui.tabs`).
 - Respaldo: si la librería no está (sitio en línea con stlite), se usan las tarjetas HTML y las pestañas propias; el sitio no cambia.
 - Pruebas: e2e 7/7 (reconocen ambos tipos de tarjeta) y sitio 5/5. Base reconstruida y `docs/` regenerado.
+
+## 12 nov 2026 · Tablero con estilo AdminLTE
+- Se quitó streamlit-shadcn-ui. Estilo inspirado en AdminLTE 3 (plantilla MIT), hecho con CSS sobre Streamlit: menú lateral oscuro con íconos de Bootstrap Icons, barra superior con la ruta y el modo ("En vivo · SQL Server"), cifras en "small boxes" de color con ícono, tarjetas con borde superior y callout para el hallazgo.
+- No se usó streamlit-option-menu: dibuja en un iframe y rompería las pruebas y el sitio stlite.
+- Pruebas: e2e 7/7 y sitio 5/5; base reconstruida y `docs/` regenerado.

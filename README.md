@@ -4,7 +4,18 @@ Problema prototípico **«Bacheo inteligente y priorización urbana»** · Unive
 
 SIPA es un sistema de **asesoría**: reúne los reportes ciudadanos de baches con información del entorno (riesgo de accidente, transporte público, marginación, zonas inundables, escuelas y hospitales cercanos) y calcula para cada bache un **Índice de Prioridad Urbana (IPU)**, un semáforo, la intervención recomendada y su costo estimado. La autoridad decide y repara; SIPA registra su decisión y el avance que informa.
 
-## Tablero en línea
+## La aplicación oficial trabaja sobre SQL Server
+
+La aplicación del proyecto es el tablero de `tablero/app.py`, que corre en local (`python -m streamlit run tablero/app.py`) **conectado en vivo a SQL Server** (base `SIPA`) con `pyodbc`:
+
+- Lee los datos con consultas y vistas (esquema `ind`).
+- Toda escritura pasa por los **procedimientos almacenados** de `bd/05` (`sp_registrar_reporte`, `sp_calcular_ipu`, `sp_registrar_decision`, `sp_actualizar_estado_bache`), con sus transacciones y restricciones: lo inválido lo rechaza la base y la transacción se revierte.
+- La barra superior del tablero indica **«En vivo · SQL Server»**.
+- Las pruebas `tablero/pruebas_e2e.py` (Playwright) recorren la app y escriben en la base real.
+
+El sitio de abajo es solo una **vista pública de consulta**: un sitio estático no puede conectarse a un SQL Server local, por eso usa una copia exportada.
+
+## Tablero en línea (vista pública de solo consulta)
 
 **https://rebeca256.github.io/sipa-bacheo-inteligente/**
 
