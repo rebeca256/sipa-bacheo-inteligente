@@ -336,7 +336,7 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - `contabilidad/contingencias_edomex.py`: valor esperado + Monte Carlo + reparto por municipio + asiento NIF C-9 al 31/12/2026. Resultados en `contabilidad/resultados_edomex/`.
 - Resultado: ≈ 2,066 casos viables al año; provisión (valor esperado) $58.7 M; IC 90 % $45.9-$75.4 M; se revela como pasivo contingente $16.7 M (P95 − VE).
 - `avance_Contabilidad_contingencias_Edomex.docx`, generado con `scripts/generar_doc_contingencias_edomex.py`.
-- Pendiente: pedir por SAIMEX el registro de indemnizaciones (art. 9 de la ley) a Junta de Caminos y ayuntamientos para sustituir supuestos.
+- Descartado (13 nov): no se envió la solicitud por SAIMEX; la respuesta no llegaría antes de la entrega del 8 de diciembre. El documento la deja como propuesta a futuro.
 
 ## 11 nov 2026 · Datos reales de Toluca en todas las materias
 - Fuente: tablero público de bacheo de la DGOP de Toluca (https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php). Servicios: `ajax/buscar_tablero_bacheo.php` (tabla paginada), `ws/ListadoMarkers.php` (coordenadas), `ws/obtenerMarker.php?folio=` (largo, ancho, profundidad, fotos).
@@ -386,3 +386,6 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 
 ## 13 nov 2026 · Contabilidad: aclaración de P(reclama)
 - Sección 6 de `avance_Contabilidad_contingencias_Edomex.docx`: párrafo y tabla que explican por qué 30 %, 50 % y 60 % no suman 100 % (son probabilidades condicionales; cada renglón suma 100 %).
+
+## 13 nov 2026 · SAIMEX descartado
+- Se borró `solicitud_SAIMEX.md`. Plazo legal: 15 días hábiles (vencería el 7 de diciembre) más 7 de prórroga; no alcanza para la entrega del 8 de diciembre.
