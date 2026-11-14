@@ -12,6 +12,7 @@ La aplicación del proyecto es el tablero de `tablero/app.py`, que corre en loca
 - Toda escritura pasa por los **procedimientos almacenados** de `bd/05` (`sp_registrar_reporte`, `sp_calcular_ipu`, `sp_registrar_decision`, `sp_actualizar_estado_bache`), con sus transacciones y restricciones: lo inválido lo rechaza la base y la transacción se revierte.
 - La barra superior del tablero indica **«En vivo · SQL Server»**.
 - Las pruebas `tablero/pruebas_e2e.py` (Playwright) recorren la app y escriben en la base real.
+- **Evidencia:** [evidencia_sql_server.pdf](pdf/evidencia_sql_server.pdf) muestra la app en un navegador y, en cada paso, la consulta directa a SQL Server: lee lo mismo, escribe un reporte (la fila aparece en la base y la cifra sube en 1) y la base rechaza una decisión inválida. Se genera con `python scripts/evidencia_sql_server.py`.
 
 El sitio de abajo es solo una **vista pública de consulta**: un sitio estático no puede conectarse a un SQL Server local, por eso usa una copia exportada.
 

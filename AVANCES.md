@@ -379,3 +379,7 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 - Se quitó streamlit-shadcn-ui. Estilo inspirado en AdminLTE 3 (plantilla MIT), hecho con CSS sobre Streamlit: menú lateral oscuro con íconos de Bootstrap Icons, barra superior con la ruta y el modo ("En vivo · SQL Server"), cifras en "small boxes" de color con ícono, tarjetas con borde superior y callout para el hallazgo.
 - No se usó streamlit-option-menu: dibuja en un iframe y rompería las pruebas y el sitio stlite.
 - Pruebas: e2e 7/7 y sitio 5/5; base reconstruida y `docs/` regenerado.
+
+## 13 nov 2026 · Reporte de evidencia de conexión a SQL Server
+- `scripts/evidencia_sql_server.py` genera `pdf/evidencia_sql_server.pdf` (5 páginas): datos del servidor (SQL Server 17, base SIPA, procedimientos), el tablero muestra el mismo conteo que `SELECT COUNT(*) FROM reporte`, un reporte enviado desde el tablero aparece como fila en la base y la cifra sube en 1, y la base rechaza AJUSTAR sin justificación sin guardar nada.
+- Base reconstruida después de generarlo.
