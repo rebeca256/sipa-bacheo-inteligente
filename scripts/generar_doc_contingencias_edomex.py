@@ -238,6 +238,17 @@ def main():
         "Los salarios son de 2025; para el cierre de 2026 deben actualizarse con el salario mínimo vigente.",
         "No se descuenta a valor presente porque los pagos se esperan dentro del año.",
     ])
+    parrafo(doc, "Los tres porcentajes no tienen que sumar 100 %, porque cada uno se aplica a un grupo distinto de "
+                 "accidentes y responde a una pregunta de sí o no dentro de ese grupo. Son probabilidades "
+                 "condicionales: P(reclama | fatal) = 0.60 se lee «probabilidad de reclamar, dado que el accidente "
+                 "fue fatal». Lo que suma 100 % es cada renglón (reclama + no reclama). Sumarían 100 % solo si "
+                 "describieran cómo se reparten todas las reclamaciones entre los tres tipos, que es otra pregunta.",
+            "¿Por qué no suman 100 %? ")
+    graves = ve[ve.tipo.str.startswith("Accidente")]
+    tabla(doc, ["Grupo de accidentes", "Accidentes/año", "Reclama", "No reclama", "Suma", "Reclamaciones esperadas"],
+          [[x.tipo.replace("Accidente: ", ""), f"{x.eventos_anuales:,.0f}", pct(x.p_reclama), pct(1 - x.p_reclama),
+            "100 %", f"{x.eventos_anuales * x.p_reclama:,.1f}"] for x in graves.itertuples()],
+          [3.4, 2.4, 2, 2.2, 1.6, 3.4])
     titulo(doc, "Referencias")
     vinetas(doc, r["fuentes"] + [
         "Consejo Mexicano de Normas de Información Financiera. (2024). NIF C-9 Provisiones, contingencias y "

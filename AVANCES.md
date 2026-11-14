@@ -383,3 +383,6 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 ## 13 nov 2026 · Reporte de evidencia de conexión a SQL Server
 - `scripts/evidencia_sql_server.py` genera `pdf/evidencia_sql_server.pdf` (5 páginas): datos del servidor (SQL Server 17, base SIPA, procedimientos), el tablero muestra el mismo conteo que `SELECT COUNT(*) FROM reporte`, un reporte enviado desde el tablero aparece como fila en la base y la cifra sube en 1, y la base rechaza AJUSTAR sin justificación sin guardar nada.
 - Base reconstruida después de generarlo.
+
+## 13 nov 2026 · Contabilidad: aclaración de P(reclama)
+- Sección 6 de `avance_Contabilidad_contingencias_Edomex.docx`: párrafo y tabla que explican por qué 30 %, 50 % y 60 % no suman 100 % (son probabilidades condicionales; cada renglón suma 100 %).
