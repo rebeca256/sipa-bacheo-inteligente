@@ -32,7 +32,7 @@ try:                                   # en el navegador (stlite) no hay pyodbc 
 except ImportError:
     pyodbc = None
 
-CONEXION = ("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA;"
+CONEXION = ("DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";DATABASE=" + os.environ.get("SIPA_BD", "SIPA") + ";"
             "Trusted_Connection=yes")
 DATOS = Path(__file__).parent / "datos"
 # --- Sistema visual (paleta validada para daltonismo; ver skill dataviz) -------
@@ -213,24 +213,70 @@ except AttributeError:              # Altair 5.5+ / 6
 # ---------------------------------------------------------------------------
 
 @st.cache_resource
-def conexion():
-    """Conexión a SQL Server, o None si no hay (entonces se usa la copia de solo consulta)."""
-    if pyodbc is None or os.environ.get("SIPA_MODO") == "demo":
-        return None
+def _conexion_guardada():
     try:
         return pyodbc.connect(CONEXION, autocommit=True, timeout=3)   # cada procedimiento maneja su transacción
     except pyodbc.Error:
         return None
 
 
-EN_LINEA = conexion() is None
+def conexion():
+    """Conexión viva a SQL Server, o None si no hay.
+
+    En cada ejecución del script se comprueba la conexión guardada con SELECT 1;
+    si SQL Server se cayó, se descarta y se intenta reconectar, de modo que al
+    volver el servidor la app recupera el modo en vivo sin reiniciarse.
+    """
+    if pyodbc is None or os.environ.get("SIPA_MODO") == "demo":
+        return None
+    cx = _conexion_guardada()
+    if cx is not None:
+        try:
+            cx.cursor().execute("SELECT 1").fetchall()
+            return cx
+        except pyodbc.Error:
+            pass
+    _conexion_guardada.clear()
+    return _conexion_guardada()
+
+
+# Modos de operación:
+#   "vivo"    SQL Server conectado: lee y escribe en la base.
+#   "demo"    sitio estático (stlite) o SIPA_MODO=demo: copia de solo consulta, por diseño.
+#   "sin_sql" la app local no encontró SQL Server: copia de solo consulta y reintento en cada recarga.
+CX = conexion()
+if CX is not None:
+    MODO = "vivo"
+elif pyodbc is None or os.environ.get("SIPA_MODO") == "demo":
+    MODO = "demo"
+else:
+    MODO = "sin_sql"
+EN_LINEA = CX is None
+
+
+# SQLSTATE de ODBC que indican conexión perdida (y no una regla incumplida)
+CONEXION_PERDIDA = {"08S01", "08001", "08003", "08004", "08007", "HYT00", "HYT01"}
+
+
+def sql_caido(e):
+    """SQL Server dejó de responder a media ejecución: se avisa y se detiene la página."""
+    _conexion_guardada.clear()
+    st.error(f"Se perdió la conexión con SQL Server ({e}). Recargue la página para reintentar; "
+             "si el servidor sigue caído, la app mostrará la copia de solo consulta.")
+    st.stop()
 
 
 def consulta(sql, *params):
-    cur = conexion().cursor()
-    cur.execute(sql, params)
-    columnas = [c[0] for c in cur.description]
-    df = pd.DataFrame.from_records(cur.fetchall(), columns=columnas)
+    try:                                   # ejecución y lectura completa de filas
+        cur = CX.cursor()
+        cur.execute(sql, params)
+        columnas = [c[0] for c in cur.description]
+        filas = cur.fetchall()
+    except pyodbc.Error as e:
+        if e.args and e.args[0] in CONEXION_PERDIDA:
+            sql_caido(e)
+        raise                                  # permisos o consulta: se ve el error real, no "se cayó"
+    df = pd.DataFrame.from_records(filas, columns=columnas)
     # SQL Server devuelve DECIMAL como decimal.Decimal: se pasa a float para tablas, gráficas y mapa
     for c in df.columns:
         if df[c].dtype == object and df[c].map(lambda v: isinstance(v, Decimal)).any():
@@ -245,7 +291,10 @@ def copia(nombre):
 
 def ejecutar(sql, *params):
     """Ejecuta un procedimiento; devuelve (ok, mensaje, filas del primer resultado o None)."""
-    cur = conexion().cursor()
+    try:
+        cur = CX.cursor()
+    except pyodbc.Error as e:
+        sql_caido(e)
     try:
         cur.execute("SET NOCOUNT ON; " + sql, params)
         filas = None
@@ -257,6 +306,8 @@ def ejecutar(sql, *params):
                 break
         return True, "", filas
     except pyodbc.Error as e:
+        if e.args and e.args[0] in CONEXION_PERDIDA:     # se cayó el servidor, no es una regla de negocio
+            sql_caido(e)
         texto = str(e.args[1]) if len(e.args) > 1 else str(e)
         texto = texto.split("[SQL Server]")[-1].split("(")[0].strip()
         for nombre, explicacion in REGLAS.items():
@@ -298,7 +349,8 @@ def total_reportes():
 
 
 def tiempos():
-    df = copia("tiempos") if EN_LINEA else consulta("SELECT * FROM ind.v_tiempo_respuesta_semaforo")
+    df = copia("tiempos") if EN_LINEA else consulta("SELECT semaforo_final, baches, dias_promedio, dias_min, dias_max, meta_dias, pct_en_meta "
+                                                                  "FROM ind.v_tiempo_respuesta_semaforo")
     return df.sort_values("meta_dias")
 
 
@@ -328,6 +380,14 @@ def detalle(id_calculo):
     det = det.copy()
     det[["valor", "peso", "aporte"]] = det[["valor", "peso", "aporte"]].astype(float)
     return det.sort_values("aporte", ascending=False).reset_index(drop=True)
+
+
+def modo_base():
+    """DEMO (selector simulado) u OPERATIVO (identidad de la sesión). El sitio estático es siempre DEMO."""
+    if EN_LINEA:
+        return "DEMO"
+    m = consulta("SELECT valor FROM dbo.configuracion WHERE clave = 'modo'")
+    return m["valor"].iloc[0] if len(m) else "OPERATIVO"
 
 
 def autoridades():
@@ -364,6 +424,34 @@ def folio(id_reporte):
         "prioridad_decidida": dec.get(id_b) if id_b else None}])
     hist = seg[seg["id_bache"] == id_b].drop(columns="id_bache").sort_values("fecha")
     return cab, hist
+
+
+@st.cache_data(ttl=300)
+def sincronizar_reincidencia():
+    """Actualiza la reincidencia si hay reportes posteriores al corte (máx. una vez cada 5 min)."""
+    c = consulta("""SELECT c.ultimo_id_reporte, c.fecha_corte, c.ultimo_error,
+                             (SELECT MAX(id_reporte) FROM reporte) AS max_id
+                      FROM ind.corte_reincidencia c""")
+    if c.empty or (c["max_id"].iloc[0] or 0) > c["ultimo_id_reporte"].iloc[0]:
+        ok, msg, _ = ejecutar("EXEC ind.sp_actualizar_reincidencia")
+        c = consulta("SELECT ultimo_id_reporte, fecha_corte, ultimo_error FROM ind.corte_reincidencia")
+        if not ok:
+            return c, msg
+    return c, None
+
+
+def corte_reincidencia():
+    """Texto con la fecha de corte del indicador de reincidencia."""
+    if EN_LINEA:
+        return "Corte: el de la copia exportada."
+    c, error = sincronizar_reincidencia()
+    if c.empty:
+        return "Sin corte registrado."
+    texto = f"Corte: {pd.to_datetime(c['fecha_corte'].iloc[0]):%d/%m/%Y %H:%M}, hasta el reporte " \
+            f"{int(c['ultimo_id_reporte'].iloc[0]):,}. Cada reporte nuevo se clasifica al registrarse."
+    if error:
+        texto += f" Última actualización fallida: {error}"
+    return texto
 
 
 def reincidencia():
@@ -553,13 +641,17 @@ def leyenda_segmentada(df, valor, etiqueta):
 # --- Piezas de la interfaz -----------------------------------------------------
 
 def barra_superior(pagina):
-    modo = ('<span class="modo">Copia de solo consulta</span>' if EN_LINEA
-            else '<span class="modo vivo">● En vivo · SQL Server</span>')
+    modo = {"vivo": '<span class="modo vivo">● En vivo · SQL Server</span>',
+            "demo": '<span class="modo">Copia de solo consulta</span>',
+            "sin_sql": '<span class="modo">SQL Server no disponible · copia</span>'}[MODO]
     st.markdown(f'<div class="topbar"><span class="ruta">Inicio / <b>{pagina}</b></span>{modo}</div>',
                 unsafe_allow_html=True)
-    if EN_LINEA:
+    if MODO == "demo":
         st.caption("Versión en línea de solo consulta (copia de los datos). Las acciones revisan las reglas, "
                    "pero no guardan cambios.")
+    elif MODO == "sin_sql":
+        st.warning("No se pudo conectar a SQL Server: se muestra la copia de solo consulta y nada se guarda. "
+                   "La app reintenta la conexión en cada recarga.")
 
 
 def menu_lateral(inicial):
@@ -758,8 +850,9 @@ def pagina_resumen():
 
 
 def pagina_ciudadano():
-    encabezado("Modo ciudadano", "No necesita cuenta. El reporte se liga al bache que ya exista en la misma "
-                                 "celda de 250 m.")
+    encabezado("Modo ciudadano", "No necesita cuenta. El reporte se liga a un bache abierto solo si está a "
+                                 "15 m o menos, en el mismo territorio y con reportes en los últimos 30 días; "
+                                 "si no, se abre un caso nuevo.")
     izq, der = st.columns(2, gap="medium")
     with izq, tarjeta("reportar", "Reportar un bache", "Ubicación y una descripción breve"):
         cols = colonias()
@@ -848,8 +941,12 @@ def pagina_ranking():
     df = baches()
     abiertos = df[df["estado"].isin(["VALIDADO", "PRIORIZADO", "EN_ATENCION"]) & df["ipu"].notna()].copy()
     territorios = sorted(abiertos["territorio"].dropna().unique())
+    if not territorios:
+        st.info("No hay baches abiertos con IPU calculado en ningún territorio.")
+        return
     f1, f2 = st.columns(2)
-    territorio = f1.selectbox("Territorio", territorios, index=territorios.index("CHALCO"))
+    territorio = f1.selectbox("Territorio", territorios,
+                              index=territorios.index("CHALCO") if "CHALCO" in territorios else 0)
     rank = abiertos[abiertos["territorio"] == territorio].sort_values("ipu", ascending=False)
     rank.insert(0, "lugar", range(1, len(rank) + 1))
     id_bache = f2.selectbox("Ver la ficha del bache", rank["id_bache"],
@@ -873,10 +970,28 @@ def pagina_autoridad():
     encabezado("Modo autoridad", "La autoridad decide sobre la recomendación y repara con sus propios "
                                  "recursos; en SIPA solo informa el avance.")
     usuarios = autoridades()
+    if usuarios.empty:
+        st.info("No hay autoridades activas registradas.")
+        return
     f1, f2 = st.columns(2)
-    nombre = f1.selectbox("Entrar como", usuarios["nombre"],
-                          index=int((usuarios["territorio"] == "CHALCO").idxmax()))
-    u = usuarios[usuarios["nombre"] == nombre].iloc[0]
+    if modo_base() == "OPERATIVO":
+        # Identidad de la sesión de SQL Server: el tablero no puede elegirla
+        actor = consulta("SELECT dbo.fn_actor(NULL) AS id")["id"].iloc[0]
+        if pd.isna(actor):
+            st.error("Su sesión de SQL Server no está asociada a una autoridad activa (usuario.login_sql). "
+                     "No puede decidir ni informar avances.")
+            return
+        u = usuarios[usuarios["id_usuario"] == int(actor)].iloc[0]
+        f1.markdown(f"**Sesión autenticada:** {u.nombre} · {u.territorio.title()}")
+    else:
+        hallazgo("<b>Simulación académica (base en modo DEMO, datos simulados):</b> el selector «Entrar como» "
+                 "reemplaza el inicio de sesión. En modo OPERATIVO la base toma la identidad de la sesión de SQL "
+                 "Server y el selector desaparece. En ambos modos la base limita a cada autoridad a su territorio y "
+                 "registra al actor.")
+        es_chalco = (usuarios["territorio"] == "CHALCO").reset_index(drop=True)
+        nombre = f1.selectbox("Entrar como", usuarios["nombre"],
+                              index=int(es_chalco.idxmax()) if es_chalco.any() else 0)
+        u = usuarios[usuarios["nombre"] == nombre].iloc[0]
     df = baches()
     mios = df[(df["territorio"] == u.territorio) & df["estado"].isin(["REPORTADO", "VALIDADO", "PRIORIZADO",
                                                                       "EN_ATENCION"])]
@@ -945,6 +1060,7 @@ def pagina_autoridad():
 def pagina_indicadores():
     encabezado("Indicadores", "Reincidencia, causas y reportes resueltos salen de datos reales; decisiones, "
                               "reparaciones y tiempos son simulados (bd/08).")
+    st.caption(corte_reincidencia())
     rein = reincidencia()
     tr = tiempos()
     cau = causas()

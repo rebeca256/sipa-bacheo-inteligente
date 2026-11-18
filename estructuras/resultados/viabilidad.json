@@ -131,22 +131,22 @@
       "rojos_en_3_dias": 1.0,
       "espera_por_alcaldia": {
         "ALVARO OBREGON": 21.8,
-        "AZCAPOTZALCO": 23.5,
+        "AZCAPOTZALCO": 23.4,
         "BENITO JUAREZ": 16.3,
         "COYOACAN": 20.6,
-        "CUAJIMALPA DE MORELOS": 32.2,
+        "CUAJIMALPA DE MORELOS": 32.1,
         "CUAUHTEMOC": 13.7,
         "GUSTAVO A. MADERO": 23.6,
         "IZTACALCO": 15.6,
         "IZTAPALAPA": 24.6,
         "LA MAGDALENA CONTRERAS": 23.8,
-        "MIGUEL HIDALGO": 24.9,
+        "MIGUEL HIDALGO": 25.0,
         "TLAHUAC": 31.8,
         "TLALPAN": 24.3,
-        "VENUSTIANO CARRANZA": 16.2,
+        "VENUSTIANO CARRANZA": 16.3,
         "XOCHIMILCO": 25.3
       },
-      "brecha_alcaldias": 18.5,
+      "brecha_alcaldias": 18.4,
       "pendientes_al_final": 1360,
       "llegadas_por_dia": 29.7,
       "espera_p90": 52
@@ -181,11 +181,11 @@
         "ALVARO OBREGON": 21.6,
         "AZCAPOTZALCO": 23.8,
         "BENITO JUAREZ": 16.5,
-        "COYOACAN": 21.5,
+        "COYOACAN": 21.6,
         "CUAJIMALPA DE MORELOS": 27.3,
         "CUAUHTEMOC": 13.9,
         "GUSTAVO A. MADERO": 24.8,
-        "IZTACALCO": 17.0,
+        "IZTACALCO": 17.1,
         "IZTAPALAPA": 25.3,
         "LA MAGDALENA CONTRERAS": 19.1,
         "MIGUEL HIDALGO": 24.0,
@@ -279,17 +279,17 @@
       "alcaldia": "GUSTAVO A. MADERO",
       "baches": 36,
       "reincidencias": 20,
-      "riesgo_72h": 0.021,
+      "riesgo_72h": 0.0206,
       "lat": 19.56051,
       "lon": -99.14131,
-      "puntaje": 10.42
+      "puntaje": 10.41
     },
     {
       "celda": "F172_C119",
       "alcaldia": "IZTACALCO",
       "baches": 40,
       "reincidencias": 12,
-      "riesgo_72h": 0.021,
+      "riesgo_72h": 0.0206,
       "lat": 19.38763,
       "lon": -99.11613,
       "puntaje": 6.25
@@ -299,17 +299,17 @@
       "alcaldia": "CUAUHTEMOC",
       "baches": 22,
       "reincidencias": 9,
-      "riesgo_72h": 0.1921,
+      "riesgo_72h": 0.1897,
       "lat": 19.43168,
       "lon": -99.16267,
-      "puntaje": 6.23
+      "puntaje": 6.21
     },
     {
       "celda": "F104_C129",
       "alcaldia": "XOCHIMILCO",
       "baches": 18,
       "reincidencias": 11,
-      "riesgo_72h": 0.021,
+      "riesgo_72h": 0.0206,
       "lat": 19.23557,
       "lon": -99.09266,
       "puntaje": 5.73
@@ -319,7 +319,7 @@
       "alcaldia": "GUSTAVO A. MADERO",
       "baches": 24,
       "reincidencias": 11,
-      "riesgo_72h": 0.021,
+      "riesgo_72h": 0.0206,
       "lat": 19.56227,
       "lon": -99.12468,
       "puntaje": 5.73
@@ -329,47 +329,47 @@
       "alcaldia": "CUAUHTEMOC",
       "baches": 23,
       "reincidencias": 6,
-      "riesgo_72h": 0.4015,
+      "riesgo_72h": 0.3976,
       "lat": 19.4616,
       "lon": -99.13672,
-      "puntaje": 5.41
+      "puntaje": 5.39
     },
     {
       "celda": "F178_C112",
       "alcaldia": "IZTACALCO",
       "baches": 25,
       "reincidencias": 8,
-      "riesgo_72h": 0.1497,
+      "riesgo_72h": 0.1476,
       "lat": 19.40078,
       "lon": -99.1319,
-      "puntaje": 5.2
+      "puntaje": 5.18
     },
     {
       "celda": "F212_C077",
       "alcaldia": "AZCAPOTZALCO",
       "baches": 23,
       "reincidencias": 8,
-      "riesgo_72h": 0.107,
+      "riesgo_72h": 0.1054,
       "lat": 19.47707,
       "lon": -99.21581,
-      "puntaje": 4.86
+      "puntaje": 4.84
     },
     {
       "celda": "F151_C088",
       "alcaldia": "ALVARO OBREGON",
       "baches": 24,
       "reincidencias": 5,
-      "riesgo_72h": 0.4428,
+      "riesgo_72h": 0.4388,
       "lat": 19.33965,
       "lon": -99.18927,
-      "puntaje": 4.71
+      "puntaje": 4.69
     },
     {
       "celda": "F172_C118",
       "alcaldia": "IZTACALCO",
       "baches": 33,
       "reincidencias": 9,
-      "riesgo_72h": 0.021,
+      "riesgo_72h": 0.0206,
       "lat": 19.38756,
       "lon": -99.11745,
       "puntaje": 4.69
@@ -399,27 +399,27 @@
       "alcaldia": "MIGUEL HIDALGO",
       "baches": 26,
       "reincidencias": 6,
-      "riesgo_72h": 0.2344,
+      "riesgo_72h": 0.2315,
       "lat": 19.42299,
       "lon": -99.22281,
-      "puntaje": 4.41
+      "puntaje": 4.39
     },
     {
       "celda": "F194_C079",
       "alcaldia": "MIGUEL HIDALGO",
       "baches": 18,
       "reincidencias": 6,
-      "riesgo_72h": 0.2344,
+      "riesgo_72h": 0.2315,
       "lat": 19.43679,
       "lon": -99.21069,
-      "puntaje": 4.41
+      "puntaje": 4.39
     },
     {
       "celda": "F176_C126",
       "alcaldia": "IZTACALCO",
       "baches": 8,
       "reincidencias": 3,
-      "riesgo_72h": 0.9614,
+      "riesgo_72h": 0.9608,
       "lat": 19.39653,
       "lon": -99.09855,
       "puntaje": 4.38
@@ -431,112 +431,112 @@
       "baches": 4019,
       "pct_reincidencia": 5.3,
       "pct_rojos": 3.4,
-      "riesgo_72h_medio": 0.155
+      "riesgo_72h_medio": 0.153
     },
     {
       "alcaldia": "ALVARO OBREGON",
       "baches": 3984,
       "pct_reincidencia": 7.0,
       "pct_rojos": 2.5,
-      "riesgo_72h_medio": 0.141
+      "riesgo_72h_medio": 0.139
     },
     {
       "alcaldia": "COYOACAN",
       "baches": 3805,
       "pct_reincidencia": 7.0,
       "pct_rojos": 3.7,
-      "riesgo_72h_medio": 0.164
+      "riesgo_72h_medio": 0.163
     },
     {
       "alcaldia": "MIGUEL HIDALGO",
       "baches": 3525,
       "pct_reincidencia": 7.6,
       "pct_rojos": 5.3,
-      "riesgo_72h_medio": 0.223
+      "riesgo_72h_medio": 0.221
     },
     {
       "alcaldia": "AZCAPOTZALCO",
       "baches": 3483,
       "pct_reincidencia": 9.3,
       "pct_rojos": 2.2,
-      "riesgo_72h_medio": 0.15
+      "riesgo_72h_medio": 0.148
     },
     {
       "alcaldia": "CUAUHTEMOC",
       "baches": 2918,
       "pct_reincidencia": 7.8,
       "pct_rojos": 12.4,
-      "riesgo_72h_medio": 0.383
+      "riesgo_72h_medio": 0.381
     },
     {
       "alcaldia": "TLALPAN",
       "baches": 2791,
       "pct_reincidencia": 5.1,
       "pct_rojos": 1.4,
-      "riesgo_72h_medio": 0.097
+      "riesgo_72h_medio": 0.096
     },
     {
       "alcaldia": "IZTACALCO",
       "baches": 1832,
       "pct_reincidencia": 7.9,
       "pct_rojos": 3.8,
-      "riesgo_72h_medio": 0.188
+      "riesgo_72h_medio": 0.186
     },
     {
       "alcaldia": "XOCHIMILCO",
       "baches": 1669,
       "pct_reincidencia": 6.1,
       "pct_rojos": 1.1,
-      "riesgo_72h_medio": 0.092
+      "riesgo_72h_medio": 0.09
     },
     {
       "alcaldia": "IZTAPALAPA",
       "baches": 1616,
       "pct_reincidencia": 3.1,
       "pct_rojos": 4.1,
-      "riesgo_72h_medio": 0.197
+      "riesgo_72h_medio": 0.195
     },
     {
       "alcaldia": "BENITO JUAREZ",
       "baches": 1427,
       "pct_reincidencia": 3.4,
       "pct_rojos": 5.2,
-      "riesgo_72h_medio": 0.28
+      "riesgo_72h_medio": 0.278
     },
     {
       "alcaldia": "VENUSTIANO CARRANZA",
       "baches": 883,
       "pct_reincidencia": 3.1,
       "pct_rojos": 9.3,
-      "riesgo_72h_medio": 0.325
+      "riesgo_72h_medio": 0.322
     },
     {
       "alcaldia": "LA MAGDALENA CONTRERAS",
       "baches": 686,
       "pct_reincidencia": 3.6,
       "pct_rojos": 0.7,
-      "riesgo_72h_medio": 0.09
+      "riesgo_72h_medio": 0.089
     },
     {
       "alcaldia": "TLAHUAC",
       "baches": 649,
       "pct_reincidencia": 3.2,
       "pct_rojos": 0.8,
-      "riesgo_72h_medio": 0.099
+      "riesgo_72h_medio": 0.098
     },
     {
       "alcaldia": "CUAJIMALPA DE MORELOS",
       "baches": 417,
       "pct_reincidencia": 3.6,
       "pct_rojos": 1.2,
-      "riesgo_72h_medio": 0.081
+      "riesgo_72h_medio": 0.08
     },
     {
       "alcaldia": "MILPA ALTA",
       "baches": 132,
       "pct_reincidencia": 0.8,
       "pct_rojos": 0.0,
-      "riesgo_72h_medio": 0.049
+      "riesgo_72h_medio": 0.048
     }
   ]
 }

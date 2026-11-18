@@ -8,6 +8,12 @@
 
    Los baches se forman agrupando los reportes de oct-dic 2022 por celda:
    un bache por celda, y sus reportes quedan ligados a él (deduplicación).
+   Hipótesis de esta carga histórica: es una agregación por celda de
+   250 m para tener baches de demostración con datos reales (los reportes
+   2022 no traen el bache exacto). NO es la regla operativa: los reportes
+   nuevos pasan por sp_registrar_reporte (bd/05), que liga solo a 15 m,
+   mismo territorio y 30 días, igual que estructuras/sipa_ed.py (≈ 11 m,
+   30 días). Los experimentos de estructuras evalúan esa regla fina.
    ===================================================================== */
 USE SIPA;
 SET QUOTED_IDENTIFIER ON;

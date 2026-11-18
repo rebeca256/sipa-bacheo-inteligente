@@ -12,7 +12,12 @@ Entradas (ejecutar antes los modelos de Probabilidad y Cálculo):
 
 Modelo de reclamaciones de un bache que permanece abierto T días:
 
-    accidentes atribuibles por día  a = −ln(1 − P72) / 3 · FA
+    accidentes atribuibles por día  a = −ln(1 − P72) / 3 · FA / n_celda
+
+P72 es el riesgo de la CELDA de 250 m; si n_celda baches pendientes comparten la
+celda, sus accidentes esperados se reparten entre ellos (no se cuentan n veces).
+FA (fracción atribuible) es un ESCENARIO hipotético, no un efecto causal: se
+reportan atribución nula (0), media (FA/2) y cota superior (1 − 1/RR).
     reclamaciones esperadas          E = a·T·p_rec  (+ ponchaduras en vía rápida)
     P(al menos una reclamación)      = 1 − e^(−E)
     provisión (mejor estimación)     = Σ E · monto promedio
@@ -80,6 +85,7 @@ def leer_baches():
                       usecols=["id_bache", "territorio", "costo_hoy", "extra_6m"])
     df = pend.merge(celdas, on="celda_id", how="left").merge(det, on="id_bache", how="left")
     df["via_rapida"] = df["via_rapida"].fillna(False).astype(bool)
+    df["n_celda"] = df.groupby("celda_id")["id_bache"].transform("size")
     return df
 
 
@@ -89,7 +95,7 @@ def ponchan(df):
 
 def reclamaciones(df, dias, fa, p_rec_pon=P_RECLAMA_PONCHADURA):
     """Reclamaciones esperadas y montos (accidentes, ponchaduras) si el bache queda abierto `dias` días."""
-    acc_dia = -np.log(1 - df["p72_accidente"]) / 3 * fa
+    acc_dia = -np.log(1 - df["p72_accidente"]) / 3 * fa / df["n_celda"]
     e_acc = acc_dia * dias * P_RECLAMA_ACCIDENTE
     e_pon = np.where(ponchan(df), PONCHADURAS_DIA * dias * p_rec_pon, 0.0)
     return e_acc + e_pon, e_acc * MONTO_ACCIDENTE, e_pon * MONTO_PONCHADURA
@@ -129,6 +135,20 @@ def sensibilidad(b, fa):
         reactivo = b["costo_reparar_reactivo"].sum() + a_r.sum() + p_r.sum()
         preventivo = b["costo_reparar_preventivo"].sum() + a_p.sum() + p_p.sum()
         filas.append(dict(supuesto=nombre, p_reclama_ponchadura=p, costo_total_reactivo=reactivo,
+                          costo_total_preventivo=preventivo, ahorro=reactivo - preventivo))
+    return pd.DataFrame(filas)
+
+
+def sensibilidad_atribucion(b, escenarios):
+    """Costo total y ahorro del preventivo con atribución nula, media y cota superior."""
+    filas = []
+    for nombre, fa in escenarios.items():
+        _, a_r, p_r = reclamaciones(b, DIAS_REACTIVO, fa)
+        _, a_p, p_p = reclamaciones(b, dias_preventivo(b), fa)
+        reactivo = b["costo_reparar_reactivo"].sum() + a_r.sum() + p_r.sum()
+        preventivo = b["costo_reparar_preventivo"].sum() + a_p.sum() + p_p.sum()
+        filas.append(dict(escenario=nombre, fraccion_atribuible=fa, provision_accidentes_reactivo=a_r.sum(),
+                          provision_accidentes_preventivo=a_p.sum(), costo_total_reactivo=reactivo,
                           costo_total_preventivo=preventivo, ahorro=reactivo - preventivo))
     return pd.DataFrame(filas)
 
@@ -402,6 +422,9 @@ def main():
     graficas(esc, b)
     sens = sensibilidad(b, fa)
     sens.to_csv(SALIDA / "t9_sensibilidad.csv", index=False)
+    esc_fa = rp["incidente"].get("escenarios_fraccion", {"nula": 0.0, "cota_superior": fa})
+    sens_fa = sensibilidad_atribucion(b, esc_fa)
+    sens_fa.to_csv(SALIDA / "t10_sensibilidad_atribucion.csv", index=False)
 
     por_terr = (b.groupby("territorio")
                  .agg(baches=("id_bache", "size"), provision_preventivo=("monto_esperado_preventivo", "sum"),
@@ -431,6 +454,7 @@ def main():
         fe.to_excel(xw, sheet_name="Flujo de efectivo", index=False)
         esc.to_excel(xw, sheet_name="Escenarios NIF C-9", index=False)
         sens.to_excel(xw, sheet_name="Sensibilidad", index=False)
+        sens_fa.to_excel(xw, sheet_name="Sensibilidad atribución", index=False)
         b[cols].to_excel(xw, sheet_name="Provisión por bache", index=False)
 
     resumen = dict(
@@ -443,6 +467,8 @@ def main():
         baches=int(len(b)),
         baches_ponchan=int(ponchan(b).sum()),
         sensibilidad=sens.to_dict(orient="records"),
+        sensibilidad_atribucion=sens_fa.to_dict(orient="records"),
+        baches_comparten_celda=int((b["n_celda"] > 1).sum()),
         escenarios=esc.to_dict(orient="records"),
         ahorro_preventivo=float(react["costo_total"] - prev["costo_total"]),
         asientos=det, asientos_reactivo=det_r,

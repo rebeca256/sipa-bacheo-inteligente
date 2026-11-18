@@ -14,6 +14,7 @@ Uso (desde la carpeta del proyecto):
 Salida:
     entregable_final_SIPA.docx
 """
+import os
 import json
 import sys
 from pathlib import Path
@@ -73,7 +74,7 @@ def figura(doc, ruta, pie, ancho=16):
 # ---------------------------------------------------------------------------
 
 def datos_base():
-    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA;"
+    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";DATABASE=SIPA;"
                         "Trusted_Connection=yes")
     cur = cx.cursor()
 
@@ -123,7 +124,7 @@ def datos_base():
                         WHERE t.nombre = 'MILPA ALTA' AND r.id_fuente = 1""")[0]
     cx.close()
 
-    dw = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA_DW;"
+    dw = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";DATABASE=SIPA_DW;"
                         "Trusted_Connection=yes").cursor()
     dw.execute("""SELECT COUNT(*) FROM (SELECT TOP 50 * FROM dm_priorizacion.v_reportes_vs_ipu
                   ORDER BY lugar_por_reportes) x WHERE lugar_por_ipu > 1000""")
@@ -245,8 +246,9 @@ def prototipo(doc, d):
     ], [3.5, 9.5, 3.5])
     parrafo(doc, "El recorrido completo de un bache en el tablero:", "Cómo se usa. ")
     vinetas(doc, [
-        "El ciudadano reporta el bache sin crear una cuenta. Si ya existe un bache en la misma celda de 250 m, "
-        "el reporte se une a él, así que se cuentan daños y no avisos repetidos.",
+        "El ciudadano reporta el bache sin crear una cuenta. Si ya hay un bache abierto a 15 m o menos, en el "
+        "mismo territorio y con reportes en los últimos 30 días, el reporte se une a él, así que se cuentan daños y "
+        "no avisos repetidos; dos baches separados dentro de la misma celda quedan como casos distintos.",
         "SIPA calcula el IPU, el semáforo, la intervención recomendada y el costo estimado, y muestra la ficha "
         "de justificación.",
         "La autoridad aprueba, ajusta o rechaza la recomendación (ajustar o rechazar exige escribir el motivo) "
@@ -324,7 +326,8 @@ def cuantitativo(doc, d, calc, prob, v):
                  "la probabilidad de al menos un accidente en 72 horas con un proceso de Poisson y la usa en el "
                  f"criterio de riesgo del IPU. El semáforo por riesgo coincide con el del IPU en el "
                  f"{pct(pend['coinciden'])} de los baches pendientes; {pend['rojo72_no_rojo_ipu']} están en rojo "
-                 "por riesgo sin estarlo en el IPU, porque el IPU pondera también otros criterios.",
+                 "por riesgo sin estarlo en el IPU, porque el IPU pondera también otros criterios. El modelo se "
+                 f"validó prediciendo 2019 con datos de 2018 (Spearman {prob['validacion_temporal']['spearman']:.2f}).",
             "Riesgo de accidente a 72 horas. ")
     parrafo(doc, f"Con Cálculo Integral, la pérdida de material es P(T) = V₀(e^(kT) − 1). En lluvias el daño "
                  f"crece {calc['factor_lluvias']:.2f} veces más rápido, un factor que sale de los reportes reales. "
@@ -383,8 +386,10 @@ def financiera(doc, d, cont):
         ["Costo total para el erario", mm(esc["preventivo"]["costo_total"]), mm(esc["reactivo"]["costo_total"])],
     ], [6, 4.5, 4.5])
     parrafo(doc, f"El esquema preventivo ahorra {mm(cont['ahorro_preventivo'])}. Aun sin contar ninguna "
-                 f"ponchadura, el ahorro es de {mm(cont['sensibilidad'][0]['ahorro'])}, así que la conclusión no "
-                 f"depende del supuesto más incierto. La plataforma requiere {mm(sup['equipo'])} en equipo y "
+                 f"ponchadura, el ahorro es de {mm(cont['sensibilidad'][0]['ahorro'])}, y aun suponiendo que el bache "
+                 f"no causa ningún accidente (atribución nula, porque el riesgo relativo es una asociación y no un "
+                 f"efecto causal) es de {mm(cont['sensibilidad_atribucion'][0]['ahorro'])}; la conclusión no "
+                 f"depende de los supuestos más inciertos. La plataforma requiere {mm(sup['equipo'])} en equipo y "
                  f"{mm(sup['software'])} en software, que se recuperan con el ahorro del primer año.")
     ed = leer("contabilidad/resultados_edomex/resumen.json")
     parrafo(doc, f"A escala del Estado de México, el valor esperado de las indemnizaciones por daños viales es "

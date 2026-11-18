@@ -11,7 +11,7 @@ La aplicación del proyecto es el tablero de `tablero/app.py`, que corre en loca
 - Lee los datos con consultas y vistas (esquema `ind`).
 - Toda escritura pasa por los **procedimientos almacenados** de `bd/05` (`sp_registrar_reporte`, `sp_calcular_ipu`, `sp_registrar_decision`, `sp_actualizar_estado_bache`), con sus transacciones y restricciones: lo inválido lo rechaza la base y la transacción se revierte.
 - La barra superior del tablero indica **«En vivo · SQL Server»**.
-- Las pruebas `tablero/pruebas_e2e.py` (Playwright) recorren la app y escriben en la base real.
+- Las pruebas `tablero/pruebas_e2e.py` (Playwright) recorren la app y escriben en una copia desechable de la base (`SIPA_PRUEBAS`), no en `SIPA`.
 - **Evidencia:** [evidencia_sql_server.pdf](pdf/evidencia_sql_server.pdf) muestra la app en un navegador y, en cada paso, la consulta directa a SQL Server: lee lo mismo, escribe un reporte (la fila aparece en la base y la cifra sube en 1) y la base rechaza una decisión inválida. Se genera con `python scripts/evidencia_sql_server.py`.
 
 El sitio de abajo es solo una **vista pública de consulta**: un sitio estático no puede conectarse a un SQL Server local, por eso usa una copia exportada.
@@ -59,33 +59,53 @@ Se generan con `python scripts/exportar_pdf.py` (sin Word: mammoth y Chrome), as
 
 ## Cómo ejecutar en local
 
-Requisitos: Python 3.11+, SQL Server con ODBC Driver 17 y PowerShell.
+Requisitos: Python 3.11+, SQL Server (probado con 2025 Developer) con ODBC Driver 17, `sqlcmd` y PowerShell.
 
 ```
 pip install -r requirements.txt
-powershell -ExecutionPolicy Bypass -File bd\ejecutar_todo.ps1     # base, DW y réplica
-python probabilidad/riesgo_72h.py
+python -m playwright install chromium                     # navegador para las pruebas
+
+python probabilidad/riesgo_72h.py                         # 1. genera t4_riesgo_72h_por_celda.csv (lo carga la base)
+powershell -ExecutionPolicy Bypass -File bd\ejecutar_todo.ps1    # 2. base, DW y réplica (instalación nueva)
+python probabilidad/riesgo_72h.py                         # 3. con la base: riesgo de los baches pendientes
 python calculo/degradacion.py
 python contabilidad/provisiones.py
 python estructuras/viabilidad.py
-python -m streamlit run tablero/app.py                              # tablero completo (Streamlit 1.67)
+python -m streamlit run tablero/app.py                    # tablero completo (Streamlit 1.67)
 ```
 
-Las rutas de los archivos de datos están en los scripts de `bd/` (variable `@carpeta` o `@archivo`); ajústalas a la carpeta donde clones el proyecto.
+El paso 1 puede omitirse si se usa el CSV versionado en `probabilidad/resultados/`: es el mismo que genera el script.
+
+**Instalación protegida.** `ejecutar_todo.ps1` revisa antes de escribir que existan `sqlcmd`, todos los scripts y los archivos de datos, y que el servidor responda. Si ya existen `SIPA`, `SIPA_DW` o `SIPA_REPLICA`, se detiene sin tocarlas; para borrarlas y reconstruir la demostración hay que pedirlo explícitamente con `-Reconstruir`.
+
+**Otro equipo u otra carpeta.** No hay que editar los `.sql`: usan la variable `$(RAIZ)` de `sqlcmd`, que el orquestador toma de la carpeta del repositorio (o de `-Raiz`). El servidor se indica con `-Servidor` o con la variable de entorno `SIPA_SERVIDOR`, que también leen el tablero, el exportador y los generadores (por omisión, `localhost`). `BULK INSERT` lee los archivos con la cuenta del servicio de SQL Server, así que la carpeta del proyecto debe ser accesible para ese servicio (en una instancia local lo es; en un servidor remoto use una ruta UNC).
+
+```
+$env:SIPA_SERVIDOR = ".\SQLEXPRESS"
+powershell -ExecutionPolicy Bypass -File bd\ejecutar_todo.ps1 -Reconstruir
+```
+
+**Identidad de las autoridades.** La instalación deja la base en modo `DEMO` (datos simulados): el tablero muestra el selector «Entrar como», marcado como simulación. En modo `OPERATIVO` la base toma la identidad del login de SQL Server de la sesión (`usuario.login_sql`), el selector desaparece y nadie puede actuar en nombre de otra autoridad ni fuera de su territorio. Pasos en el encabezado de `dbo.fn_actor` (`bd/05`).
 
 Para actualizar el sitio en línea después de cambiar la base:
 
 ```
-python scripts/exportar_datos_tablero.py
+python scripts/exportar_datos_tablero.py      # solo columnas públicas (ver la política en el script)
 python scripts/construir_sitio.py
 ```
 
 ## Pruebas
 
+`pytest.ini` declara las suites (los archivos se llaman `pruebas*.py`). Ninguna modifica la base operativa `SIPA`: las de base de datos y las del tablero local copian `SIPA` a una base desechable con nombre único por corrida, trabajan sobre ella y borran solo esa base al terminar (nunca una que ya existiera).
+
 ```
-python -m pytest tablero/pruebas_e2e.py -v      # tablero local (escribe en la base: reconstruirla después)
-python -m pytest tablero/pruebas_sitio.py -v    # sitio en línea (python -m http.server 8000 --directory docs)
+python -m pytest estructuras -v                  # estructuras de datos (12 pruebas, sin requisitos)
+python -m pytest bd -v                           # procedimientos, vistas, DW y copia pública (15 pruebas)
+python -m pytest tablero/pruebas_e2e.py -v       # tablero local: levanta su propio Streamlit en el puerto 8599
+python -m pytest tablero/pruebas_sitio.py -v     # sitio estático: antes, python -m http.server 8000 --directory docs
 ```
+
+La demostración de la réplica que inserta un reporte de prueba quedó fuera de la instalación: `sqlcmd -S localhost -E -f 65001 -i bd\12b_demo_replicacion.sql`.
 
 ## Datos
 

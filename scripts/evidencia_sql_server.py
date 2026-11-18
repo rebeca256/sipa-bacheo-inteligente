@@ -15,6 +15,7 @@ Uso (con el tablero corriendo: python -m streamlit run tablero/app.py --server.h
     python scripts/evidencia_sql_server.py
 ATENCIÓN: escribe un reporte en la base; después reconstruirla con bd/ejecutar_todo.ps1.
 """
+import os
 import base64
 import datetime as dt
 import html
@@ -28,11 +29,12 @@ from playwright.sync_api import sync_playwright, expect
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "tablero"))
-from pruebas_e2e import (URL, AVISO, KPI, ESPERA, abrir, esperar_quieto, elegir,  # noqa: E402
+from pruebas_e2e import (AVISO, KPI, ESPERA, abrir, esperar_quieto, elegir,  # noqa: E402
                          bache_priorizado)
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-CONEXION = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA;Trusted_Connection=yes"
+URL = os.environ.get("SIPA_URL_APP", "http://localhost:8501")   # tablero abierto sobre SIPA
+CONEXION = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";DATABASE=SIPA;Trusted_Connection=yes"
 SALIDA = RAIZ / "pdf" / "evidencia_sql_server.pdf"
 TEMP = RAIZ / "tablero" / "capturas" / "evidencia"
 TEMP.mkdir(parents=True, exist_ok=True)

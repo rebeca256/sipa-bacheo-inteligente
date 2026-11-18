@@ -32,6 +32,7 @@ Uso (desde la carpeta del proyecto):
 Genera en calculo/resultados/: gráficas PNG, tablas CSV y resumen.json.
 """
 
+import os
 import json
 import warnings
 import math
@@ -154,7 +155,7 @@ def perdida_anual_estacional(v0, k_secas, k_lluvias, w_rel=1.0, mes_inicio=1):
 
 def leer_base():
     import pyodbc
-    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;"
+    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";"
                         "DATABASE=SIPA;Trusted_Connection=yes")
     estacional = pd.read_sql("""
         SELECT temporada_lluvias,

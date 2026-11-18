@@ -67,7 +67,10 @@ GO
 -- registrar el seguimiento. Sin motivo, el CHECK ck_seguimiento_descarte
 -- falla y la transacción completa se revierte: el bache conserva su estado.
 DECLARE @bache INT = (SELECT TOP 1 id_bache FROM bache WHERE id_estado_bache = 2 ORDER BY id_bache);
-DECLARE @autoridad INT = (SELECT MIN(id_usuario) FROM usuario WHERE rol = 'AUTORIDAD');
+-- autoridad del territorio del bache (otra sería rechazada antes por fn_autoridad_puede)
+DECLARE @autoridad INT = (SELECT TOP 1 u.id_usuario FROM usuario u
+                          WHERE u.rol = 'AUTORIDAD' AND dbo.fn_autoridad_puede(u.id_usuario, @bache) = 1
+                          ORDER BY u.id_usuario);
 DECLARE @antes TINYINT = (SELECT id_estado_bache FROM bache WHERE id_bache = @bache),
         @seg_antes INT = (SELECT COUNT(*) FROM seguimiento_bache), @despues TINYINT, @seg_despues INT;
 

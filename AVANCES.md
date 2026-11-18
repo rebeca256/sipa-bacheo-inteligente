@@ -389,3 +389,27 @@ Carpeta nueva `bd/`, probada en SQL Server 2025 (`localhost`):
 
 ## 13 nov 2026 · SAIMEX descartado
 - Se borró `solicitud_SAIMEX.md`. Plazo legal: 15 días hábiles (vencería el 7 de diciembre) más 7 de prórroga; no alcanza para la entrega del 8 de diciembre.
+
+## 17 nov 2026 · Auditoría técnica de Codex atendida (C01–C11)
+- Detalle y verificación de cada hallazgo en [`observaciones_codex.md`](observaciones_codex.md).
+- Instalador protegido (`-Reconstruir`, revisiones previas) y reproducible (`$(RAIZ)`, `SIPA_SERVIDOR`); pruebas sobre copias desechables de la base.
+- Modelo de riesgo a 72 h sin doble conteo del RR, validado con corte temporal 2018 → 2019; fracción atribuible como escenario (nula, media, cota superior); en Contabilidad el ahorro del preventivo se mantiene con atribución nula ($6.59 M).
+- Reportes ligados por distancia (15 m, 30 días, territorio); permisos por territorio en decisiones y avances; tiempos de atención sin decisiones posteriores a la reparación; corte de reincidencia visible; réplica con reintento ordenado; copia pública sin comentarios libres ni nombres.
+- Pruebas: estructuras 12/12, bd 11/11, E2E 7/7, sitio 5/5. Base reconstruida; documentos, PDF y sitio regenerados (salvo Probabilidad, abierto en Word).
+
+## 18 nov 2026 · Segunda ronda de la auditoría de Codex (7.4 → reevaluación)
+- Prevalidación de cada archivo del instalador; pruebas con bases de nombre único (nunca borran bases ajenas).
+- Modo DEMO/OPERATIVO: en operación, la identidad de la autoridad sale del login de la sesión de SQL Server (`dbo.fn_actor`).
+- Validación del riesgo con ventanas reales de 72 h y puntaje de Brier; documento de Probabilidad regenerado.
+- Reincidencia clasificada al instante en cada alta; réplica sin ventana entre respaldo y bitácora; columnas públicas explícitas en todas las tablas.
+- Instalación probada desde otra carpeta; CSV de riesgo = tabla cargada. Pruebas 37/37.
+
+## 18 nov 2026 · Tercera ronda de la auditoría de Codex (8.1 → reevaluación)
+- Validación del riesgo: solo 121 ventanas completas de 72 h y celdas fijadas sin ver 2019; documento de Probabilidad regenerado.
+- Reincidencia: las altas se clasifican una tras otra (candado exclusivo); prueba con 6 altas simultáneas.
+- Errores de permisos ya no se muestran como "se cayó SQL Server"; `rol_autoridad` puede leer los indicadores.
+- Inicio de sesión por persona declarado fuera del alcance académico (prototipo con datos simulados). Pruebas 38/38.
+
+## 18 nov 2026 · Cuarta ronda de la auditoría de Codex (8.6 → reevaluación)
+- Alta de reportes: candado de reincidencia antes de insertar; prueba con altas y reconstrucción simultáneas.
+- Validación del riesgo solo con información al cierre de 2018; documento de Probabilidad regenerado. Pruebas 39/39.

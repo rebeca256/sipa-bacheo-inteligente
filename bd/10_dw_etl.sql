@@ -141,16 +141,19 @@ BEGIN
                     WHEN DATEDIFF(HOUR, d.fecha, fin.fecha) <= 24 * sf.dias_objetivo THEN 1 ELSE 0 END
         FROM SIPA.dbo.bache b
         JOIN SIPA.dbo.cat_estado_bache e ON e.id_estado_bache = b.id_estado_bache
+        -- Cierre (REPARADO o DESCARTADO) y la última decisión anterior a él:
+        -- misma regla que ind.v_tiempo_respuesta_bache (empates por id estable).
+        OUTER APPLY (SELECT TOP 1 s.fecha, s.id_estado_nuevo, s.costo_reportado
+                     FROM SIPA.dbo.seguimiento_bache s
+                     WHERE s.id_bache = b.id_bache AND s.id_estado_nuevo IN (5, 6)
+                     ORDER BY s.fecha DESC, s.id_seguimiento DESC) fin
         CROSS APPLY (SELECT TOP 1 dh.fecha, cp.costo_estimado, cp.clave_tarifa,
                             COALESCE(dh.semaforo_ajustado, cp.semaforo) AS semaforo_final
                      FROM SIPA.dbo.decision_humana dh
                      JOIN SIPA.dbo.calculo_prioridad cp ON cp.id_calculo = dh.id_calculo
                      WHERE cp.id_bache = b.id_bache AND dh.decision IN ('APROBAR','AJUSTAR')
-                     ORDER BY dh.fecha DESC) d
-        OUTER APPLY (SELECT TOP 1 s.fecha, s.id_estado_nuevo, s.costo_reportado
-                     FROM SIPA.dbo.seguimiento_bache s
-                     WHERE s.id_bache = b.id_bache AND s.id_estado_nuevo IN (5, 6)
-                     ORDER BY s.fecha DESC) fin
+                       AND (fin.fecha IS NULL OR dh.fecha <= fin.fecha)
+                     ORDER BY dh.fecha DESC, dh.id_decision DESC) d
         JOIN dw.dim_semaforo sf          ON sf.nombre = d.semaforo_final
         LEFT JOIN dw.dim_celda dc        ON dc.celda_id = b.celda_id
         LEFT JOIN dw.dim_intervencion di ON di.clave = d.clave_tarifa

@@ -180,10 +180,12 @@ def main():
     parrafo(doc, "La provisión se calcula bache por bache con los modelos que el proyecto ya desarrolló en otras "
                  "materias:")
     tabla(doc, ["Dato", "Valor", "Origen"], [
-        ["Probabilidad de accidente en 72 h por bache", "Una por celda de 250 m",
+        ["Probabilidad de accidente en 72 h", "Una por celda de 250 m; si varios baches comparten la celda, "
+         "sus accidentes esperados se reparten entre ellos",
          "Modelo de Probabilidad (Poisson con Bayes empírico, datos de la SSC)"],
-        ["Fracción de accidentes atribuible al bache", f"{r['fraccion_atribuible'] * 100:.1f} %",
-         "Riesgo relativo de celdas con baches (Probabilidad)"],
+        ["Fracción de accidentes atribuible al bache (escenario)", f"{r['fraccion_atribuible'] * 100:.1f} % "
+         "(cota superior); también 0 % y la mitad",
+         "1 − 1/RR de Probabilidad. Es una asociación, no un efecto causal: escenario hipotético"],
         ["Costo de reparar hoy y tras 6 meses de lluvias", "Por bache", "Modelo de degradación (Cálculo Integral)"],
         ["Días que el bache queda abierto, reactivo", f"{sup['dias_reactivo']} días", "Se repara tras las lluvias"],
         ["Días abierto, preventivo", "Rojo 3, amarillo 7, verde 30; vía rápida profunda 3",
@@ -232,6 +234,20 @@ def main():
            for x in terr.head(6).itertuples()], [5, 2.5, 4, 4])
 
     # 5 -----------------------------------------------------------------
+    titulo(doc, "4.3 Sensibilidad a la atribución del riesgo al bache", 2)
+    sfa = pd.DataFrame(r["sensibilidad_atribucion"])
+    nombres = {"nula": "Nula (0 %)", "media": "Media", "cota_superior": "Cota superior"}
+    tabla(doc, ["Atribución", "Fracción", "Provisión accidentes reactivo", "Costo total reactivo",
+                "Costo total preventivo", "Ahorro"],
+          [[nombres.get(x.escenario, x.escenario), f"{x.fraccion_atribuible * 100:.1f} %",
+            m(x.provision_accidentes_reactivo), m(x.costo_total_reactivo), m(x.costo_total_preventivo), m(x.ahorro)]
+           for x in sfa.itertuples()], [2.6, 1.8, 3, 3, 3, 2.6])
+    nula = sfa.loc[sfa["escenario"] == "nula", "ahorro"].iloc[0]
+    parrafo(doc, f"Aun suponiendo que el bache no causa ningún accidente (atribución nula), el preventivo ahorra "
+                 f"{mm(nula)}, por el costo de reparar tarde y las ponchaduras. La atribución solo cambia la "
+                 "magnitud del ahorro, no la conclusión. Unidad: el bache pendiente; horizonte: los días que queda "
+                 "abierto en cada esquema.", "Lectura: ")
+
     titulo(doc, "5. Registro contable (escenario preventivo)")
     parrafo(doc, "Caso de estudio: la Unidad de Bacheo opera el programa SIPA durante un ejercicio (1 de enero a "
                  f"31 de diciembre). Recibe una asignación de {m(sup['presupuesto'])}, compra equipo, contrata la "

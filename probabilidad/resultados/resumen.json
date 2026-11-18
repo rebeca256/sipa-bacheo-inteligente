@@ -91,21 +91,56 @@
   ],
   "riesgo": {
     "rr": 1.3769911027329051,
-    "p_grave": 0.033502968617472435
+    "p_grave": 0.033502968617472435,
+    "unidad": "celda de 250 m",
+    "horizonte_dias": 3,
+    "rr_uso": "descriptivo; no multiplica la tasa"
   },
   "incidente": {
     "celdas_via_rapida": 922,
-    "p72_accidente_mediana": 0.030933723450213835,
-    "p72_grave_mediana": 7.862843004624587e-05,
-    "p72_accidente_p90": 0.08567831318165409,
-    "p72_grave_p90": 0.004912404495379996,
+    "p72_accidente_mediana": 0.022561121541390783,
+    "p72_grave_mediana": 5.7102239969353263e-05,
+    "p72_accidente_p90": 0.06297907802914793,
+    "p72_grave_p90": 0.003569895820354718,
     "fraccion_atribuible": 0.27377889514659415,
-    "p72_otras_mediana": 0.007167073258266821
+    "escenarios_fraccion": {
+      "nula": 0.0,
+      "media": 0.13688944757329707,
+      "cota_superior": 0.27377889514659415
+    },
+    "p72_otras_mediana": 0.005210001953745769
+  },
+  "validacion_temporal": {
+    "periodo_ajuste": "2018",
+    "periodo_validacion": "2019",
+    "total_predicho": 16924.0,
+    "total_observado": 11679,
+    "razon_obs_pred": 0.6900850862680218,
+    "spearman": 0.6054148339856826,
+    "mae": 1.810359729666683,
+    "ventanas_72h": 121,
+    "celdas_universo": 5113,
+    "accidentes_2019_fuera_del_universo": 2051,
+    "brier_72h": 0.017767554479114548,
+    "brier_referencia": 0.017968666795766513,
+    "habilidad_brier": 0.011192389448690054,
+    "por_semaforo": {
+      "AMARILLO": {
+        "celdas": 3572,
+        "p72_predicha": 0.0171,
+        "p72_observada": 0.0101
+      },
+      "ROJO": {
+        "celdas": 1541,
+        "p72_predicha": 0.0487,
+        "p72_observada": 0.0373
+      }
+    }
   },
   "semaforo_celdas": {
-    "ROJO": 1727,
-    "AMARILLO": 2760,
-    "VERDE": 5025
+    "ROJO": 1000,
+    "AMARILLO": 2363,
+    "VERDE": 6149
   },
   "acc_por_mes_2019": {
     "1": 843,
@@ -124,15 +159,15 @@
   "pendientes": {
     "baches": 1345,
     "semaforo_72h": {
-      "VERDE": 764,
-      "AMARILLO": 417,
-      "ROJO": 164
+      "VERDE": 936,
+      "AMARILLO": 334,
+      "ROJO": 75
     },
     "semaforo_ipu": {
       "VERDE": 1145,
       "AMARILLO": 200
     },
-    "coinciden": 0.5539033457249071,
-    "rojo72_no_rojo_ipu": 164
+    "coinciden": 0.6624535315985131,
+    "rojo72_no_rojo_ipu": 75
   }
 }

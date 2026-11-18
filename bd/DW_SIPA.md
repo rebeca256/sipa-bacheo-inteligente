@@ -195,7 +195,8 @@ La demostración del script comprueba cuatro cosas:
 
 | Prueba | Resultado |
 |---|---|
-| Un reporte nuevo en la principal aparece en la réplica solo después de `sp_replicar` | Principal 35,701 → réplica 35,700 → tras replicar, 35,701 |
+| Un reporte nuevo en la principal aparece en la réplica solo después de `sp_replicar` (demostración aparte: `12b_demo_replicacion.sql`) | Principal N+1 → réplica N → tras replicar, N+1 |
+| Si una restauración falla, el siguiente `sp_replicar` reintenta ese tramo antes que el nuevo, en orden | Prueba del 17/11/2026: envío 3 marcado ERROR → se aplicó 3 y luego 4; réplica al día sin recrearse |
 | La réplica rechaza escrituras | «the database is read-only» |
 | El tablero (`rol_tablero`) lee `dbo` en la réplica | Permitido |
 | El tablero intenta leer `priv.contacto_ciudadano` | Permiso denegado |

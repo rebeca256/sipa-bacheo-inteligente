@@ -26,6 +26,7 @@ Uso (desde la carpeta del proyecto):
 Genera en probabilidad/resultados/: gráficas PNG, tablas CSV y resumen.json.
 """
 
+import os
 import json
 import math
 import sys
@@ -265,22 +266,34 @@ def distribuciones_continuas(acc, rep, celda_top):
 # E) Modelo de riesgo a 72 h y semáforo
 # ---------------------------------------------------------------------------
 
+def tasa_eb(n, r, m, anios):
+    """Bayes empírico (Gamma-Poisson): λ = (r + n) / (r/m + años)."""
+    return (r + n) / (r / m + anios)
+
+
 def modelo_riesgo(df, acc, nb):
-    # Riesgo relativo: accidentes por celda con baches / sin baches (2019)
+    """Riesgo de al menos un accidente en las próximas 72 h por celda.
+
+    Unidad de riesgo: la celda de 250 m (no el bache). Horizonte: 72 h.
+    λ_c ya se estima con los accidentes observados en la celda en su condición
+    habitual (con los baches que haya tenido), así que NO se multiplica por el
+    riesgo relativo: hacerlo contaría dos veces la asociación bache-accidente.
+    El RR se conserva solo como medida descriptiva de asociación territorial y
+    para el escenario hipotético de fracción atribuible (no es un efecto causal:
+    no aísla aforo vehicular ni propensión a reportar).
+    """
     rr = df.loc[df["B"], "acc_2019"].mean() / df.loc[~df["B"], "acc_2019"].mean()
     p_grave = acc["grave"].mean()
 
-    # Bayes empírico (Gamma-Poisson): λ_c = (r + n_c) / (r/m + años)
-    # Una celda sin accidentes no queda con riesgo 0, y una con pocos datos se acerca al promedio.
     r, m = nb["r"], nb["media"]
-    lam = (r + df["acc_total"]) / (r / m + ANIOS_ACCIDENTES)
+    lam = tasa_eb(df["acc_total"], r, m, ANIOS_ACCIDENTES)
     lam_grave = (r * p_grave + df["graves_total"]) / (r / m + ANIOS_ACCIDENTES)
 
-    mu = lam * rr * DIAS_VENTANA / 365
+    mu = lam * DIAS_VENTANA / 365
     out = df.copy()
     out["lambda_anual"] = lam
     out["p72_accidente"] = 1 - np.exp(-mu)
-    out["p72_grave"] = 1 - np.exp(-lam_grave * rr * DIAS_VENTANA / 365)
+    out["p72_grave"] = 1 - np.exp(-lam_grave * DIAS_VENTANA / 365)
     out["semaforo_72h"] = np.select(
         [out["p72_accidente"] >= UMBRAL_ROJO, out["p72_accidente"] >= UMBRAL_AMARILLO],
         ["ROJO", "AMARILLO"], "VERDE")
@@ -290,23 +303,76 @@ def modelo_riesgo(df, acc, nb):
 
     # Incidente: bache profundo en vía rápida.
     vr = out[out["via_rapida"]]
-    atribuible = 1 - 1 / rr          # fracción del riesgo atribuible al bache
+    asociada = 1 - 1 / rr   # cota superior HIPOTÉTICA: supone que toda la diferencia se debe al bache
     incidente = dict(
         celdas_via_rapida=len(vr),
         p72_accidente_mediana=vr["p72_accidente"].median(),
         p72_grave_mediana=vr["p72_grave"].median(),
         p72_accidente_p90=vr["p72_accidente"].quantile(0.9),
         p72_grave_p90=vr["p72_grave"].quantile(0.9),
-        fraccion_atribuible=atribuible,
+        fraccion_atribuible=asociada,
+        escenarios_fraccion={"nula": 0.0, "media": asociada / 2, "cota_superior": asociada},
         p72_otras_mediana=out[~out["via_rapida"]]["p72_accidente"].median(),
     )
-    return out, dict(rr=rr, p_grave=p_grave), incidente
+    return out, dict(rr=rr, p_grave=p_grave, unidad="celda de 250 m", horizonte_dias=DIAS_VENTANA,
+                     rr_uso="descriptivo; no multiplica la tasa"), incidente
+
+
+def validacion_temporal(acc, df, rep):
+    """Corte temporal: estima λ con 2018 y lo compara con 2019 (conteos anuales y ventanas reales de 72 h).
+
+    El universo de celdas usa SOLO información disponible al cierre de 2018: las celdas con al
+    menos un accidente en 2018 (los reportes de baches son de 2019-2022 y no se usan aquí).
+    Los accidentes de 2019 en celdas fuera del universo se informan aparte.
+    """
+    universo = pd.Index(sorted(set(acc[acc["anio"] == 2018]["celda_id"])), name="celda_id")
+    a19_todos = acc[acc["anio"] == 2019]
+    fuera = int((~a19_todos["celda_id"].isin(universo)).sum())
+    n18 = acc[acc["anio"] == 2018]["celda_id"].value_counts().reindex(universo, fill_value=0)
+    n19 = a19_todos["celda_id"].value_counts().reindex(universo, fill_value=0)
+    m18, v18 = n18.mean(), n18.var()
+    r18 = m18 ** 2 / (v18 - m18) if v18 > m18 else 1e6
+    pred = tasa_eb(n18, r18, m18, 1)
+    t = pd.DataFrame({"pred": pred, "obs": n19})
+    t["decil"] = pd.qcut(t["pred"].rank(method="first"), 10, labels=range(1, 11))
+    cal = t.groupby("decil", observed=True).agg(celdas=("obs", "size"), predicho=("pred", "mean"),
+                                                observado=("obs", "mean")).reset_index()
+    # Validación con VENTANAS REALES de 72 h: 2019 se parte en ventanas consecutivas de 3 días y,
+    # por celda, se cuenta en qué fracción de ventanas hubo al menos un accidente.
+    p72 = 1 - np.exp(-pred * DIAS_VENTANA / 365)
+    sem = pd.Series(np.select([p72 >= UMBRAL_ROJO, p72 >= UMBRAL_AMARILLO], ["ROJO", "AMARILLO"], "VERDE"),
+                    index=universo)
+    # Solo ventanas COMPLETAS de 72 h: 365 // 3 = 121; los días 364 y 365 sobran y se descartan.
+    n_ventanas = 365 // DIAS_VENTANA
+    a19 = a19_todos[a19_todos["celda_id"].isin(universo)]
+    ventana = (a19["fecha"].dt.dayofyear - 1) // DIAS_VENTANA
+    a19, ventana = a19[ventana < n_ventanas], ventana[ventana < n_ventanas]
+    con_acc = pd.DataFrame({"celda_id": a19["celda_id"], "v": ventana}).drop_duplicates() \
+        .groupby("celda_id").size().reindex(universo, fill_value=0)
+    f_obs = con_acc / n_ventanas                     # fracción observada de ventanas de 72 h con accidente
+    brier = ((1 - f_obs) * p72 ** 2 + f_obs * (1 - p72) ** 2).mean()
+    brier_ref = ((1 - f_obs) * f_obs.mean() ** 2 + f_obs * (1 - f_obs.mean()) ** 2).mean()  # misma P en todas
+    por_sem = pd.DataFrame({"semaforo": sem, "p72_pred": p72, "p72_obs": f_obs}).groupby("semaforo") \
+        .agg(celdas=("p72_pred", "size"), p72_predicha=("p72_pred", "mean"), p72_observada=("p72_obs", "mean"))
+    res = dict(
+        periodo_ajuste="2018", periodo_validacion="2019",
+        total_predicho=float(pred.sum()), total_observado=int(n19.sum()),
+        razon_obs_pred=float(n19.sum() / pred.sum()),
+        spearman=float(stats.spearmanr(pred, n19).statistic),
+        mae=float((pred - n19).abs().mean()),
+        ventanas_72h=n_ventanas, celdas_universo=int(len(universo)),
+        accidentes_2019_fuera_del_universo=fuera,
+        brier_72h=float(brier), brier_referencia=float(brier_ref),
+        habilidad_brier=float(1 - brier / brier_ref),
+        por_semaforo=por_sem.round(4).to_dict(orient="index"),
+    )
+    return cal, res
 
 
 def leer_pendientes():
     """Baches validados o priorizados en la base SIPA, con su último IPU."""
     import pyodbc
-    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;"
+    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=" + os.environ.get("SIPA_SERVIDOR", "localhost") + ";"
                         "DATABASE=SIPA;Trusted_Connection=yes")
     q = pd.read_sql("""
         SELECT b.id_bache, b.celda_id, b.profundidad_cm, cp.ipu, cp.semaforo AS semaforo_ipu
@@ -407,13 +473,15 @@ def main():
     comp, nb, celda_top, ponchadura = distribuciones_discretas(df, acc)
     cont = distribuciones_continuas(acc, rep, celda_top)
     riesgo, params, incidente = modelo_riesgo(df, acc, nb)
+    cal, validacion = validacion_temporal(acc, df, rep)
+    cal.to_csv(SALIDA / "t7_validacion_temporal.csv", index=False)
 
     try:
         pend = leer_pendientes()
         pend = pend.merge(riesgo[["p72_accidente", "p72_grave", "semaforo_72h", "v_riesgo_72h"]],
                           left_on="celda_id", right_index=True, how="left")
         # celdas sin ningún accidente ni reporte en el periodo: riesgo base del modelo
-        base = 1 - math.exp(-(nb["r"] / (nb["r"] / nb["media"] + ANIOS_ACCIDENTES)) * params["rr"] * DIAS_VENTANA / 365)
+        base = 1 - math.exp(-(nb["r"] / (nb["r"] / nb["media"] + ANIOS_ACCIDENTES)) * DIAS_VENTANA / 365)
         pend["p72_accidente"] = pend["p72_accidente"].fillna(base)
         pend["semaforo_72h"] = pend["semaforo_72h"].fillna("VERDE")
         pend.to_csv(SALIDA / "t6_baches_pendientes_72h.csv", index=False)
@@ -442,7 +510,7 @@ def main():
         "continuas": {k: (float(v) if np.isscalar(v) else None) for k, v in cont.items()
                       if k not in ("espera", "horas", "lluvias", "secas", "ic_lluvias")},
         "ic_lluvias": [float(x) for x in cont["ic_lluvias"]],
-        "riesgo": params, "incidente": incidente,
+        "riesgo": params, "incidente": incidente, "validacion_temporal": validacion,
         "semaforo_celdas": semaforo.to_dict(),
         "acc_por_mes_2019": acc[acc["anio"] == ANIO_COMUN]["fecha"].dt.month.value_counts().sort_index().to_dict(),
     }

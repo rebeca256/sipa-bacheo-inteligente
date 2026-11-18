@@ -5,7 +5,7 @@
        staging  ->  territorio, colonia, celda, reporte
    Al final asigna los pesos iniciales del IPU a cada territorio.
 
-   ANTES DE EJECUTAR: cambia @archivo a la ruta del CSV en tu equipo.
+   Ruta: $(RAIZ) la pone bd/ejecutar_todo.ps1 (carpeta del repositorio); a mano: sqlcmd con la variable de entorno RAIZ.
    El servicio de SQL Server debe poder leer esa carpeta; si marca
    "Access is denied", copia el CSV a C:\SIPA\ y usa esa ruta.
    ===================================================================== */
@@ -16,7 +16,7 @@ GO
 SET NOCOUNT ON;
 
 DECLARE @archivo NVARCHAR(400) =
-    N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\datos\limpios\base_maestra_limpia.csv';
+    N'$(RAIZ)\datos\limpios\base_maestra_limpia.csv';
 
 /* 1. Tabla temporal de paso con la misma forma que el CSV (todo como texto) */
 DROP TABLE IF EXISTS #staging;

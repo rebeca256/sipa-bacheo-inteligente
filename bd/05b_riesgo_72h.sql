@@ -5,7 +5,7 @@
    deja disponible para el criterio RIESGO_72H del IPU (sp_calcular_ipu).
    Solo cubre CDMX; las celdas sin dato (p. ej. Chalco) siguen en 0.5.
 
-   ANTES DE EJECUTAR: ajusta @archivo a la ruta del CSV.
+   Ruta: $(RAIZ) la pone bd/ejecutar_todo.ps1 (carpeta del repositorio); a mano: sqlcmd con la variable de entorno RAIZ.
    ===================================================================== */
 USE SIPA;
 SET QUOTED_IDENTIFIER ON;
@@ -14,7 +14,7 @@ GO
 SET NOCOUNT ON;
 
 DECLARE @archivo NVARCHAR(400) =
-    N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\probabilidad\resultados\t4_riesgo_72h_por_celda.csv';
+    N'$(RAIZ)\probabilidad\resultados\t4_riesgo_72h_por_celda.csv';
 
 IF OBJECT_ID('riesgo_celda_72h') IS NULL
 CREATE TABLE riesgo_celda_72h (

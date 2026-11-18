@@ -4,7 +4,7 @@
    datos es una transacción: si cualquier paso falla, se revierte todo.
 
      Modo ciudadano
-       sp_registrar_reporte        reporte nuevo + deduplicación por celda
+       sp_registrar_reporte        reporte nuevo + vinculación por distancia (15 m, 30 días, territorio)
        sp_consultar_folio          estado del reporte y su historial
      Asesoría (SIPA)
        sp_calcular_ipu             IPU, semáforo, intervención y costo estimado
@@ -20,8 +20,23 @@ SET ANSI_NULLS ON;
 GO
 
 /* ---------------------------------------------------------------------
-   Registra un reporte. Si ya hay un bache abierto en la misma celda,
-   el reporte se liga a él en lugar de crear uno nuevo (duplicado).
+   Registra un reporte con una POLÍTICA DE VINCULACIÓN explícita (la misma
+   que usa el prototipo de estructuras/sipa_ed.py):
+
+     Un reporte se liga a un bache existente solo si el bache
+       a) sigue abierto (REPORTADO, VALIDADO, PRIORIZADO o EN_ATENCION),
+       b) está a 15 m o menos (distancia física, no la celda de 250 m:
+          dos baches separados dentro de una celda quedan como casos
+          distintos y un duplicado junto al borde entre celdas sí se liga),
+       c) pertenece al mismo territorio que la colonia del reporte, y
+       d) recibió su último reporte hace 30 días o menos.
+     Si varios cumplen, gana el más cercano (empate: el id menor).
+     En otro caso se crea un bache nuevo.
+
+   Validación de coordenadas: si la colonia ya tiene reportes, el punto
+   debe quedar a 3 km o menos de su centro; y el punto debe caer dentro
+   de la cuadrícula (celda a 300 m o menos). Lo demás se rechaza.
+   La celda se sigue guardando para los indicadores territoriales.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE sp_registrar_reporte
     @id_fuente   TINYINT,
@@ -35,17 +50,54 @@ AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
 
-    -- Celda más cercana (cuadrícula de 250 m)
-    DECLARE @celda VARCHAR(12) = (
-        SELECT TOP 1 celda_id FROM celda
-        ORDER BY SQUARE(latitud - @latitud) + SQUARE(longitud - @longitud));
+    DECLARE @radio_m FLOAT = 15, @dias INT = 30;
+    -- metros por grado (aproximación plana, válida a la escala de una calle)
+    DECLARE @m_lat FLOAT = 110574,
+            @m_lon FLOAT = 111320 * COS(RADIANS(CAST(@latitud AS FLOAT)));
+    DECLARE @territorio INT = (SELECT id_territorio FROM colonia WHERE id_colonia = @id_colonia);
+    IF @territorio IS NULL THROW 50012, 'La colonia del reporte no existe.', 1;
+
+    -- Coordenadas congruentes con la colonia (si ya hay reportes de ella)
+    DECLARE @c_lat FLOAT, @c_lon FLOAT;
+    SELECT @c_lat = AVG(CAST(latitud AS FLOAT)), @c_lon = AVG(CAST(longitud AS FLOAT))
+    FROM reporte WHERE id_colonia = @id_colonia AND latitud IS NOT NULL;
+    IF @c_lat IS NOT NULL AND
+       SQRT(SQUARE((@latitud - @c_lat) * @m_lat) + SQUARE((@longitud - @c_lon) * @m_lon)) > 3000
+        THROW 50013, 'Las coordenadas quedan a más de 3 km de la colonia indicada; revise la colonia o el punto.', 1;
+
+    -- Celda más cercana (cuadrícula de 250 m), solo para indicadores
+    DECLARE @celda VARCHAR(12), @d_celda FLOAT;
+    SELECT TOP 1 @celda = celda_id,
+           @d_celda = SQRT(SQUARE((latitud - @latitud) * @m_lat) + SQUARE((longitud - @longitud) * @m_lon))
+    FROM celda
+    WHERE latitud BETWEEN @latitud - 0.01 AND @latitud + 0.01
+      AND longitud BETWEEN @longitud - 0.01 AND @longitud + 0.01
+    ORDER BY SQUARE((latitud - @latitud) * @m_lat) + SQUARE((longitud - @longitud) * @m_lon);
+    IF @celda IS NULL OR @d_celda > 300
+        THROW 50014, 'Las coordenadas quedan fuera de la zona cubierta por SIPA.', 1;
+
+    DECLARE @dlat FLOAT = @radio_m / @m_lat, @dlon FLOAT = @radio_m / @m_lon;
 
     BEGIN TRANSACTION;
+        -- Primero el candado de reincidencia (exclusivo, hasta el COMMIT), antes de leer o
+        -- insertar nada: las altas obtienen su ID en el mismo orden en que se clasifican, y
+        -- una reconstrucción completa (mismo candado) nunca queda cruzada con un alta a medias.
+        DECLARE @lock INT;
+        EXEC @lock = sp_getapplock @Resource = 'ind.reincidencia', @LockMode = 'Exclusive',
+                                   @LockOwner = 'Transaction', @LockTimeout = 60000;
+        IF @lock < 0 THROW 50020, 'Otra alta o reconstrucción de reincidencia sigue en curso.', 1;
 
-        SELECT TOP 1 @id_bache = id_bache
-        FROM bache WITH (UPDLOCK, HOLDLOCK)
-        WHERE celda_id = @celda AND id_estado_bache IN (1,2,3,4)
-        ORDER BY fecha_deteccion;
+        SELECT TOP 1 @id_bache = b.id_bache
+        FROM bache b WITH (UPDLOCK, HOLDLOCK)
+        WHERE b.id_estado_bache IN (1,2,3,4)
+          AND b.latitud  BETWEEN @latitud  - @dlat AND @latitud  + @dlat
+          AND b.longitud BETWEEN @longitud - @dlon AND @longitud + @dlon
+          AND SQRT(SQUARE((b.latitud - @latitud) * @m_lat) + SQUARE((b.longitud - @longitud) * @m_lon)) <= @radio_m
+          AND EXISTS (SELECT 1 FROM reporte r JOIN colonia c ON c.id_colonia = r.id_colonia
+                      WHERE r.id_bache = b.id_bache AND c.id_territorio = @territorio)
+          AND (SELECT MAX(r.fecha_solicitud) FROM reporte r WHERE r.id_bache = b.id_bache)
+              >= DATEADD(DAY, -@dias, CAST(GETDATE() AS DATE))
+        ORDER BY SQUARE((b.latitud - @latitud) * @m_lat) + SQUARE((b.longitud - @longitud) * @m_lon), b.id_bache;
 
         IF @id_bache IS NULL
         BEGIN
@@ -59,6 +111,10 @@ BEGIN
         VALUES (@id_fuente, @id_bache, @id_colonia, @celda, CAST(GETDATE() AS DATE),
                 'RECIBIDO', @latitud, @longitud, @descripcion);
         SET @id_reporte = SCOPE_IDENTITY();
+
+        -- Reincidencia al instante (el esquema ind se crea en bd/13; antes de eso no aplica)
+        IF OBJECT_ID('ind.sp_reincidencia_reporte') IS NOT NULL
+            EXEC ind.sp_reincidencia_reporte @id_reporte;
 
     COMMIT TRANSACTION;
 END
@@ -192,6 +248,72 @@ END
 GO
 
 /* ---------------------------------------------------------------------
+   IDENTIDAD DEL ACTOR. La base tiene un modo de operación:
+     DEMO       (lo que instala ejecutar_todo.ps1, con datos simulados):
+                el cliente indica @id_usuario; es la simulación académica
+                del selector «Entrar como» del tablero.
+     OPERATIVO  la identidad la da la SESIÓN de SQL Server: el login
+                autenticado (ORIGINAL_LOGIN()) debe estar asociado a un
+                usuario activo en usuario.login_sql. El @id_usuario que
+                mande el cliente se ignora si es NULL y se rechaza si no
+                coincide: nadie puede hacerse pasar por otra autoridad.
+   Pasar a operación real:
+     UPDATE dbo.configuracion SET valor = 'OPERATIVO' WHERE clave = 'modo';
+     UPDATE dbo.usuario SET login_sql = N'DOMINIO\persona' WHERE id_usuario = ...;
+   y dar a cada login solo el rol rol_autoridad (EXECUTE de los procedimientos).
+   --------------------------------------------------------------------- */
+IF OBJECT_ID('dbo.configuracion') IS NULL
+    CREATE TABLE dbo.configuracion (
+        clave  VARCHAR(30)  CONSTRAINT pk_configuracion PRIMARY KEY,
+        valor  VARCHAR(100) NOT NULL,
+        CONSTRAINT ck_configuracion_modo CHECK (clave <> 'modo' OR valor IN ('DEMO','OPERATIVO'))
+    );
+IF NOT EXISTS (SELECT 1 FROM dbo.configuracion WHERE clave = 'modo')
+    INSERT INTO dbo.configuracion VALUES ('modo', 'DEMO');
+IF COL_LENGTH('dbo.usuario', 'login_sql') IS NULL
+    ALTER TABLE dbo.usuario ADD login_sql NVARCHAR(128) NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'uq_usuario_login')
+    CREATE UNIQUE INDEX uq_usuario_login ON dbo.usuario(login_sql) WHERE login_sql IS NOT NULL;
+GO
+
+/* Devuelve el id del actor autorizado (AUTORIDAD o ADMIN activo) o NULL. */
+CREATE OR ALTER FUNCTION dbo.fn_actor(@id_usuario INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @modo VARCHAR(100) = ISNULL((SELECT valor FROM dbo.configuracion WHERE clave = 'modo'), 'OPERATIVO');
+    DECLARE @sesion INT = (SELECT id_usuario FROM dbo.usuario
+                           WHERE login_sql = ORIGINAL_LOGIN() AND activo = 1 AND rol IN ('AUTORIDAD','ADMIN'));
+    IF @modo = 'OPERATIVO'
+        RETURN IIF(@sesion IS NOT NULL AND (@id_usuario IS NULL OR @id_usuario = @sesion), @sesion, NULL);
+    RETURN (SELECT id_usuario FROM dbo.usuario
+            WHERE id_usuario = @id_usuario AND activo = 1 AND rol IN ('AUTORIDAD','ADMIN'));
+END
+GO
+
+/* ---------------------------------------------------------------------
+   Territorio del bache: el de la colonia de sus reportes. Una autoridad
+   (rol AUTORIDAD) solo puede decidir o informar avances de baches con al
+   menos un reporte en su territorio; ADMIN no tiene esa restricción.
+   --------------------------------------------------------------------- */
+CREATE OR ALTER FUNCTION dbo.fn_autoridad_puede(@id_usuario INT, @id_bache INT)
+RETURNS BIT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM usuario WHERE id_usuario = @id_usuario AND rol = 'ADMIN' AND activo = 1)
+        RETURN 1;
+    IF EXISTS (SELECT 1 FROM usuario u
+               JOIN colonia c ON c.id_territorio = u.id_territorio
+               JOIN reporte r ON r.id_colonia = c.id_colonia
+               WHERE u.id_usuario = @id_usuario AND u.rol = 'AUTORIDAD' AND u.activo = 1
+                 AND r.id_bache = @id_bache)
+        RETURN 1;
+    RETURN 0;
+END
+GO
+
+/* ---------------------------------------------------------------------
    MODO AUTORIDAD. Decisión sobre la recomendación: APROBAR, AJUSTAR el
    semáforo o RECHAZAR. Las restricciones CHECK obligan a justificar los
    ajustes y rechazos. SIPA no crea órdenes de trabajo: la autoridad
@@ -199,7 +321,7 @@ GO
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE sp_registrar_decision
     @id_calculo        INT,
-    @id_usuario        INT,
+    @id_usuario        INT = NULL,       -- en modo OPERATIVO lo da la sesión
     @decision          VARCHAR(10),
     @semaforo_ajustado VARCHAR(8)   = NULL,
     @justificacion     VARCHAR(500) = NULL,
@@ -208,13 +330,24 @@ AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
 
-    IF NOT EXISTS (SELECT 1 FROM usuario WHERE id_usuario = @id_usuario
-                   AND rol IN ('AUTORIDAD','ADMIN') AND activo = 1)
-        THROW 50002, 'Solo una autoridad activa puede decidir sobre una recomendación.', 1;
+    DECLARE @actor INT = dbo.fn_actor(@id_usuario);
+    IF @actor IS NULL
+        THROW 50002, 'Solo una autoridad activa y autenticada puede decidir sobre una recomendación.', 1;
+
+    DECLARE @bache_dec INT, @estado_dec TINYINT;
+    SELECT @bache_dec = cp.id_bache, @estado_dec = b.id_estado_bache
+    FROM calculo_prioridad cp JOIN bache b ON b.id_bache = cp.id_bache
+    WHERE cp.id_calculo = @id_calculo;
+    IF @bache_dec IS NULL THROW 50008, 'El cálculo de prioridad no existe.', 1;
+    IF dbo.fn_autoridad_puede(@actor, @bache_dec) = 0
+        THROW 50010, 'La autoridad solo puede decidir sobre baches de su territorio.', 1;
+    -- Un bache reparado o descartado ya no admite decisiones (evita tiempos de atención negativos).
+    IF @estado_dec IN (5, 6)
+        THROW 50009, 'El bache ya está cerrado: reparado o descartado; no admite nuevas decisiones.', 1;
 
     BEGIN TRANSACTION;
         INSERT INTO decision_humana (id_calculo, id_usuario, decision, semaforo_ajustado, justificacion)
-        VALUES (@id_calculo, @id_usuario, @decision, @semaforo_ajustado, @justificacion);
+        VALUES (@id_calculo, @actor, @decision, @semaforo_ajustado, @justificacion);
         SET @id_decision = SCOPE_IDENTITY();
     COMMIT TRANSACTION;
 END
@@ -232,7 +365,7 @@ GO
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE sp_actualizar_estado_bache
     @id_bache         INT,
-    @id_usuario       INT,
+    @id_usuario       INT,              -- en modo OPERATIVO puede ir NULL: lo da la sesión
     @nuevo            TINYINT,
     @comentario       VARCHAR(300)  = NULL,
     @costo_reportado  DECIMAL(12,2) = NULL,
@@ -242,9 +375,11 @@ BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
     DECLARE @actual TINYINT;
 
-    IF NOT EXISTS (SELECT 1 FROM usuario WHERE id_usuario = @id_usuario
-                   AND rol IN ('AUTORIDAD','ADMIN') AND activo = 1)
-        THROW 50003, 'Solo una autoridad activa puede actualizar el estado de un bache.', 1;
+    DECLARE @actor INT = dbo.fn_actor(@id_usuario);
+    IF @actor IS NULL
+        THROW 50003, 'Solo una autoridad activa y autenticada puede actualizar el estado de un bache.', 1;
+    IF dbo.fn_autoridad_puede(@actor, @id_bache) = 0
+        THROW 50011, 'La autoridad solo puede actualizar baches de su territorio.', 1;
 
     BEGIN TRANSACTION;
         SELECT @actual = id_estado_bache FROM bache WITH (UPDLOCK) WHERE id_bache = @id_bache;
@@ -260,7 +395,7 @@ BEGIN
         -- descartar, costo solo al reparar) hacen fallar toda la transacción.
         INSERT INTO seguimiento_bache (id_bache, id_estado_anterior, id_estado_nuevo, id_usuario,
                                        comentario, costo_reportado)
-        VALUES (@id_bache, @actual, @nuevo, @id_usuario, @comentario, @costo_reportado);
+        VALUES (@id_bache, @actual, @nuevo, @actor, @comentario, @costo_reportado);
         SET @id_seguimiento = SCOPE_IDENTITY();
 
         IF @nuevo IN (5, 6)

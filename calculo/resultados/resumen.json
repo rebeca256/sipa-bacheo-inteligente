@@ -5,7 +5,7 @@
   "k_secas": 0.08,
   "k_lluvias": 0.14370389865599903,
   "v0_tipico_m3": 0.13631,
-  "area_tipica_m2": 1.72,
+  "area_tipica_m2": 1.73,
   "profundidad_tipica_cm": 9.5,
   "costo_m3": 7578.9473684210525,
   "baches_analizados": 1345,
@@ -201,12 +201,12 @@
   ],
   "coincide_con_base": 9.094947017729282e-13,
   "total_baches": {
-    "costo_hoy": 4610686.8,
-    "extra_3m": 698248.718373829,
-    "extra_6m": 1808044.294680193,
-    "extra_12m": 6209706.608196579,
-    "toneladas_hoy": 579.9007104,
-    "toneladas_6m": 1373.4488879630837
+    "costo_hoy": 4610299.8,
+    "extra_3m": 698363.5184378707,
+    "extra_6m": 1808335.7683045387,
+    "extra_12m": 6210688.414007191,
+    "toneladas_hoy": 580.0127784,
+    "toneladas_6m": 1373.7143121421127
   },
   "chalco": {
     "territorio": "CHALCO",

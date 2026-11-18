@@ -42,7 +42,7 @@ CREATE TABLE ext.toluca_medida (
 CREATE INDEX ix_toluca_bache_deleg ON ext.toluca_bache(delegacion, fecha);
 
 DECLARE @carpeta NVARCHAR(400) =
-    N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\datos\limpios\';
+    N'$(RAIZ)\datos\limpios\';
 
 DROP TABLE IF EXISTS #b, #m;
 CREATE TABLE #b (folio VARCHAR(30), tipo VARCHAR(15), calle NVARCHAR(150), colonia NVARCHAR(150),

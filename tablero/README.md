@@ -5,7 +5,7 @@ Interfaz en Streamlit sobre la base `SIPA` (SQL Server). Todo pasa por los proce
 | Sección | Qué hace |
 |---|---|
 | Resumen y mapa | Indicadores clave, mapa de baches abiertos por semáforo y costo pendiente por territorio |
-| Modo ciudadano | Reportar un bache (se liga al bache existente de la misma celda) y consultar el folio |
+| Modo ciudadano | Reportar un bache (se liga a un bache abierto a 15 m o menos, del mismo territorio y con reportes en los últimos 30 días) y consultar el folio |
 | Recomendación de SIPA | Ranking por territorio, ficha de justificación del IPU, intervención y costo estimado; recalcular el IPU |
 | Modo autoridad | Aprobar, ajustar o rechazar la recomendación e informar el avance (en atención, reparado con costo real, descartado con motivo) |
 | Indicadores | Reincidencia, causa probable, tiempos de respuesta, cobertura y reportes resueltos por año |
@@ -17,4 +17,4 @@ pip install --user streamlit pydeck
 streamlit run tablero/app.py
 ```
 
-Requiere la base construida (`bd/ejecutar_todo.ps1`) y el ODBC Driver 17 for SQL Server. Lo que se registre desde el tablero queda en la base; para volver a los datos de los documentos, reconstruirla con `ejecutar_todo.ps1` (los datos sintéticos son reproducibles).
+Requiere la base construida (`bd/ejecutar_todo.ps1`) y el ODBC Driver 17 for SQL Server. Lo que se registre desde el tablero queda en la base; para volver a los datos de los documentos, reconstruirla con `ejecutar_todo.ps1 -Reconstruir` (los datos sintéticos son reproducibles). Las pruebas no escriben en `SIPA`: usan una copia desechable.

@@ -10,5 +10,6 @@ matplotlib
 scipy
 playwright
 pytest
+pytest-playwright   # fixture `page` de las pruebas E2E; después: python -m playwright install chromium
 mammoth
 pymupdf

@@ -77,7 +77,8 @@ def test_carga_y_resumen(pagina):
     expect(pagina.get_by_test_id("stMain")).to_contain_text("Versión en línea de solo consulta")
     metricas = pagina.locator(".kpi")
     expect(metricas).to_have_count(4)
-    expect(metricas.nth(0)).to_contain_text("35,700")
+    total = sum(1 for _ in open("tablero/datos/reportes.csv", encoding="utf-8")) - 1   # cifra de la copia exportada
+    expect(metricas.nth(0)).to_contain_text(f"{total:,}")
     expect(metricas.nth(1)).to_contain_text("1,345")
     expect(metricas.nth(2)).to_contain_text("$4.61 M")
     expect(pagina.get_by_test_id("stDeckGlJsonChart").locator("canvas").first).to_be_visible(timeout=ESPERA)

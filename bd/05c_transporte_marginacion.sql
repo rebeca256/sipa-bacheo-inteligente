@@ -23,7 +23,7 @@ GO
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-DECLARE @carpeta NVARCHAR(400) = N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\datos\';
+DECLARE @carpeta NVARCHAR(400) = N'$(RAIZ)\datos\';
 
 /* 1. Tablas */
 DROP TABLE IF EXISTS contexto_celda, parada_transporte, marginacion_colonia;

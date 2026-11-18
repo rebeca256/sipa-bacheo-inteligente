@@ -180,7 +180,8 @@ def main():
     va = {x["grupo"]: x for x in r["variable_aleatoria"]}
     parrafo(doc, f"Una celda con baches tiene en promedio {va['Con baches (B)']['E[X]']:.2f} accidentes al año, "
                  f"contra {va['Sin baches']['E[X]']:.2f} sin baches: {rg['rr']:.2f} veces más. Ese cociente es el "
-                 "riesgo relativo (RR) que usa el modelo de 72 h.")
+                 "riesgo relativo (RR). Es una asociación territorial, no un efecto causal: no separa el aforo "
+                 "vehicular ni la propensión a reportar, así que el modelo de 72 h no lo usa como multiplicador.")
     parrafo(doc, f"en una distribución Poisson la varianza es igual a la media (Var/E = 1). Aquí "
                  f"Var/E ≈ {va['Todas']['Var/E']:.1f}: hay sobredispersión, porque unas pocas celdas concentran "
                  "muchos accidentes. Eso obliga a usar otra distribución (sección 5.2).",
@@ -265,12 +266,16 @@ def main():
     titulo(doc, "7. Modelo de riesgo de siniestro a 72 horas")
     parrafo(doc, "Para una celda c con un bache activo, el número de accidentes en las próximas 72 horas se modela "
                  "como Poisson:")
-    ecuacion(doc, "N_c ~ Poisson(μ_c),     μ_c = λ_c · RR · 3/365,     P(al menos uno en 72 h) = 1 − e^(−μ_c)")
+    parrafo(doc, "Unidad de riesgo: la celda de 250 m (no el bache). Horizonte: 72 horas. Periodo de estimación: "
+                 "2018-2019; periodo de validación: 2019 con un modelo ajustado solo con 2018 (sección 7.3).")
+    ecuacion(doc, "N_c ~ Poisson(μ_c),     μ_c = λ_c · 3/365,     P(al menos uno en 72 h) = 1 − e^(−μ_c)")
     tabla(doc, ["Componente", "Cómo se obtiene"], [
         ["λ_c (accidentes por año)",
          "Bayes empírico gamma-Poisson: λ_c = (r + n_c) / (r/m + 2). Una celda sin accidentes no queda con "
          "riesgo cero y una con pocos datos se acerca al promedio."],
-        ["RR (riesgo relativo)", f"{rg['rr']:.2f}: accidentes por celda con baches / sin baches (sección 4)."],
+        ["Sin RR", f"λ_c ya cuenta los accidentes observados en la celda con los baches que tuvo; multiplicarla "
+                   f"por el RR ({rg['rr']:.2f}) contaría dos veces la misma asociación. Una versión anterior lo "
+                   "hacía y se corrigió."],
         ["3/365", "Ventana de 72 horas."],
         ["Accidente grave", f"Igual, con la proporción de graves ({pc(rg['p_grave'])}) en lugar de todos."],
     ], [4, 12])
@@ -295,10 +300,51 @@ def main():
         ["Ponchaduras esperadas en 72 h (escenario)", f"{po['mu']:.0f}", "—"],
     ], [7, 3.5, 3.5])
     parrafo(doc, f"Una celda típica de vía rápida tiene {inc['p72_accidente_mediana'] / inc['p72_otras_mediana']:.1f}"
-                 f" veces más riesgo de accidente a 72 h que una de otras vías. La fracción atribuible al bache es "
-                 f"1 − 1/RR = {pc(inc['fraccion_atribuible'])}: aproximadamente uno de cada cuatro accidentes en "
-                 "celdas con baches se evitaría si el riesgo bajara al de las celdas sin baches. El accidente grave "
-                 "es poco probable en 72 h, pero la ponchadura es casi segura.")
+                 f" veces más riesgo de accidente a 72 h que una de otras vías. El accidente grave es poco probable "
+                 "en 72 h, pero la ponchadura es casi segura.")
+    parrafo(doc, f"La expresión 1 − 1/RR = {pc(inc['fraccion_atribuible'])} sería la fracción de accidentes "
+                 "atribuible al bache SOLO si toda la diferencia entre celdas con y sin baches se debiera al bache. "
+                 "Como no se controla el aforo ni la propensión a reportar, se usa como cota superior de un "
+                 "escenario hipotético, junto con atribución media (la mitad) y nula (0 %). Contabilidad reporta "
+                 "las tres.", "Escenario hipotético, no efecto causal. ")
+
+    vt = r["validacion_temporal"]
+    titulo(doc, "7.3 Validación con un corte temporal", 2)
+    parrafo(doc, f"Se reestimó λ_c solo con los accidentes de {vt['periodo_ajuste']} y se comparó con lo observado "
+                 f"en {vt['periodo_validacion']}, que el modelo no vio:")
+    tabla(doc, ["Indicador", "Valor"], [
+        ["Accidentes predichos / observados", f"{vt['total_predicho']:,.0f} / {vt['total_observado']:,}"],
+        ["Observado ÷ predicho", f"{vt['razon_obs_pred']:.2f}"],
+        ["Correlación de rangos (Spearman) por celda", f"{vt['spearman']:.2f}"],
+        ["Error absoluto medio por celda", f"{vt['mae']:.2f} accidentes"],
+        ["Ventanas reales de 72 h en 2019", f"{vt['ventanas_72h']} completas (los días 364 y 365 se descartan)"],
+        ["Celdas evaluadas", f"{vt['celdas_universo']:,}: las que tuvieron al menos un accidente en 2018, "
+         f"es decir, solo información disponible al cierre de 2018 "
+         f"({vt['accidentes_2019_fuera_del_universo']:,} accidentes de 2019 caen fuera)"],
+        ["Puntaje de Brier en ventanas de 72 h (menor es mejor)",
+         f"{vt['brier_72h']:.5f} contra {vt['brier_referencia']:.5f} con la misma P para todas las celdas"],
+    ] + [[f"Celdas {c}: P(72 h) predicha → fracción observada de ventanas con accidente",
+          f"{pc(v['p72_predicha'], 2)} → {pc(v['p72_observada'], 2)} ({v['celdas']:,} celdas)"]
+         for c, v in sorted(vt["por_semaforo"].items(), key=lambda kv: ["ROJO", "AMARILLO", "VERDE"].index(kv[0]))],
+          [8, 8])
+    parrafo(doc, "La P(72 h) observada se mide directamente: 2019 se partió en ventanas consecutivas y completas de "
+                 "72 horas y, para cada celda, se contó en qué fracción de ventanas hubo al menos un accidente. No se "
+                 "deriva de conteos anuales. Las celdas evaluadas se eligieron solo con información disponible al "
+                 "cierre de 2018 (accidentes de 2018), sin reportes posteriores ni accidentes de 2019.",
+            "Cómo se midió. ")
+    ps = vt["por_semaforo"]
+    if "ROJO" in ps and "AMARILLO" in ps:
+        parrafo(doc, f"En ventanas reales, las celdas rojas tuvieron accidente en el {pc(ps['ROJO']['p72_observada'], 1)} "
+                     f"de las ventanas contra {pc(ps['AMARILLO']['p72_observada'], 1)} en las amarillas. No aparecen "
+                     "celdas verdes porque toda celda con un accidente en 2018 ya supera el umbral de 1 %; las verdes "
+                     "son celdas sin accidentes previos, que quedan fuera de esta muestra.", "Separación. ")
+    parrafo(doc, f"El modelo ordena bien las celdas (Spearman {vt['spearman']:.2f}) pero "
+                 f"sobreestima el nivel en un {(1 / vt['razon_obs_pred'] - 1) * 100:.0f} % porque {vt['periodo_validacion']} "
+                 f"tuvo menos accidentes registrados que {vt['periodo_ajuste']}. Para el semáforo importa el orden; "
+                 "las probabilidades absolutas deben recalibrarse con cada año nuevo de datos. La mejora del "
+                 f"puntaje de Brier es modesta ({vt['habilidad_brier'] * 100:.1f} %) porque el accidente en 72 h es "
+                 "un evento raro en casi todas las celdas: el valor del modelo está en separar las pocas celdas "
+                 "rojas, no en predecir cada ventana.")
 
     # 8 -----------------------------------------------------------------
     titulo(doc, "8. ¿Más reportes o más riesgo? Comparación con el semáforo actual")
@@ -353,7 +399,9 @@ def main():
         "riesgo depende del historial de accidentes y del tránsito. Las dos clasificaciones solo coinciden en "
         f"{pc(pe['coinciden'], 0)} de los baches pendientes.",
         f"Modelo a 72 h: Poisson con tasa por celda estimada con Bayes empírico (binomial negativa, porque los "
-        f"datos tienen sobredispersión) y un riesgo relativo de {rg['rr']:.2f} por la presencia de baches.",
+        f"datos tienen sobredispersión). El riesgo relativo de {rg['rr']:.2f} se reporta como asociación, no se "
+        f"multiplica (evita contar dos veces). Validado con corte temporal: Spearman "
+        f"{r['validacion_temporal']['spearman']:.2f}.",
         f"Semáforo: rojo con P ≥ 3 %, amarillo entre 1 % y 3 %, verde menos de 1 %. En la CDMX quedan "
         f"{sem['ROJO']:,} celdas en rojo.",
         f"Bache profundo en vía rápida: P(accidente en 72 h) mediana de {pc(inc['p72_accidente_mediana'], 1)} "
@@ -369,7 +417,8 @@ def main():
     titulo(doc, "10. Supuestos y limitaciones")
     vinetas(doc, [
         "Asociación no es causalidad: el riesgo relativo puede deberse en parte al tránsito, que aumenta tanto los "
-        "baches como los accidentes. Sin datos de aforo por calle no se puede separar ese efecto.",
+        "baches como los accidentes, o a que en calles transitadas se reporta más. Sin datos de aforo por calle no se "
+        "puede separar ese efecto; por eso la fracción atribuible es solo un escenario.",
         "Los accidentes son de 2018-2019 y los reportes de baches de 2019-2022; el cruce se hace solo con 2019.",
         "La celda de 250 m es una aproximación: no sabemos si el accidente ocurrió exactamente sobre el bache.",
         "Las vías rápidas se identifican por el nombre de la calle en el registro del accidente.",

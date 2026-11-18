@@ -50,7 +50,7 @@ INSERT INTO usuario (nombre, rol) VALUES
 
 -- Tarifas de reparación desde el archivo JSON
 DECLARE @json NVARCHAR(400) =
-    N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\datos\costos\tarifas_reparacion.json';
+    N'$(RAIZ)\datos\costos\tarifas_reparacion.json';
 -- BULK INSERT lee el archivo completo como un solo renglón (los separadores
 -- 0x00 y 0x01 no aparecen en el JSON). OPENROWSET(BULK) usaría la cuenta del
 -- servicio de SQL Server, que no tiene acceso a la carpeta del proyecto.

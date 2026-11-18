@@ -51,8 +51,20 @@ IF OBJECT_ID('dbo.replicacion_bitacora') IS NULL
 GO
 
 /* ---------------------------------------------------------------------
-   Procedimiento de envío de log: respalda el log de SIPA y lo aplica a
-   la réplica. Se puede ejecutar cuantas veces se quiera.
+   Procedimiento de envío de log. Se puede ejecutar cuantas veces se quiera.
+
+     1. Serializa: si otra ejecución está en curso, espera (sp_getapplock).
+     2. Anota el archivo como PREPARADO ANTES de respaldar, respalda el log
+        y lo pasa a PENDIENTE. Si la sesión se corta entre el respaldo y la
+        anotación, el tramo ya está en la bitácora (PREPARADO) y el siguiente
+        ciclo lo aplica; si el respaldo nunca llegó a escribirse (ni el
+        archivo ni msdb lo conocen), ese renglón se marca ANULADO.
+     3. Aplica EN ORDEN todos los archivos PENDIENTE o ERROR posteriores al
+        último respaldo completo. Si uno falla, se marca ERROR y se detiene:
+        el siguiente ciclo lo reintenta antes que los nuevos, así la cadena
+        de logs nunca se salta un tramo.
+     Si un archivo ya estaba aplicado (consta en msdb.dbo.restorehistory),
+     se marca OK y se continúa con el siguiente.
    --------------------------------------------------------------------- */
 CREATE OR ALTER PROCEDURE dbo.sp_replicar
 AS
@@ -61,10 +73,19 @@ BEGIN
     DECLARE @dir NVARCHAR(400) = CAST(SERVERPROPERTY('InstanceDefaultBackupPath') AS NVARCHAR(400)) + N'\';
     DECLARE @archivo NVARCHAR(400) = @dir + N'SIPA_log_' + FORMAT(SYSDATETIME(), 'yyyyMMdd_HHmmss_fff') + N'.trn';
     DECLARE @undo NVARCHAR(400) = @dir + N'SIPA_REPLICA_undo.tuf';
-    DECLARE @sql NVARCHAR(MAX);
+    DECLARE @sql NVARCHAR(MAX), @lock INT, @id INT, @pend NVARCHAR(400), @desde INT;
+
+    EXEC @lock = sp_getapplock @Resource = 'SIPA.replicacion', @LockMode = 'Exclusive',
+                               @LockOwner = 'Session', @LockTimeout = 120000;
+    IF @lock < 0 THROW 50030, 'Otra replicación sigue en curso.', 1;
 
     BEGIN TRY
+        -- 2. Nuevo tramo del log: primero se anota, después se respalda
+        DECLARE @nuevo INT;
+        INSERT INTO SIPA.dbo.replicacion_bitacora (tipo, archivo, estado) VALUES ('LOG', @archivo, 'PREPARADO');
+        SET @nuevo = SCOPE_IDENTITY();
         BACKUP LOG SIPA TO DISK = @archivo WITH INIT;
+        UPDATE SIPA.dbo.replicacion_bitacora SET estado = 'PENDIENTE' WHERE id_envio = @nuevo;
 
         -- la réplica no debe tener conexiones abiertas mientras se restaura
         DECLARE @sesion INT;
@@ -80,13 +101,51 @@ BEGIN
         END
         CLOSE sesiones; DEALLOCATE sesiones;
 
-        RESTORE LOG SIPA_REPLICA FROM DISK = @archivo WITH STANDBY = @undo;
+        -- 3. Aplicar en orden lo pendiente desde el último respaldo completo
+        SET @desde = ISNULL((SELECT MAX(id_envio) FROM SIPA.dbo.replicacion_bitacora
+                             WHERE tipo = 'COMPLETO' AND estado = 'OK'), 0);
+        WHILE 1 = 1
+        BEGIN
+            SELECT TOP 1 @id = id_envio, @pend = archivo FROM SIPA.dbo.replicacion_bitacora
+            WHERE tipo = 'LOG' AND estado IN ('PREPARADO', 'PENDIENTE', 'ERROR') AND id_envio > @desde
+            ORDER BY id_envio;
+            IF @@ROWCOUNT = 0 BREAK;
 
-        INSERT INTO SIPA.dbo.replicacion_bitacora (tipo, archivo, estado) VALUES ('LOG', @archivo, 'OK');
+            -- ¿Ya se aplicó? (msdb registra cada restauración y el archivo de origen)
+            IF EXISTS (SELECT 1 FROM msdb.dbo.restorehistory rh
+                       JOIN msdb.dbo.backupset bs ON bs.backup_set_id = rh.backup_set_id
+                       JOIN msdb.dbo.backupmediafamily mf ON mf.media_set_id = bs.media_set_id
+                       WHERE rh.destination_database_name = 'SIPA_REPLICA' AND mf.physical_device_name = @pend)
+            BEGIN
+                UPDATE SIPA.dbo.replicacion_bitacora SET estado = 'OK', mensaje = 'Ya estaba aplicado.'
+                WHERE id_envio = @id;
+                CONTINUE;
+            END
+
+            -- ¿Existe el archivo? Si se anotó pero el respaldo nunca se escribió, no hay tramo que aplicar.
+            DECLARE @existe INT = 0;
+            EXEC master.dbo.xp_fileexist @pend, @existe OUTPUT;
+            IF @existe = 0 AND NOT EXISTS (SELECT 1 FROM msdb.dbo.backupmediafamily WHERE physical_device_name = @pend)
+            BEGIN
+                UPDATE SIPA.dbo.replicacion_bitacora SET estado = 'ANULADO',
+                       mensaje = 'El respaldo no llegó a escribirse.' WHERE id_envio = @id;
+                CONTINUE;
+            END
+
+            BEGIN TRY
+                RESTORE LOG SIPA_REPLICA FROM DISK = @pend WITH STANDBY = @undo;
+                UPDATE SIPA.dbo.replicacion_bitacora SET estado = 'OK', mensaje = NULL WHERE id_envio = @id;
+            END TRY
+            BEGIN CATCH
+                UPDATE SIPA.dbo.replicacion_bitacora
+                SET estado = 'ERROR', mensaje = LEFT(ERROR_MESSAGE(), 400) WHERE id_envio = @id;
+                THROW;
+            END CATCH
+        END
+        EXEC sp_releaseapplock @Resource = 'SIPA.replicacion', @LockOwner = 'Session';
     END TRY
     BEGIN CATCH
-        INSERT INTO SIPA.dbo.replicacion_bitacora (tipo, archivo, estado, mensaje)
-        VALUES ('LOG', @archivo, 'ERROR', LEFT(ERROR_MESSAGE(), 400));
+        EXEC sp_releaseapplock @Resource = 'SIPA.replicacion', @LockOwner = 'Session';
         THROW;
     END CATCH
 END
@@ -139,26 +198,9 @@ SELECT 'antes' AS momento,
        (SELECT COUNT(*) FROM SIPA.dbo.reporte)         AS reportes_principal,
        (SELECT COUNT(*) FROM SIPA_REPLICA.dbo.reporte) AS reportes_replica;
 
--- b) Llega un reporte nuevo a la principal
-DECLARE @rep INT, @bache INT;
-DECLARE @colonia INT = (SELECT TOP 1 c.id_colonia FROM colonia c JOIN territorio t
-                        ON t.id_territorio = c.id_territorio WHERE t.nombre = 'CHALCO' AND c.nombre = 'CENTRO');
-EXEC sp_registrar_reporte @id_fuente = 2, @id_colonia = @colonia,
-     @latitud = 19.260100, @longitud = -98.897700,
-     @descripcion = 'Prueba de replicación: bache frente al mercado',
-     @id_reporte = @rep OUTPUT, @id_bache = @bache OUTPUT;
-
-SELECT 'después del reporte, sin replicar' AS momento,
-       (SELECT COUNT(*) FROM SIPA.dbo.reporte)         AS reportes_principal,
-       (SELECT COUNT(*) FROM SIPA_REPLICA.dbo.reporte) AS reportes_replica;
-
--- c) Se envía el log: la réplica se pone al día
-EXEC dbo.sp_replicar;
-
-SELECT 'después de replicar' AS momento,
-       (SELECT COUNT(*) FROM SIPA.dbo.reporte)         AS reportes_principal,
-       (SELECT COUNT(*) FROM SIPA_REPLICA.dbo.reporte) AS reportes_replica;
-SELECT id_reporte, descripcion FROM SIPA_REPLICA.dbo.reporte WHERE id_reporte = @rep;
+-- b) y c) El reporte de prueba y el envío de log están en 12b_demo_replicacion.sql,
+--    fuera de la instalación, para no insertar datos de demostración.
+EXEC dbo.sp_replicar;   -- primer envío: deja la réplica al día con la instalación
 GO
 
 -- d) La réplica es de solo lectura: cualquier escritura se rechaza

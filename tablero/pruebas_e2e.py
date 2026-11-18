@@ -5,22 +5,34 @@ Abren el tablero en un navegador real (Chromium sin ventana), recorren las
 cinco secciones, usan los formularios del modo ciudadano y del modo autoridad
 y revisan que la base acepte lo válido y rechace lo inválido.
 
-ATENCIÓN: escriben en la base SIPA (un reporte, decisiones y cambios de
-estado). Al terminar, reconstruir la base con bd/ejecutar_todo.ps1.
+Base desechable: las pruebas NO tocan la base operativa SIPA. Al iniciar,
+la fixture base_desechable copia SIPA (respaldo COPY_ONLY, que no rompe la
+cadena de logs de la réplica) a SIPA_PRUEBAS, levanta su propio tablero en
+el puerto 8599 apuntando a esa copia (variable SIPA_BD), y al terminar
+detiene el tablero y borra SIPA_PRUEBAS. Correrlas dos veces deja SIPA igual.
 
-Uso (desde la carpeta del proyecto, con el tablero corriendo):
-    streamlit run tablero/app.py --server.headless true
+Uso (desde la carpeta del proyecto; no hace falta tener el tablero abierto):
     python -m pytest tablero/pruebas_e2e.py -v
 Las capturas quedan en tablero/capturas/pruebas/.
 """
+import os
 import re
+import subprocess
+import sys
+import time
+import urllib.request
+import uuid
 from pathlib import Path
 
 import pyodbc
 import pytest
 from playwright.sync_api import Page, expect
 
-URL = "http://localhost:8501"
+SERVIDOR = os.environ.get("SIPA_SERVIDOR", "localhost")
+# Nombre único por corrida: las pruebas solo borran la base que ellas mismas crearon.
+BD_PRUEBAS = f"SIPA_PRUEBAS_{uuid.uuid4().hex[:8]}"
+PUERTO = 8599
+URL = f"http://localhost:{PUERTO}"
 # El nombre de la gráfica Altair cambia según la versión de Streamlit
 GRAFICA = "[data-testid=stVegaLiteChart], [data-testid=stArrowVegaLiteChart]"
 # Avisos (éxito, error, info): stAlertContent… en 1.67, stNotification en 1.32
@@ -30,6 +42,63 @@ KPI = ".kpi, [class*=st-key-kpi_]"
 CAPTURAS = Path("tablero/capturas/pruebas")
 CAPTURAS.mkdir(parents=True, exist_ok=True)
 ESPERA = 120_000  # ms: la primera carga tras reiniciar o cambiar el código puede tardar
+
+
+def _sql(sql, base="master"):
+    cx = pyodbc.connect(f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVIDOR};DATABASE={base};"
+                        "Trusted_Connection=yes", autocommit=True)
+    cur = cx.cursor()
+    cur.execute(sql)
+    while cur.nextset():      # BACKUP/RESTORE devuelven varios mensajes
+        pass
+    cx.close()
+
+
+def _borrar_base_pruebas():
+    _sql(f"IF DB_ID('{BD_PRUEBAS}') IS NOT NULL BEGIN "
+         f"ALTER DATABASE {BD_PRUEBAS} SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE {BD_PRUEBAS}; END")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def base_desechable():
+    """Copia SIPA a SIPA_PRUEBAS, levanta un tablero sobre ella y la borra al final."""
+    creada = False
+    _sql(f"IF DB_ID('{BD_PRUEBAS}') IS NOT NULL THROW 50100, 'Ya existe {BD_PRUEBAS}; no se toca.', 1;")
+    _sql(f"""
+        DECLARE @dir NVARCHAR(400) = CAST(SERVERPROPERTY('InstanceDefaultBackupPath') AS NVARCHAR(400)) + N'\\';
+        DECLARE @datos NVARCHAR(400) = CAST(SERVERPROPERTY('InstanceDefaultDataPath') AS NVARCHAR(400));
+        DECLARE @bak NVARCHAR(400) = @dir + N'{BD_PRUEBAS}.bak';
+        DECLARE @d NVARCHAR(128), @l NVARCHAR(128);
+        SELECT @d = name FROM SIPA.sys.database_files WHERE type_desc = 'ROWS';
+        SELECT @l = name FROM SIPA.sys.database_files WHERE type_desc = 'LOG';
+        BACKUP DATABASE SIPA TO DISK = @bak WITH COPY_ONLY, INIT, FORMAT;
+        DECLARE @mdf NVARCHAR(400) = @datos + N'{BD_PRUEBAS}.mdf', @ldf NVARCHAR(400) = @datos + N'{BD_PRUEBAS}_log.ldf';
+        RESTORE DATABASE {BD_PRUEBAS} FROM DISK = @bak WITH MOVE @d TO @mdf, MOVE @l TO @ldf, REPLACE, RECOVERY;
+        ALTER DATABASE {BD_PRUEBAS} SET RECOVERY SIMPLE;""")
+    creada = True
+    entorno = dict(os.environ, SIPA_BD=BD_PRUEBAS, SIPA_SERVIDOR=SERVIDOR)
+    entorno.pop("SIPA_MODO", None)
+    app = subprocess.Popen([sys.executable, "-m", "streamlit", "run", "tablero/app.py",
+                            "--server.port", str(PUERTO), "--server.headless", "true"],
+                           env=entorno, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(120):
+            try:
+                urllib.request.urlopen(f"{URL}/_stcore/health", timeout=2)
+                break
+            except OSError:
+                time.sleep(1)
+        else:
+            raise RuntimeError("El tablero de pruebas no arrancó en 120 s")
+        yield
+    finally:
+        app.terminate()
+        try:
+            app.wait(timeout=20)
+        except subprocess.TimeoutExpired:
+            app.kill()
+        if creada:
+            _borrar_base_pruebas()
 
 
 @pytest.fixture
@@ -88,7 +157,7 @@ def elegida(page, opcion):
 
 def bache_priorizado(territorio="CHALCO"):
     """Un bache del territorio que siga en PRIORIZADO (las pruebas no dependen de corridas anteriores)."""
-    cx = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=SIPA;"
+    cx = pyodbc.connect(f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={SERVIDOR};DATABASE={BD_PRUEBAS};"
                         "Trusted_Connection=yes")
     fila = cx.execute("""SELECT TOP 1 b.id_bache FROM bache b
                          JOIN ind.v_celda_territorio ct ON ct.celda_id = b.celda_id

@@ -45,8 +45,29 @@ GO
      - 30 días o más          → REAPARICION (el bache volvió)
    Buscar vecinos en una vista sería muy lento (se recalcula en cada
    consulta), así que la clasificación se guarda en ind.reporte_reaparicion
-   y se actualiza con ind.sp_actualizar_reincidencia (p. ej. cada noche).
+   y se actualiza con ind.sp_actualizar_reincidencia.
+
+   Sincronización (frecuencia publicada): INMEDIATA. Cada alta por
+   sp_registrar_reporte clasifica su propio reporte con
+   ind.sp_reincidencia_reporte dentro de la misma transacción (el reporte
+   nuevo es el más reciente, así que su clasificación es exacta) y avanza
+   el corte. ind.sp_actualizar_reincidencia reconstruye todo (instalación,
+   cargas masivas); el tablero la lanza si detecta un atraso.
+   ind.corte_reincidencia guarda el corte visible: hasta qué reporte y a
+   qué hora. El corte nunca retrocede, dos ejecuciones simultáneas se
+   serializan con sp_getapplock y, si una falla, la tabla y el corte
+   anteriores quedan intactos y el error se registra en ultimo_error.
    --------------------------------------------------------------------- */
+IF OBJECT_ID('ind.corte_reincidencia') IS NULL
+CREATE TABLE ind.corte_reincidencia (
+    id                  TINYINT       CONSTRAINT pk_corte_reincidencia PRIMARY KEY
+                                      CONSTRAINT ck_corte_unico CHECK (id = 1),
+    ultimo_id_reporte   INT           NOT NULL,
+    fecha_corte         DATETIME2(0)  NOT NULL,
+    ultimo_error        NVARCHAR(400) NULL,
+    fecha_error         DATETIME2(0)  NULL
+);
+GO
 IF OBJECT_ID('ind.reporte_reaparicion') IS NULL
 CREATE TABLE ind.reporte_reaparicion (
     id_reporte          INT         CONSTRAINT pk_reaparicion PRIMARY KEY
@@ -60,10 +81,82 @@ CREATE TABLE ind.reporte_reaparicion (
 );
 GO
 
-CREATE OR ALTER PROCEDURE ind.sp_actualizar_reincidencia
+/* Clasificación incremental de UN reporte (lo llama sp_registrar_reporte
+   dentro de su transacción, que ya tomó el candado ANTES de insertar; aquí
+   se vuelve a pedir, lo que es reentrante). Candado EXCLUSIVO hasta el COMMIT del alta:
+   las altas se clasifican una tras otra y cada una ve confirmadas todas las
+   anteriores, igual que la reconstrucción completa (que usa el mismo
+   candado). Así el corte "hasta el reporte N" cubre todos los IDs menores.
+   A la escala del proyecto (decenas de altas al día) la espera es nula. */
+CREATE OR ALTER PROCEDURE ind.sp_reincidencia_reporte
+    @id_reporte INT
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
+    IF @@TRANCOUNT = 0 THROW 50021, 'ind.sp_reincidencia_reporte debe llamarse dentro de una transacción.', 1;
+    DECLARE @lock INT;
+    EXEC @lock = sp_getapplock @Resource = 'ind.reincidencia', @LockMode = 'Exclusive',
+                               @LockOwner = 'Transaction', @LockTimeout = 60000;
+    IF @lock < 0 THROW 50020, 'Otra clasificación de reincidencia sigue en curso.', 1;
+
+    DECLARE @k_lat INT, @k_lon INT, @f DATE, @celda VARCHAR(12);
+    SELECT @k_lat = CAST(ROUND(latitud * 10000, 0) AS INT), @k_lon = CAST(ROUND(longitud * 10000, 0) AS INT),
+           @f = fecha_solicitud, @celda = celda_id
+    FROM dbo.reporte WHERE id_reporte = @id_reporte AND latitud IS NOT NULL AND celda_id IS NOT NULL;
+    IF @f IS NULL OR EXISTS (SELECT 1 FROM ind.reporte_reaparicion WHERE id_reporte = @id_reporte) RETURN;
+
+    -- mismo criterio que la reconstrucción: punto de ≈ 11 m y sus 8 vecinos
+    DECLARE @ant DATE = (
+        SELECT MAX(q.fecha_solicitud) FROM dbo.reporte q
+        WHERE q.latitud  BETWEEN (@k_lat - 1.5) / 10000.0 AND (@k_lat + 1.5) / 10000.0
+          AND q.longitud BETWEEN (@k_lon - 1.5) / 10000.0 AND (@k_lon + 1.5) / 10000.0
+          AND CAST(ROUND(q.latitud  * 10000, 0) AS INT) BETWEEN @k_lat - 1 AND @k_lat + 1
+          AND CAST(ROUND(q.longitud * 10000, 0) AS INT) BETWEEN @k_lon - 1 AND @k_lon + 1
+          AND q.celda_id IS NOT NULL
+          AND (q.fecha_solicitud < @f OR (q.fecha_solicitud = @f AND q.id_reporte < @id_reporte)));
+
+    INSERT INTO ind.reporte_reaparicion (id_reporte, celda_id, fecha_solicitud, fecha_anterior,
+                                         dias_desde_anterior, tipo)
+    VALUES (@id_reporte, @celda, @f, @ant, DATEDIFF(DAY, @ant, @f),
+            CASE WHEN @ant IS NULL THEN 'NUEVO'
+                 WHEN DATEDIFF(DAY, @ant, @f) < 30 THEN 'DUPLICADO' ELSE 'REAPARICION' END);
+
+    MERGE ind.corte_reincidencia AS c USING (SELECT 1 AS id) s ON c.id = s.id
+    WHEN MATCHED THEN UPDATE SET
+         ultimo_id_reporte = IIF(@id_reporte > c.ultimo_id_reporte, @id_reporte, c.ultimo_id_reporte),
+         fecha_corte = IIF(SYSDATETIME() > c.fecha_corte, SYSDATETIME(), c.fecha_corte)
+    WHEN NOT MATCHED THEN INSERT (id, ultimo_id_reporte, fecha_corte) VALUES (1, @id_reporte, SYSDATETIME());
+END
+GO
+
+CREATE OR ALTER PROCEDURE ind.sp_actualizar_reincidencia
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        EXEC ind.sp_actualizar_reincidencia_nucleo;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;
+        MERGE ind.corte_reincidencia AS c USING (SELECT 1 AS id) s ON c.id = s.id
+        WHEN MATCHED THEN UPDATE SET ultimo_error = LEFT(ERROR_MESSAGE(), 400), fecha_error = SYSDATETIME()
+        WHEN NOT MATCHED THEN INSERT (id, ultimo_id_reporte, fecha_corte, ultimo_error, fecha_error)
+             VALUES (1, 0, '19000101', LEFT(ERROR_MESSAGE(), 400), SYSDATETIME());
+        THROW;
+    END CATCH
+END
+GO
+
+CREATE OR ALTER PROCEDURE ind.sp_actualizar_reincidencia_nucleo
+AS
+BEGIN
+    SET NOCOUNT ON; SET XACT_ABORT ON;
+    DECLARE @lock INT;
+    BEGIN TRANSACTION;
+    -- Serializa: una segunda ejecución espera a la primera (hasta 60 s).
+    EXEC @lock = sp_getapplock @Resource = 'ind.reincidencia', @LockMode = 'Exclusive',
+                               @LockOwner = 'Transaction', @LockTimeout = 60000;
+    IF @lock < 0 THROW 50020, 'Otra actualización de reincidencia sigue en curso.', 1;
 
     -- 1. Clave del punto (≈ 11 m) en una tabla de paso indexada
     DROP TABLE IF EXISTS #p;
@@ -89,8 +182,8 @@ BEGIN
                OR (q.fecha_solicitud = r.fecha_solicitud AND q.id_reporte < r.id_reporte))
     ) ant;
 
-    -- 3. Reemplazo completo, todo o nada
-    BEGIN TRANSACTION;
+    -- 3. Reemplazo completo, todo o nada (dentro de la transacción del candado)
+    DECLARE @max_id INT = ISNULL((SELECT MAX(id_reporte) FROM #p), 0);
         DELETE FROM ind.reporte_reaparicion;
         INSERT INTO ind.reporte_reaparicion (id_reporte, celda_id, fecha_solicitud, fecha_anterior,
                                              dias_desde_anterior, tipo)
@@ -100,6 +193,13 @@ BEGIN
                     WHEN DATEDIFF(DAY, fecha_anterior, fecha_solicitud) < 30 THEN 'DUPLICADO'
                     ELSE 'REAPARICION' END
         FROM #r;
+        -- Corte visible: nunca retrocede
+        MERGE ind.corte_reincidencia AS c USING (SELECT 1 AS id) s ON c.id = s.id
+        WHEN MATCHED THEN UPDATE SET
+             ultimo_id_reporte = IIF(@max_id > c.ultimo_id_reporte, @max_id, c.ultimo_id_reporte),
+             fecha_corte = IIF(SYSDATETIME() > c.fecha_corte, SYSDATETIME(), c.fecha_corte),
+             ultimo_error = NULL, fecha_error = NULL
+        WHEN NOT MATCHED THEN INSERT (id, ultimo_id_reporte, fecha_corte) VALUES (1, @max_id, SYSDATETIME());
     COMMIT TRANSACTION;
 END
 GO
@@ -142,13 +242,18 @@ SELECT b.id_bache, ct.id_territorio, ct.territorio,
        m.meta_dias,
        IIF(DATEDIFF(HOUR, d.fecha, s.fecha) <= 24 * m.meta_dias, 1, 0) AS en_meta
 FROM bache b
+-- Reparación: el último seguimiento a REPARADO (empates por id estable).
+CROSS APPLY (SELECT TOP 1 fecha FROM seguimiento_bache
+             WHERE id_bache = b.id_bache AND id_estado_nuevo = 5
+             ORDER BY fecha DESC, id_seguimiento DESC) s
+-- Decisión que rige la reparación: la última APROBAR/AJUSTAR registrada ANTES
+-- de reparar. Una decisión posterior no altera el plazo (ni lo vuelve negativo).
 CROSS APPLY (SELECT TOP 1 dh.fecha, COALESCE(dh.semaforo_ajustado, cp.semaforo) AS semaforo_final,
                     IIF(dh.semaforo_ajustado IS NULL, 0, 1) AS ajustado_por_persona
              FROM decision_humana dh JOIN calculo_prioridad cp ON cp.id_calculo = dh.id_calculo
              WHERE cp.id_bache = b.id_bache AND dh.decision IN ('APROBAR','AJUSTAR')
-             ORDER BY dh.fecha DESC) d
-CROSS APPLY (SELECT TOP 1 fecha FROM seguimiento_bache
-             WHERE id_bache = b.id_bache AND id_estado_nuevo = 5 ORDER BY fecha DESC) s
+               AND dh.fecha <= s.fecha
+             ORDER BY dh.fecha DESC, dh.id_decision DESC) d
 CROSS APPLY (SELECT CASE d.semaforo_final WHEN 'ROJO' THEN 3 WHEN 'AMARILLO' THEN 15 ELSE 60 END AS meta_dias) m
 LEFT JOIN ind.v_celda_territorio ct ON ct.celda_id = b.celda_id;
 GO
@@ -305,6 +410,11 @@ CROSS APPLY (SELECT TOP 1 semaforo, clave_tarifa, costo_estimado FROM calculo_pr
 LEFT JOIN ind.v_celda_territorio ct ON ct.celda_id = b.celda_id
 WHERE b.id_estado_bache IN (2, 3, 4)
 GROUP BY ct.id_territorio, ct.territorio;
+GO
+
+-- El rol de autoridad también lee los indicadores que muestra el tablero
+IF DATABASE_PRINCIPAL_ID('rol_autoridad') IS NOT NULL
+    GRANT SELECT ON SCHEMA::ind TO rol_autoridad;
 GO
 
 /* ---------------------------------------------------------------------

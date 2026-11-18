@@ -23,102 +23,132 @@
     {
       "supuesto": "Sin ponchaduras",
       "p_reclama_ponchadura": 0.0,
-      "costo_total_reactivo": 7451087.331421085,
-      "costo_total_preventivo": 4663724.134774248,
-      "ahorro": 2787363.1966468366
+      "costo_total_reactivo": 7170175.426687497,
+      "costo_total_preventivo": 4662149.083622548,
+      "ahorro": 2508026.343064949
     },
     {
       "supuesto": "Bajo (0.5 %)",
       "p_reclama_ponchadura": 0.005,
-      "costo_total_reactivo": 8666087.331421085,
-      "costo_total_preventivo": 4683974.134774248,
-      "ahorro": 3982113.1966468366
+      "costo_total_reactivo": 8385175.426687497,
+      "costo_total_preventivo": 4682399.083622548,
+      "ahorro": 3702776.343064949
     },
     {
       "supuesto": "Base (2 %)",
       "p_reclama_ponchadura": 0.02,
-      "costo_total_reactivo": 12311087.331421085,
-      "costo_total_preventivo": 4744724.134774248,
-      "ahorro": 7566363.196646837
+      "costo_total_reactivo": 12030175.426687498,
+      "costo_total_preventivo": 4743149.083622548,
+      "ahorro": 7287026.34306495
     },
     {
       "supuesto": "Alto (5 %)",
       "p_reclama_ponchadura": 0.05,
-      "costo_total_reactivo": 19601087.331421085,
-      "costo_total_preventivo": 4866224.134774248,
-      "ahorro": 14734863.196646836
+      "costo_total_reactivo": 19320175.426687498,
+      "costo_total_preventivo": 4864649.083622548,
+      "ahorro": 14455526.343064949
     }
   ],
+  "sensibilidad_atribucion": [
+    {
+      "escenario": "nula",
+      "fraccion_atribuible": 0.0,
+      "provision_accidentes_reactivo": 0.0,
+      "provision_accidentes_preventivo": 0.0,
+      "costo_total_reactivo": 11278635.568304539,
+      "costo_total_preventivo": 4691299.8,
+      "ahorro": 6587335.768304539
+    },
+    {
+      "escenario": "media",
+      "fraccion_atribuible": 0.13688944757329707,
+      "provision_accidentes_reactivo": 375769.9291914791,
+      "provision_accidentes_preventivo": 25924.64181127396,
+      "costo_total_reactivo": 11654405.497496018,
+      "costo_total_preventivo": 4717224.441811274,
+      "ahorro": 6937181.055684744
+    },
+    {
+      "escenario": "cota_superior",
+      "fraccion_atribuible": 0.27377889514659415,
+      "provision_accidentes_reactivo": 751539.8583829582,
+      "provision_accidentes_preventivo": 51849.28362254792,
+      "costo_total_reactivo": 12030175.426687498,
+      "costo_total_preventivo": 4743149.083622548,
+      "ahorro": 7287026.34306495
+    }
+  ],
+  "baches_comparten_celda": 0,
   "escenarios": [
     {
       "escenario": "preventivo",
-      "costo_reparar": 4610686.8,
-      "reclamaciones_esperadas": 33.91535242212137,
+      "costo_reparar": 4610299.8,
+      "reclamaciones_esperadas": 33.881408103501364,
       "p_al_menos_una": 0.9999999999999981,
-      "provision_total": 134037.33477424807,
-      "provision_accidentes": 53037.334774248084,
+      "provision_total": 132849.28362254793,
+      "provision_accidentes": 51849.28362254792,
       "provision_ponchaduras": 81000.0,
-      "provision_individual": 82127.40500032842,
+      "provision_individual": 81818.74530495577,
       "revelacion_individual": 0.0,
       "baches_probable": 45,
       "baches_posible": 0,
       "baches_remota": 1300,
-      "costo_total": 4744724.134774248
+      "costo_total": 4743149.083622548
     },
     {
       "escenario": "reactivo",
-      "costo_reparar": 6418731.094680194,
-      "reclamaciones_esperadas": 1973.4958924783114,
+      "costo_reparar": 6418635.568304539,
+      "reclamaciones_esperadas": 1965.47256738237,
       "p_al_menos_una": 1.0,
-      "provision_total": 5892356.236740891,
-      "provision_accidentes": 1032356.2367408907,
+      "provision_total": 5611539.858382958,
+      "provision_accidentes": 751539.8583829582,
       "provision_ponchaduras": 4860000.0,
-      "provision_individual": 4927644.300019704,
-      "revelacion_individual": 87952.44439119613,
+      "provision_individual": 4909124.718297345,
+      "revelacion_individual": 12029.133264349648,
       "baches_probable": 45,
-      "baches_posible": 20,
-      "baches_remota": 1280,
-      "costo_total": 12311087.331421085
+      "baches_posible": 3,
+      "baches_remota": 1297,
+      "costo_total": 12030175.426687498
     }
   ],
-  "ahorro_preventivo": 7566363.196646837,
+  "ahorro_preventivo": 7287026.34306495,
   "asientos": {
-    "toneladas": 1557.6644594594593,
-    "compra": 3677022.72,
-    "consumo": 3342747.93,
-    "mano_obra": 2005648.76,
-    "mano_obra_pagada": 1704801.45,
-    "provision": 134037.33,
-    "pagos_rec": 53614.93,
+    "toneladas": 1557.533716216216,
+    "compra": 3676714.09,
+    "consumo": 3342467.35,
+    "mano_obra": 2005480.41,
+    "mano_obra_pagada": 1704658.35,
+    "provision": 132849.28,
+    "pagos_rec": 53139.71,
     "dep": 120000.0,
     "amo": 120000.0
   },
   "asientos_reactivo": {
-    "toneladas": 2168.4902346892545,
-    "compra": 5118938.05,
-    "consumo": 4653580.04,
-    "mano_obra": 2792148.03,
-    "mano_obra_pagada": 2373325.83,
-    "provision": 5892356.24,
-    "pagos_rec": 2356942.5,
+    "toneladas": 2168.4579622650467,
+    "compra": 5118861.87,
+    "consumo": 4653510.79,
+    "mano_obra": 2792106.47,
+    "mano_obra_pagada": 2373290.5,
+    "provision": 5611539.86,
+    "pagos_rec": 2244615.94,
     "dep": 120000.0,
     "amo": 120000.0
   },
-  "resultado": 277565.97999999963,
-  "resultado_reactivo": -7578084.3100000005,
+  "resultado": 279202.9600000002,
+  "resultado_reactivo": -7297157.12,
   "razones": {
-    "liquidez": -0.42270420590190605,
-    "prueba_acida": -1.2994452142552841,
-    "endeudamiento": 0.3290110179468152,
-    "provision_sobre_pasivo": 0.21093309510477504,
-    "provision_sobre_ingresos": 0.022339554999999997
+    "liquidez": -0.4211618624186379,
+    "prueba_acida": -1.2995296869277333,
+    "endeudamiento": 0.3281195829469914,
+    "provision_sobre_pasivo": 0.20946897370922887,
+    "provision_sobre_ingresos": 0.022141546666666668
   },
   "razones_reactivo": {
-    "liquidez": -1.1238197308985056,
-    "prueba_acida": -1.2415056801087088,
-    "endeudamiento": -1.2658219835426905,
-    "provision_sobre_pasivo": 0.8940826479868573,
-    "provision_sobre_ingresos": 0.9820593733333334
+    "liquidez": -1.144140209273596,
+    "prueba_acida": -1.2670623046952125,
+    "endeudamiento": -1.2571289864075064,
+    "provision_sobre_pasivo": 0.8893701146488435,
+    "provision_sobre_ingresos": 0.9352566433333334
   },
   "estado_resultados_reactivo": [
     {
@@ -127,19 +157,19 @@
     },
     {
       "concepto": "(−) Costo de materiales de bacheo",
-      "importe": -4653580.04
+      "importe": -4653510.79
     },
     {
       "concepto": "(−) Costo de mano de obra de bacheo",
-      "importe": -2792148.03
+      "importe": -2792106.47
     },
     {
       "concepto": "= Resultado bruto de operación",
-      "importe": -1445728.0700000003
+      "importe": -1445617.2599999998
     },
     {
       "concepto": "(−) Gasto por provisión de reclamaciones (NIF C-9)",
-      "importe": -5892356.24
+      "importe": -5611539.86
     },
     {
       "concepto": "(−) Depreciación y amortización",
@@ -147,7 +177,7 @@
     },
     {
       "concepto": "= Resultado del ejercicio (ahorro de la gestión)",
-      "importe": -7578084.3100000005
+      "importe": -7297157.12
     }
   ],
   "balance_reactivo": [
@@ -157,15 +187,15 @@
     },
     {
       "concepto": "Bancos",
-      "importe": -4909206.38
+      "importe": -4796768.31
     },
     {
       "concepto": "Inventario de mezcla asfáltica",
-      "importe": 465358.01
+      "importe": 465351.08
     },
     {
       "concepto": "Total activo circulante",
-      "importe": -4443848.37
+      "importe": -4331417.2299999995
     },
     {
       "concepto": "Equipo de bacheo, neto de depreciación",
@@ -181,7 +211,7 @@
     },
     {
       "concepto": "TOTAL ACTIVO",
-      "importe": -3123848.37
+      "importe": -3011417.2299999995
     },
     {
       "concepto": "PASIVO",
@@ -189,15 +219,15 @@
     },
     {
       "concepto": "Acreedores diversos (contratista)",
-      "importe": 418822.2
+      "importe": 418815.97
     },
     {
       "concepto": "Provisión para reclamaciones por daños (NIF C-9)",
-      "importe": 3535413.74
+      "importe": 3366923.92
     },
     {
       "concepto": "TOTAL PASIVO",
-      "importe": 3954235.9400000004
+      "importe": 3785739.8899999997
     },
     {
       "concepto": "PATRIMONIO",
@@ -209,15 +239,15 @@
     },
     {
       "concepto": "Resultado del ejercicio",
-      "importe": -7578084.3100000005
+      "importe": -7297157.12
     },
     {
       "concepto": "TOTAL PATRIMONIO",
-      "importe": -7078084.3100000005
+      "importe": -6797157.12
     },
     {
       "concepto": "TOTAL PASIVO + PATRIMONIO",
-      "importe": -3123848.37
+      "importe": -3011417.2300000004
     }
   ]
 }

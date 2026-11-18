@@ -17,7 +17,7 @@ GO
 SET NOCOUNT ON;
 
 DECLARE @carpeta NVARCHAR(400) =
-    N'C:\Users\gerry\Documents\Rebeca_unrc\sistema_bacheo_3er_semestre\datos\chalco\limpios\';
+    N'$(RAIZ)\datos\chalco\limpios\';
 
 /* 1. Tablas de paso */
 DROP TABLE IF EXISTS #comunidades, #reportes, #zonas, #equipamiento;

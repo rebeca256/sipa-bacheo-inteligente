@@ -1,18 +1,18 @@
 concepto,importe
 ACTIVO,
-Bancos,-495439.1
-Inventario de mezcla asfáltica,334274.79
-Total activo circulante,-161164.31
+Bancos,-494512.15
+Inventario de mezcla asfáltica,334246.74
+Total activo circulante,-160265.41000000003
 "Equipo de bacheo, neto de depreciación",1080000.0
 "Software SIPA, neto de amortización",240000.0
 Total activo no circulante,1320000.0
-TOTAL ACTIVO,1158835.69
+TOTAL ACTIVO,1159734.5899999999
 PASIVO,
-Acreedores diversos (contratista),300847.31
-Provisión para reclamaciones por daños (NIF C-9),80422.4
-TOTAL PASIVO,381269.70999999996
+Acreedores diversos (contratista),300822.06
+Provisión para reclamaciones por daños (NIF C-9),79709.57
+TOTAL PASIVO,380531.63
 PATRIMONIO,
 Patrimonio inicial,500000.0
-Resultado del ejercicio,277565.97999999963
-TOTAL PATRIMONIO,777565.9799999996
-TOTAL PASIVO + PATRIMONIO,1158835.6899999995
+Resultado del ejercicio,279202.9600000002
+TOTAL PATRIMONIO,779202.9600000002
+TOTAL PASIVO + PATRIMONIO,1159734.5900000003
