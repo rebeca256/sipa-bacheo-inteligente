@@ -169,7 +169,7 @@ def portada(doc):
         ["UCA que integra", "Fundamentos de Bases de Datos, Estructuras de Datos, Probabilidad, Cálculo Integral, "
                             "Contabilidad Financiera y Pensamiento Complejo para la Argumentación"],
         ["Grupo", "302"],
-        ["Fecha de entrega", "13 de noviembre de 2026"],
+        ["Fecha de entrega", "8 de diciembre de 2026"],
     ], [4, 9.5])
     doc.add_page_break()
 
@@ -178,7 +178,9 @@ def declaracion(doc):
     parrafo(doc, "El código del prototipo, los modelos y este documento se elaboraron con apoyo de IA "
                  "generativa (Claude, de Anthropic), con autorización de las y los docentes y dando el crédito "
                  "correspondiente. El equipo revisó, ejecutó y verificó los resultados, y es responsable de su "
-                 "contenido. La percepción inicial de la sección 3.1 la escribe el equipo sin apoyo de IA.",
+                 "contenido. La IA apoyó en programación, limpieza de datos, redacción y revisión técnica; "
+                 "las decisiones de diseño (criterios del IPU, alcance de asesoría, territorios) y la percepción "
+                 "inicial de la sección 3.1 son del equipo, esta última escrita sin apoyo de IA.",
             "Declaración de uso de IA. ")
 
 
@@ -371,6 +373,36 @@ def gestion(doc, d, exp, v, sipa_ed, cupo):
         "alimenta el tablero sin cargar la base principal.",
     ])
 
+    titulo(doc, "Rutas de atención y capacidad de las cuadrillas (recomendaciones a la autoridad)", 3)
+    parrafo(doc, "SIPA no programa ni dirige cuadrillas: la autoridad repara con sus propios recursos. Lo que sigue "
+                 "son sugerencias que SIPA le entrega para organizar mejor ese trabajo.", "Alcance. ")
+    parrafo(doc, f"La red de celdas de {nombre(ru['alcaldia'])} se modela como un grafo ponderado ({ru['vertices']} "
+                 f"vértices y {ru['aristas']:,} aristas, con la distancia como peso). Dijkstra da la distancia real "
+                 f"por la red entre cualquier par de baches: de la planta a cada bache hay en promedio "
+                 f"{ru['km_red_planta_promedio']:.1f} km por la red contra {ru['km_linea_recta_planta_promedio']:.1f} km "
+                 f"en línea recta. Con esas distancias, SIPA sugiere a la autoridad un orden de recorrido para los "
+                 f"{ru['baches_en_plan']} baches de mayor IPU del día (los entrega el max-heap), por vecino más cercano: "
+                 f"{ru['km_vecino_cercano']:.1f} km contra {ru['km_orden_prioridad']:.1f} km si se recorrieran en orden "
+                 "de prioridad. La prioridad indica QUÉ conviene atender hoy; la ruta sugerida, en QUÉ ORDEN recorrerlo. "
+                 "La autoridad decide si la usa.")
+    figura(doc, Path("estructuras/resultados/g3_ruta_brigada.png"),
+           f"Figura 4. Ruta sugerida en {nombre(ru['alcaldia'])}: los baches de mayor IPU del día, "
+           "recorridos por vecino más cercano sobre la red.", 13)
+    rec = {r["temporada"]: r for r in v["recursos"]}
+    lluv, sec = rec["lluvias"], rec["secas"]
+    parrafo(doc, "Capacidad que necesitaría la autoridad por temporada (estimación con 6 baches por brigada al día):")
+    tabla(doc, ["Temporada", "Meses", "Baches nuevos por día", "Brigadas", "Mezcla asfáltica al mes",
+                "Material al mes"], [
+        ["Lluvias", lluv["meses"], f"{lluv['baches_por_dia']:.1f}", f"{lluv['brigadas']:.0f}",
+         f"{lluv['toneladas_mes']:,.0f} t", mm(lluv["costo_material_mes"])],
+        ["Secas", sec["meses"], f"{sec['baches_por_dia']:.1f}", f"{sec['brigadas']:.0f}",
+         f"{sec['toneladas_mes']:,.0f} t", mm(sec["costo_material_mes"])],
+    ], [2.6, 1.6, 3, 2.2, 3.4, 3.2])
+    parrafo(doc, f"SIPA recomienda a la autoridad reforzar de {sec['brigadas']:.0f} a {lluv['brigadas']:.0f} brigadas de "
+                 "mayo a octubre y programar la compra de mezcla antes de la temporada; en secas, la capacidad que sobra "
+                 "puede dedicarse a la conservación preventiva de las celdas crónicas. La decisión y la operación son de "
+                 "la autoridad.")
+
 
 def financiera(doc, d, cont):
     titulo(doc, "3.4 Viabilidad financiera (inciso c)", 2)
@@ -419,6 +451,53 @@ def equidad(doc, d):
         "personales son opcionales, piden consentimiento y están en un esquema protegido que ni el tablero ni la "
         "autoridad pueden leer.",
     ])
+
+
+def modelos(doc, prob):
+    titulo(doc, "3.6 Modelos analíticos utilizados", 2)
+    vt = prob["validacion_temporal"]
+    parrafo(doc, "SIPA no utiliza aprendizaje automático (no hay redes neuronales, árboles de decisión ni modelos "
+                 "entrenados con bibliotecas de machine learning). Se eligieron a propósito modelos estadísticos, "
+                 "multicriterio y de reglas, porque cada resultado se puede explicar y verificar: el problema pide "
+                 "criterios «suficientemente técnicos, pero también comprensibles y verificables para la "
+                 "ciudadanía». Aun así, varios modelos predicen o clasifican, y por eso se documenta para cada uno el "
+                 "algoritmo, las variables y su contribución.", "Aclaración. ")
+    tabla(doc, ["Modelo", "Tipo y algoritmo", "Variables", "Contribución a la solución"], [
+        ["Riesgo de accidente a 72 h (Probabilidad)",
+         "Predicción. Proceso de Poisson con tasa por celda estimada por Bayes empírico (gamma-Poisson, equivalente "
+         "a binomial negativa por la sobredispersión).",
+         "Accidentes por celda de 250 m (SSC 2018-2019), accidentes graves, vía rápida.",
+         f"Semáforo de riesgo y criterio RIESGO_72H del IPU. Validado prediciendo 2019 con datos de 2018: "
+         f"Spearman {vt['spearman']:.2f}; las celdas rojas tuvieron accidente en el "
+         f"{pct(vt['por_semaforo']['ROJO']['p72_observada'])} de las ventanas reales de 72 h."],
+        ["Índice de Prioridad Urbana, IPU (Bases de Datos)",
+         "Clasificación multicriterio. Suma ponderada de criterios normalizados de 0 a 1; pesos por territorio "
+         "(AHP de Saaty), no aprendidos de los datos. Semáforo por umbrales.",
+         "Deterioro, riesgo a 72 h, transporte público (GTFS), marginación (CONAPO), zona inundable, servicios "
+         "cercanos, reportes (acotados), personas y tránsito (neutrales por falta de datos).",
+         "Responde qué bache atender primero y con qué argumento: cada ficha muestra cuánto aportó cada criterio."],
+        ["Degradación del asfalto (Cálculo Integral)",
+         "Modelo exponencial; la pérdida acumulada es la integral definida de la tasa de pérdida.",
+         "Volumen inicial del bache, tasa de crecimiento por temporada (lluvias y secas, de los reportes reales).",
+         "Cuánto material y dinero cuesta esperar; base de la comparación preventivo contra reactivo."],
+        ["Provisiones NIF C-9 (Contabilidad)",
+         "Valor esperado de reclamaciones con clasificación probable, posible o remota.",
+         "Riesgo a 72 h, días abierto, fracción atribuible (escenario 0 %, media y cota superior), montos.",
+         "Costo total para el erario en cada escenario y revelación contable."],
+        ["Duplicados y reincidencia (Estructuras de Datos y Bases de Datos)",
+         "Clasificación por reglas con tabla hash: distancia y tiempo entre reportes.",
+         "Ubicación (15 m al registrar; punto de ≈ 11 m y vecinos para reincidencia), días desde el reporte "
+         "anterior (30), territorio.",
+         "Cuenta baches y no avisos repetidos; detecta celdas crónicas candidatas a reencarpetado."],
+        ["Causa probable del daño (Bases de Datos)",
+         "Clasificación por reglas (hipótesis, no diagnóstico).",
+         "Zona inundable, reincidencia, tipo de vía, profundidad.",
+         "Sugiere el tipo de intervención: bacheo superficial o atender la causa (drenaje, base)."],
+    ], [3, 4.4, 4.3, 4.3])
+    parrafo(doc, "Un modelo de aprendizaje automático (por ejemplo, un bosque aleatorio para predecir accidentes) "
+                 "podría ganar algo de precisión, pero perdería la explicación directa de cada prioridad y "
+                 "necesitaría variables que no hay en datos abiertos (aforo por calle). Queda como trabajo futuro, "
+                 "siempre que conserve una ficha explicable.", "¿Por qué no aprendizaje automático? ")
 
 
 def catalogo(doc, d, calc, cont, v, exp, sipa_ed, fifo, cupo):
@@ -500,6 +579,24 @@ def integracion(doc):
         ["Pensamiento Complejo", "Mapa de red de agentes, argumentación lógico-formal y dialéctica",
          "Explica las prioridades a vecinos y autoridades y anticipa sus objeciones"],
     ], [3.7, 6, 6.3])
+    figura(doc, Path("pensamiento/resultados/g1_mapa_red_agentes.png"),
+           "Figura 5. Mapa de red de los agentes del bacheo y sus interconexiones (Pensamiento Complejo).", 14)
+    parrafo(doc, "La evidencia de Pensamiento Complejo incluye una simulación grupal. Los papeles y lo que cada uno "
+                 "defiende con la evidencia de SIPA:", "Juego de roles. ")
+    tabla(doc, ["Papel", "Posición inicial", "Argumento con la evidencia de SIPA"], [
+        ["Vecinos de la Zona A (muchos reportes)", "«Llevamos 2,000 reportes: nos toca primero».",
+         "Se reconoce su participación: sus reportes quedan registrados y con folio. Pero el número de avisos no "
+         "mide el riesgo (falsa causalidad y apelación a la tradición)."],
+        ["Vecinos de la Zona B (riesgo de socavón)", "Pocos reportes, mayor peligro.",
+         "Riesgo a 72 h, zona inundable y transporte público ponen a la Zona B en rojo: es el punto de "
+         "apalancamiento que evita una cadena de daños."],
+        ["Analistas de datos (equipo SIPA)", "Recomiendan con datos.",
+         "Presentan la ficha del IPU (dato), la prevención del riesgo colectivo (garantía) y la siniestralidad y los "
+         "costos (respaldo), según el modelo de Toulmin."],
+        ["Autoridad", "Decide y rinde cuentas.",
+         "Aprueba, ajusta o rechaza con un motivo que queda registrado, y comunica el calendario a la Zona A con "
+         "escucha atenta y comunicación asertiva."],
+    ], [3.6, 3.6, 8.8])
     parrafo(doc, "Ejemplo de la cadena completa: un bache sobre una vía rápida en lluvias recibe un riesgo alto "
                  "(Probabilidad), sube en la cola (Estructuras de Datos) y en el IPU (Bases de Datos); su costo "
                  "crece si espera (Cálculo), y ese costo y la reclamación probable se reconocen como provisión "
@@ -547,6 +644,7 @@ def limitaciones(doc):
 
 def referencias(doc):
     titulo(doc, "Referencias")
+    parrafo(doc, "En formato APA, 7.ª edición.")
     for r in [
         "Base maestra de solicitudes de bacheo de la Ciudad de México 2019-2022 [Conjunto de datos]. Proporcionada "
         "para el problema prototípico (base_maestra_baches_2019_2024.csv).",
@@ -565,6 +663,10 @@ def referencias(doc):
         "Dirección General de Obras Públicas de Toluca. (2026). Tablero de bacheo [Datos públicos]. "
         "https://dgop.toluca.gob.mx/tablero_bacheo_filtros1.php",
         "Meadows, D. H. (2008). Thinking in systems: A primer. Chelsea Green Publishing.",
+        "Morin, E. (1998). Introducción al pensamiento complejo. Gedisa.",
+        "El País. (2025, 20 de septiembre). Los socavones de Iztapalapa: una herida que no se cierra en Ciudad de "
+        "México. El País México.",
+        "Goleman, D. (1995). La inteligencia emocional. Javier Vergara.",
         "Saaty, T. L. (1980). The analytic hierarchy process. McGraw-Hill.",
         "Secretaría de Movilidad. (2021). GTFS [Conjunto de datos]. Portal de Datos Abiertos de la Ciudad de México. "
         "https://datos.cdmx.gob.mx/dataset/gtfs",
@@ -620,6 +722,7 @@ def main():
     gestion(doc, d, exp, v, sipa_ed, cupo)
     financiera(doc, d, cont)
     equidad(doc, d)
+    modelos(doc, prob)
     catalogo(doc, d, calc, cont, v, exp, sipa_ed, fifo, cupo)
     integracion(doc)
     dilemas(doc, d, cont)
@@ -627,6 +730,8 @@ def main():
     referencias(doc)
     anexo(doc)
     doc.save(SALIDA)
+    from simbolos_seguros import asegurar   # sin símbolos que se vean como cuadritos
+    asegurar(SALIDA)
     print(f"Documento generado: {SALIDA}")
 
 

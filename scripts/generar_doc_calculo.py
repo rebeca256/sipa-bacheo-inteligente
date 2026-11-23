@@ -325,6 +325,8 @@ def main():
                  "calculo/resultados/). El código documenta cada fórmula.")
 
     doc.save(SALIDA)
+    from simbolos_seguros import asegurar   # sin símbolos que se vean como cuadritos
+    asegurar(SALIDA)
     print(f"Documento generado: {SALIDA}")
 
 

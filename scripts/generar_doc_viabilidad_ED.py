@@ -541,6 +541,8 @@ def main():
     intervenciones(doc, v, calc, exp, eq, cap)
     limitaciones(doc)
     doc.save(SALIDA)
+    from simbolos_seguros import asegurar   # sin símbolos que se vean como cuadritos
+    asegurar(SALIDA)
     print(f"Documento generado: {SALIDA}")
 
 
